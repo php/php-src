@@ -129,6 +129,8 @@ PHP                                                                        NEWS
   . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
   . Fix JIT register allocation for ASSIGN to traced reference. (ndossche)
+  . Fixed opcache.jit_buffer_size accepting negative values, which failed
+    an assertion or the shared memory allocation. (Marc Bennewitz)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,

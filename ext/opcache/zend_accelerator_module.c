@@ -220,6 +220,18 @@ static ZEND_INI_MH(OnUpdateJitDebug)
 	return FAILURE;
 }
 
+static ZEND_INI_MH(OnUpdateJitBufferSize)
+{
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
+	if (EXPECTED(val >= 0)) {
+		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		*p = val;
+		return SUCCESS;
+	}
+	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be greater than or equal to 0", ZSTR_VAL(entry->name));
+	return FAILURE;
+}
+
 static ZEND_INI_MH(OnUpdateCounter)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
@@ -343,7 +355,7 @@ ZEND_INI_BEGIN()
 #endif
 #ifdef HAVE_JIT
 	STD_PHP_INI_ENTRY("opcache.jit"                           , "disable",                    PHP_INI_ALL,    OnUpdateJit,      options,               zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateLong,     buffer_size,           zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateJitBufferSize, buffer_size,           zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,                 zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit,          zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_prof_threshold"            , "0.005",                      PHP_INI_ALL,    OnUpdateReal,     prof_threshold,        zend_jit_globals, jit_globals)
