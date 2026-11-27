@@ -98,6 +98,62 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 }
 /* }}} */
 
+static long php_stat_timestamp_nanoseconds(const zend_stat_t *stat_sb, int type)
+{
+	switch (type) {
+	case FS_ATIME_NS:
+#ifdef PHP_WIN32
+			return stat_sb->st_atime_nsec;
+#else
+#if defined(HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC)
+			return stat_sb->st_atim.tv_nsec;
+#elif defined(HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC)
+			return stat_sb->st_atimespec.tv_nsec;
+#endif
+			return 0;
+#endif
+	case FS_MTIME_NS:
+#ifdef PHP_WIN32
+			return stat_sb->st_mtime_nsec;
+#else
+#if defined(HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC)
+			return stat_sb->st_mtim.tv_nsec;
+#elif defined(HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC)
+			return stat_sb->st_mtimespec.tv_nsec;
+#endif
+			return 0;
+#endif
+	case FS_CTIME_NS:
+#ifdef PHP_WIN32
+			return stat_sb->st_ctime_nsec;
+#else
+#if defined(HAVE_STRUCT_STAT_ST_CTIM_TV_NSEC)
+			return stat_sb->st_ctim.tv_nsec;
+#elif defined(HAVE_STRUCT_STAT_ST_CTIMESPEC_TV_NSEC)
+			return stat_sb->st_ctimespec.tv_nsec;
+#endif
+			return 0;
+#endif
+	}
+
+	return 0;
+}
+
+static void php_stat_return_timestamp_ns(zval *return_value, time_t seconds, long nanoseconds)
+{
+#if SIZEOF_ZEND_LONG == 8
+	if (seconds >= ZEND_LONG_MIN / 1000000000 && seconds <= ZEND_LONG_MAX / 1000000000) {
+		zend_long timestamp = (zend_long) seconds * 1000000000;
+		if (timestamp <= ZEND_LONG_MAX - nanoseconds) {
+			ZVAL_LONG(return_value, timestamp + nanoseconds);
+			return;
+		}
+	}
+#endif
+
+	ZVAL_DOUBLE(return_value, (double) seconds * 1000000000 + nanoseconds);
+}
+
 static zend_result php_disk_total_space(char *path, double *space) /* {{{ */
 #if defined(PHP_WIN32) /* {{{ */
 {
@@ -890,6 +946,15 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		RETURN_LONG((zend_long)stat_sb->st_mtime);
 	case FS_CTIME:
 		RETURN_LONG((zend_long)stat_sb->st_ctime);
+	case FS_ATIME_NS:
+		php_stat_return_timestamp_ns(return_value, stat_sb->st_atime, php_stat_timestamp_nanoseconds(stat_sb, type));
+		return;
+	case FS_MTIME_NS:
+		php_stat_return_timestamp_ns(return_value, stat_sb->st_mtime, php_stat_timestamp_nanoseconds(stat_sb, type));
+		return;
+	case FS_CTIME_NS:
+		php_stat_return_timestamp_ns(return_value, stat_sb->st_ctime, php_stat_timestamp_nanoseconds(stat_sb, type));
+		return;
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
 			RETURN_STRING("link");
@@ -1019,13 +1084,19 @@ FileFunction(PHP_FN(filegroup), FS_GROUP)
 FileFunction(PHP_FN(fileatime), FS_ATIME)
 /* }}} */
 
+FileFunction(PHP_FN(fileatime_ns), FS_ATIME_NS)
+
 /* {{{ Get last modification time of file */
 FileFunction(PHP_FN(filemtime), FS_MTIME)
 /* }}} */
 
+FileFunction(PHP_FN(filemtime_ns), FS_MTIME_NS)
+
 /* {{{ Get inode modification time of file */
 FileFunction(PHP_FN(filectime), FS_CTIME)
 /* }}} */
+
+FileFunction(PHP_FN(filectime_ns), FS_CTIME_NS)
 
 /* {{{ Get file type */
 FileFunction(PHP_FN(filetype), FS_TYPE)

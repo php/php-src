@@ -500,6 +500,15 @@ AC_CHECK_MEMBERS(m4_normalize([
   struct stat.st_blocks,
   struct stat.st_rdev
 ]))
+AC_CHECK_MEMBERS(m4_normalize([
+  struct stat.st_atim.tv_nsec,
+  struct stat.st_mtim.tv_nsec,
+  struct stat.st_ctim.tv_nsec,
+  struct stat.st_atimespec.tv_nsec,
+  struct stat.st_mtimespec.tv_nsec,
+  struct stat.st_ctimespec.tv_nsec
+]),,,[#include <sys/types.h>
+#include <sys/stat.h>])
 
 dnl Checks for types.
 AC_TYPE_UID_T
