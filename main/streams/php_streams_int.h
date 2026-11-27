@@ -66,3 +66,31 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 /* Escapes NUL and backslash bytes so a host containing them cannot truncate or
  * collide the persistent stream hash key. */
 zend_string *php_stream_escape_persistent_key(const char *host, size_t hostlen);
+
+/* Make sure the stream is not closed while the notifier callback executes. */
+static zend_always_inline void php_stream_notify_progress_increment_no_fclose(
+		php_stream *stream, size_t dsofar)
+{
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+
+	if (context && context->notifier) {
+		uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+		stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+		php_stream_notify_progress_increment(context, dsofar, 0);
+		stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+		stream->flags |= orig_no_fclose;
+	}
+}
+
+static zend_always_inline void php_stream_notify_completed_no_fclose(php_stream *stream)
+{
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+
+	if (context && context->notifier) {
+		uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+		stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+		php_stream_notify_completed(context);
+		stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+		stream->flags |= orig_no_fclose;
+	}
+}

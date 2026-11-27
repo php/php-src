@@ -747,7 +747,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 out_check_eof:
 	if (old_eof != stream->eof) {
 out_is_eof:
-		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
+		php_stream_notify_completed_no_fclose(stream);
 	}
 	return retval;
 }
@@ -1259,7 +1259,7 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 
 out:
 	if (old_eof != stream->eof) {
-		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
+		php_stream_notify_completed_no_fclose(stream);
 	}
 	return retval;
 }

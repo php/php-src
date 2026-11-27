@@ -2265,7 +2265,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 
 		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
-			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
+			php_stream_notify_progress_increment_no_fclose(stream, nr_bytes);
 		}
 
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
