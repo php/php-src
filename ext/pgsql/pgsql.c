@@ -1923,8 +1923,7 @@ PHP_FUNCTION(pg_fetch_result)
 			RETURN_THROWS();
 		}
 		if (row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
-							row, Z_LVAL_P(result));
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT, row);
 			RETURN_FALSE;
 		}
 		pgsql_row = (int)row;
@@ -1972,8 +1971,7 @@ static bool php_pgsql_fetch_hash(zval *return_value, const zval *result, zend_lo
 
 	if (!row_is_null) {
 		if (row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
-							row, Z_LVAL_P(result));
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT, row);
 			return false;
 		}
 		pgsql_row = (int)row;
@@ -2312,8 +2310,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 			RETURN_THROWS();
 		}
 		if (row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT " on PostgreSQL result index " ZEND_LONG_FMT,
-							row, Z_LVAL_P(result));
+			php_error_docref(NULL, E_WARNING, "Unable to jump to row " ZEND_LONG_FMT, row);
 			RETURN_FALSE;
 		}
 		pgsql_row = (int)row;
