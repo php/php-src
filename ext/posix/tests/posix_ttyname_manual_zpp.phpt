@@ -59,12 +59,10 @@ bool(false)
 class:
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be of type int|resource, stdClass given in %s on line %d
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
 bool(false)
 stringable class:
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be of type int|resource, classWithToString given in %s on line %d
 
-Warning: Object of class classWithToString could not be converted to int in %s on line %d
 bool(false)
 int castable class:
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be of type int|resource, GMP given in %s on line %d

@@ -477,7 +477,7 @@ PHP_FUNCTION(posix_ttyname)
 		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
-			fd = zval_get_long(z_fd);
+			RETURN_FALSE;
 		}
 		/* fd must fit in an int and be positive */
 		if (fd < 0 || fd > INT_MAX) {
