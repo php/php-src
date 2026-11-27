@@ -16,11 +16,16 @@ all
 memory_limit=-1
 --FILE--
 <?php
+
 $length = 2147483646; // 32-bit INT_MAX - 1
+
 // Parsing a single relative path segment is cheap under sanitizers.
-$string = (new Uri\Rfc3986\Uri(str_repeat("x", $length)))->toRawString();
+$uri = new Uri\Rfc3986\Uri(str_repeat("x", $length));
+
+$string = $uri->toRawString();
+
 var_dump(strlen($string));
-var_dump(strcmp($string, str_repeat("x", $length)) === 0);
+var_dump($string === str_repeat("x", $length));
 ?>
 --EXPECT--
 int(2147483646)
