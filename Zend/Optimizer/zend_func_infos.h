@@ -580,7 +580,7 @@ static const func_info_t func_infos[] = {
 	FN("stream_context_set_default", MAY_BE_RESOURCE),
 	FN("stream_filter_prepend", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("stream_filter_append", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	F1("stream_socket_client", MAY_BE_RESOURCE|MAY_BE_FALSE),
+	FN("stream_socket_client", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("stream_socket_server", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("stream_socket_accept", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("stream_socket_recvfrom", MAY_BE_STRING|MAY_BE_FALSE),
