@@ -1119,6 +1119,10 @@ PHP_FUNCTION(strtotime)
 		return;
 	}
 
+	if (zend_string_equals_literal(times, "now")) {
+		RETURN_LONG(!preset_ts_is_null ? preset_ts : php_time());
+	}
+
 	now = timelib_time_ctor();
 	now->tz_info = tzi;
 	now->zone_type = TIMELIB_ZONETYPE_ID;

@@ -220,6 +220,9 @@ PHP 8.7 UPGRADE NOTES
   . Improved performance of integer to string conversion (string casts, echo,
     implode(), json_encode(), serialize(), var_export() and others).
 
+- Date:
+  . Improved performance of strtotime() with "now".
+
 - DOM:
   . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
     small inputs.
