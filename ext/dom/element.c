@@ -397,8 +397,7 @@ static void dom_check_register_attribute_id(xmlAttrPtr attr, php_libxml_ref_obj 
 {
 	dom_mark_ids_modified(document);
 
-	if (attr->atype != XML_ATTRIBUTE_ID && attr->doc->type == XML_HTML_DOCUMENT_NODE && attr->ns == NULL && xmlStrEqual(attr->name, BAD_CAST "id")) {
-		/* To respect XML's ID behaviour, we only do this registration for HTML documents. */
+	if (attr->atype != XML_ATTRIBUTE_ID && attr->ns == NULL && xmlStrEqual(attr->name, BAD_CAST "id")) {
 		attr->atype = XML_ATTRIBUTE_ID;
 	}
 }
@@ -455,9 +454,10 @@ PHP_METHOD(DOMElement, setAttribute)
 			xmlAddChild((xmlNodePtr) attr, node);
 		} else {
 			attr = xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
-			if (EXPECTED(attr != NULL)) {
-				dom_check_register_attribute_id(attr, intern->document);
-			}
+		}
+
+		if (EXPECTED(attr != NULL)) {
+			dom_check_register_attribute_id(attr, intern->document);
 		}
 
 		if (name_processed != BAD_CAST name) {
@@ -2293,6 +2293,9 @@ PHP_METHOD(Dom_Element, rename)
 
 	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 
+	const xmlChar *old_ns_href = nodep->ns ? nodep->ns->href : NULL;
+	bool name_changed = !xmlStrEqual(nodep->name, localname);
+
 	/* Update namespace uri + prefix by querying the namespace mapper */
 	/* prefix can be NULL here, but that is taken care of by the called APIs. */
 	nodep->ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), namespace_uri);
@@ -2307,6 +2310,12 @@ PHP_METHOD(Dom_Element, rename)
 	} else {
 		nodep->name = localname;
 		localname = NULL;
+	}
+
+	if (nodep->type == XML_ATTRIBUTE_NODE
+	 && (name_changed || !xmlStrEqual(old_ns_href, nodep->ns ? nodep->ns->href : NULL))) {
+		php_set_attribute_id((xmlAttrPtr) nodep, false, intern->document);
+		dom_check_register_attribute_id((xmlAttrPtr) nodep, intern->document);
 	}
 
 cleanup:

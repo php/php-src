@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed use-after-free when a php:function() callback of DOMXPath or
     Dom\XPath modifies nodes that are still being evaluated; such
     modifications now throw a DOMException or Error. (Ilia Alshanetsky)
+  . getElementById() now finds elements whose id attribute was set with
+    setAttribute()/setAttributeNS() on Dom\XMLDocument. (Ilia Alshanetsky)
+  . Fixed getElementById() ignoring an id attribute renamed with
+    Dom\Attr::rename(). (Ilia Alshanetsky)
 
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
