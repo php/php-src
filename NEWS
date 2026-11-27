@@ -284,6 +284,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25746 (array_column() crashes with JIT when the result for an
     empty array is modified). (Tomasz Kowalczyk)
 
+- Standard:
+  . Fixed var_dump() and debug_zval_dump() printing the full name of anonymous
+    classes, including the NUL byte. (Jorg Sowa)
+
 - Streams:
   . Fixed in-place URL decoding of interned strings in the HTTP and FTP
     wrappers. (Alejandro Pacheco)
