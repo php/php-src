@@ -7672,7 +7672,6 @@ static void zend_jit_stop_counter_handlers(void)
 	/* mprotect has an extreme overhead, avoid calls to it for every function. */
 	SHM_UNPROTECT();
 	if (!ZCSG(jit_counters_stopped)) {
-		ZCSG(jit_counters_stopped) = true;
 		for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
 			zend_accel_hash_entry *cache_entry;
 			for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
@@ -7682,6 +7681,9 @@ static void zend_jit_stop_counter_handlers(void)
 				zend_jit_stop_persistent_script(script);
 			}
 		}
+		/* Set last, so the next call redoes a loop that a killed process left half done */
+		ZEND_ATOMIC_FENCE_RELEASE();
+		ZCSG(jit_counters_stopped) = true;
 	}
 	SHM_PROTECT();
 	zend_shared_alloc_unlock();
