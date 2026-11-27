@@ -3340,9 +3340,9 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 			const char *o = ZSTR_VAL(haystack);
 			const char *n = needle;
 			const char *endp = o + ZSTR_LEN(haystack);
+			const char *first_match = php_memnstr(o, n, needle_len, endp);
 
-			while ((o = (char*)php_memnstr(o, n, needle_len, endp))) {
-				o += needle_len;
+			for (o = first_match; o; o = php_memnstr(o + needle_len, n, needle_len, endp)) {
 				count++;
 			}
 			if (count == 0) {
@@ -3360,10 +3360,15 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 
 			e = ZSTR_VAL(new_str);
 			end = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
-			for (p = ZSTR_VAL(haystack); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+			*replace_count += count;
+			p = ZSTR_VAL(haystack);
+			for (r = first_match; ; r = php_memnstr(p, needle, needle_len, end)) {
 				e = zend_mempcpy(e, p, r - p);
 				e = zend_mempcpy(e, str, str_len);
-				(*replace_count)++;
+				p = r + needle_len;
+				if (--count == 0) {
+					break;
+				}
 			}
 
 			if (p < end) {
