@@ -20,9 +20,7 @@ memory_limit=-1
 $length = 2147483646; // 32-bit INT_MAX - 1
 
 // Parsing a single relative path segment is cheap under sanitizers.
-$uri = new Uri\Rfc3986\Uri(str_repeat("x", $length));
-
-$string = $uri->toRawString();
+$string = (new Uri\Rfc3986\Uri(str_repeat("x", $length)))->toRawString();
 
 var_dump(strlen($string));
 var_dump($string === str_repeat("x", $length));
