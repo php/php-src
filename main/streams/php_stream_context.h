@@ -14,6 +14,8 @@
 
 /* Stream context and status notification related definitions */
 
+typedef struct _php_stream_context php_stream_context;
+
 /* callback for status notifications */
 typedef void (*php_stream_notification_func)(php_stream_context *context,
 		int notifycode, int severity,
@@ -22,20 +24,6 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 		void * ptr);
 
 #define PHP_STREAM_NOTIFIER_PROGRESS	1
-
-/* TODO: Remove dependence on ext/standard/file.h for the default context global */
-#define php_stream_context_get_default(without_context) \
-	(without_context) ? NULL : FG(default_context) ? FG(default_context) : \
-		(FG(default_context) = php_stream_context_alloc())
-
-/* Attempt to fetch context from the zval passed,
-   If no context was passed, use the default context
-   The default context has not yet been created, do it now. */
-#define php_stream_context_from_zval(zcontext, nocontext) ( \
-		(zcontext) ? zend_fetch_resource_ex(zcontext, "Stream-Context", php_le_stream_context()) : \
-		php_stream_context_get_default(nocontext))
-
-#define php_stream_context_to_zval(context, zval) { ZVAL_RES(zval, (context)->res); GC_ADDREF((context)->res); }
 
 typedef struct _php_stream_notifier php_stream_notifier;
 
@@ -70,6 +58,31 @@ PHPAPI const struct php_uri_parser *php_stream_context_get_uri_parser(const char
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
 END_EXTERN_C()
+
+//#include "php_globals.h"
+#define php_stream_context_get_default() \
+	PG(default_context) ? PG(default_context) : (PG(default_context) = php_stream_context_alloc())
+
+/* Attempt to fetch context from the zval passed,
+   If no context was passed, use the default context
+   The default context has not yet been created, do it now. */
+#define php_stream_context_from_zval(zcontext) \
+		zend_fetch_resource_ex(zcontext, "Stream-Context", php_le_stream_context())
+
+//static inline php_stream_context *php_stream_context_from_zval_or_default(zval *zcontext) {
+//	php_stream_context *context = NULL;
+//	if (zcontext) {
+//		context = php_stream_context_from_zval(zcontext);
+//	} else {
+//		context = php_stream_context_get_default();
+//	}
+//	return context;
+//}
+
+#define php_stream_context_from_zval_or_default(zcontext) \
+	zcontext ? php_stream_context_from_zval(zcontext) : php_stream_context_get_default()
+
+#define php_stream_context_to_zval(context, zval) { ZVAL_RES(zval, (context)->res); GC_ADDREF((context)->res); }
 
 /* not all notification codes are implemented */
 #define PHP_STREAM_NOTIFY_RESOLVE		1

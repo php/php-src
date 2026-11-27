@@ -96,30 +96,7 @@ php_file_globals file_globals;
 
 /* }}} */
 
-/* {{{ ZTS-stuff / Globals / Prototypes */
-
-/* sharing globals is *evil* */
-static int le_stream_context = FAILURE;
-
-PHPAPI int php_le_stream_context(void)
-{
-	return le_stream_context;
-}
-/* }}} */
-
 /* {{{ Module-Stuff */
-static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
-{
-	php_stream_context *context = (php_stream_context*)res->ptr;
-	if (context == FG(default_context)) {
-		FG(default_context) = NULL;
-	}
-	if (Z_TYPE(context->options) != IS_UNDEF) {
-		zval_ptr_dtor(&context->options);
-		ZVAL_UNDEF(&context->options);
-	}
-	php_stream_context_free(context);
-}
 
 static void file_globals_ctor(php_file_globals *file_globals_p)
 {
@@ -143,8 +120,6 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
-
 #ifdef ZTS
 	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else
@@ -401,7 +376,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 	stream = php_stream_open_wrapper_ex(filename, "rb",
 				(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 				NULL, context);
@@ -461,7 +436,11 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext);
+	} else if ((flags & PHP_FILE_NO_DEFAULT_CONTEXT) == 0) {
+		context = php_stream_context_get_default();
+	}
 
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
@@ -616,7 +595,12 @@ PHP_FUNCTION(file)
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext);
+		if ((flags & PHP_FILE_NO_DEFAULT_CONTEXT) == 0) {
+			context = php_stream_context_get_default();
+		}
+	}
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (!stream) {
@@ -751,7 +735,7 @@ PHP_FUNCTION(fopen)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	php_stream_error_operation_end(context);
@@ -1144,7 +1128,7 @@ PHP_FUNCTION(mkdir)
 	zval *zcontext = NULL;
 	zend_long mode = 0777;
 	bool recursive = 0;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_PATH(dir, dir_len)
@@ -1154,7 +1138,7 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	php_stream_error_operation_begin();
 	RETVAL_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
@@ -1168,7 +1152,7 @@ PHP_FUNCTION(rmdir)
 	char *dir;
 	size_t dir_len;
 	zval *zcontext = NULL;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(dir, dir_len)
@@ -1176,7 +1160,7 @@ PHP_FUNCTION(rmdir)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	php_stream_error_operation_begin();
 	RETVAL_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
@@ -1202,7 +1186,7 @@ PHP_FUNCTION(readfile)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	php_stream_error_operation_begin();
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
@@ -1270,7 +1254,7 @@ PHP_FUNCTION(rename)
 	size_t old_name_len, new_name_len;
 	zval *zcontext = NULL;
 	php_stream_wrapper *wrapper;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_PATH(old_name, old_name_len)
@@ -1280,7 +1264,7 @@ PHP_FUNCTION(rename)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
 
@@ -1323,7 +1307,7 @@ PHP_FUNCTION(unlink)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 
@@ -1503,7 +1487,7 @@ PHP_FUNCTION(copy)
 	char *source, *target;
 	size_t source_len, target_len;
 	zval *zcontext = NULL;
-	php_stream_context *context;
+	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_PATH(source, source_len)
@@ -1513,7 +1497,7 @@ PHP_FUNCTION(copy)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_error_operation_begin();
-	context = php_stream_context_from_zval(zcontext, 0);
+	context = php_stream_context_from_zval_or_default(zcontext);
 
 	if (php_stream_locate_url_wrapper(source, NULL, 0) == &php_plain_files_wrapper && php_check_open_basedir(source)) {
 		php_stream_error_operation_end(context);

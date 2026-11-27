@@ -15,9 +15,8 @@
 #ifndef PHP_GLOBALS_H
 #define PHP_GLOBALS_H
 
-#include "zend_globals.h"
-
 #include <stdint.h>
+#include "php_streams.h"
 
 typedef struct _php_core_globals php_core_globals;
 
@@ -176,6 +175,7 @@ struct _php_core_globals {
 	zend_long syslog_filter;
 	zend_long error_log_mode;
 	zend_long default_socket_timeout;
+	php_stream_context *default_context;
 	const char *user_stream_current_filename; /* for simple recursion protection */
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */

@@ -39,6 +39,7 @@ static HashTable url_stream_wrappers_hash;
 static int le_stream = -1; /* true global */
 static int le_pstream = -1; /* true global */
 static int le_stream_filter = -1; /* true global */
+static int le_stream_context = -1; /* true global */
 
 PHPAPI int php_file_le_stream(void)
 {
@@ -53,6 +54,11 @@ PHPAPI int php_file_le_pstream(void)
 PHPAPI int php_file_le_stream_filter(void)
 {
 	return le_stream_filter;
+}
+
+PHPAPI int php_le_stream_context(void)
+{
+	return le_stream_context;
 }
 
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash(void)
@@ -2251,7 +2257,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	 * stream_context_set_option() on the stream mutate the global default
 	 * context, leaking options into every other stream. Stream errors fall
 	 * back to the default context on their own when the stream has none. */
-	if (stream->ctx == NULL && context != NULL && context != FG(default_context) && !persistent) {
+	if (stream->ctx == NULL && context != NULL && context != PG(default_context) && !persistent) {
 		php_stream_context_set(stream, context);
 	}
 
@@ -2365,6 +2371,24 @@ PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
 		notifier->dtor(notifier);
 	}
 	efree(notifier);
+}
+
+
+static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
+{
+	php_stream_context *context = (php_stream_context*)res->ptr;
+	if (context == PG(default_context)) {
+		PG(default_context) = NULL;
+	}
+	if (Z_TYPE(context->options) != IS_UNDEF) {
+		zval_ptr_dtor(&context->options);
+		ZVAL_UNDEF(&context->options);
+	}
+	php_stream_context_free(context);
+}
+
+void php_stream_context_init(int module_number) {
+	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
 }
 
 PHPAPI zval *php_stream_context_get_option(const php_stream_context *context,

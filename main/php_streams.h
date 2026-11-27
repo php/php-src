@@ -93,7 +93,6 @@ END_EXTERN_C()
 
 typedef struct _php_stream php_stream;
 typedef struct _php_stream_wrapper php_stream_wrapper;
-typedef struct _php_stream_context php_stream_context;
 typedef struct _php_stream_filter php_stream_filter;
 
 #include "streams/php_stream_context.h"
@@ -615,6 +614,7 @@ END_EXTERN_C()
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
+void php_stream_context_init(int module_number);
 void php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);

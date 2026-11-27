@@ -1428,7 +1428,7 @@ PHP_METHOD(SoapServer, handle)
 */
 
 			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
-			php_stream_context *context = php_stream_context_from_zval(NULL, false);
+			php_stream_context *context = php_stream_context_get_default();
 			php_stream *stream = php_stream_open_wrapper_ex(service->sdl->source, "rb", REPORT_ERRORS, NULL, context);
 			if (stream) {
 				php_stream_passthru(stream);
@@ -2275,7 +2275,7 @@ PHP_METHOD(SoapClient, __construct)
 
 		if ((tmp = zend_hash_str_find(ht, "stream_context", sizeof("stream_context")-1)) != NULL &&
 				Z_TYPE_P(tmp) == IS_RESOURCE) {
-			context = php_stream_context_from_zval(tmp, 1);
+			context = php_stream_context_from_zval(tmp);
 			Z_ADDREF_P(tmp);
 		} else {
 			context = php_stream_context_alloc();
