@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_sqlite.stub.php instead.
- * Stub hash: 721c46905fa8fb1e18d7196ed85c37f56049ea33 */
+ * Stub hash: ffc048d27553b31bbbd6cf33751c983339058285 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -127,6 +127,14 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_TRANSACTION_MODE_name = zend_string_init_interned("ATTR_TRANSACTION_MODE", sizeof("ATTR_TRANSACTION_MODE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_TRANSACTION_MODE_name, &const_ATTR_TRANSACTION_MODE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ATTR_TRANSACTION_MODE_name, true);
+#if defined(SQLITE_DBCONFIG_DQS_DML)
+
+	zval const_ATTR_DQS_value;
+	ZVAL_LONG(&const_ATTR_DQS_value, PDO_SQLITE_ATTR_DQS);
+	zend_string *const_ATTR_DQS_name = zend_string_init_interned("ATTR_DQS", sizeof("ATTR_DQS") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_DQS_name, &const_ATTR_DQS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ATTR_DQS_name, true);
+#endif
 
 	zval const_TRANSACTION_MODE_DEFERRED_value;
 	ZVAL_LONG(&const_TRANSACTION_MODE_DEFERRED_value, 0);
