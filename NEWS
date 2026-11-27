@@ -94,6 +94,10 @@ PHP                                                                        NEWS
   . Fixed FFI::string() reading out of bounds for a negative size.
     (Marc Bennewitz)
 
+- Exif:
+  . Fixed bug GH-25678 (exif_read_data() reports "Invalid WebP file" for a
+    valid WebP without an EXIF chunk). (Shane Rounce)
+
 - Fileinfo:
   . Fixed bug GH-25051 (TrueType fonts detected as application/octet-stream
     since libmagic 5.48). (Weilin Du)
