@@ -290,6 +290,7 @@ typedef struct _zend_accel_shared_globals {
 	/* Tracing JIT */
 	void *jit_traces;
 	const void **jit_exit_groups;
+	void *jit_dirty_func_infos;
 
 	/* Interned Strings Support (must be the last element) */
 	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);

@@ -57,12 +57,18 @@ static void zend_jit_trace_startup(bool reattached)
 		if (!zend_jit_exit_groups) {
 			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not allocate JIT exit groups buffer!");
 		}
+		zend_jit_dirty_func_infos = (zend_jit_func_info_list*)zend_shared_alloc(sizeof(zend_jit_func_info_list));
+		if (!zend_jit_dirty_func_infos) {
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not allocate JIT func info buffer!");
+		}
+		zend_jit_dirty_func_infos->count = 0;
 		ZEND_JIT_TRACE_NUM = 1;
 		ZEND_JIT_COUNTER_NUM = 0;
 		ZEND_JIT_EXIT_NUM = 0;
 		ZEND_JIT_EXIT_COUNTERS = 0;
 		ZCSG(jit_traces) = zend_jit_traces;
 		ZCSG(jit_exit_groups) = zend_jit_exit_groups;
+		ZCSG(jit_dirty_func_infos) = zend_jit_dirty_func_infos;
 		ZCSG(jit_counters_stopped) = false;
 	} else {
 		zend_jit_traces = ZCSG(jit_traces);
@@ -72,6 +78,10 @@ static void zend_jit_trace_startup(bool reattached)
 		zend_jit_exit_groups = ZCSG(jit_exit_groups);
 		if (!zend_jit_exit_groups) {
 			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not obtain JIT exit groups buffer!");
+		}
+		zend_jit_dirty_func_infos = ZCSG(jit_dirty_func_infos);
+		if (!zend_jit_dirty_func_infos) {
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not obtain JIT func info buffer!");
 		}
 	}
 
@@ -538,12 +548,8 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 
 	jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-	jit_extension->func_info.num = 0;
-	jit_extension->func_info.flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
-		| ZEND_FUNC_JIT_ON_PROF_REQUEST
-		| ZEND_FUNC_JIT_ON_HOT_COUNTERS
-		| ZEND_FUNC_JIT_ON_HOT_TRACE;
-	memset(&jit_extension->func_info.ssa, 0, sizeof(zend_func_info) - offsetof(zend_func_info, ssa));
+	zend_jit_record_dirty_func_info(&jit_extension->func_info);
+	zend_jit_reset_func_info(&jit_extension->func_info);
 	ssa = &jit_extension->func_info.ssa;
 
 	if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNC) {
@@ -4132,6 +4138,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 	JIT_G(current_trace) = trace_buffer;
 
+	/* A process killed while compiling may have left process-local data in shared func_infos */
+	zend_jit_reset_dirty_func_infos();
+
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
 	zend_try {
@@ -7345,18 +7354,7 @@ jit_cleanup:;
 	}  zend_end_try();
 
 	/* Clean up used op_arrays */
-	while (num_op_arrays > 0) {
-		op_array = op_arrays[--num_op_arrays];
-		jit_extension =
-			(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-
-	    jit_extension->func_info.num = 0;
-		jit_extension->func_info.flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
-			| ZEND_FUNC_JIT_ON_PROF_REQUEST
-			| ZEND_FUNC_JIT_ON_HOT_COUNTERS
-			| ZEND_FUNC_JIT_ON_HOT_TRACE;
-		memset(&jit_extension->func_info.ssa, 0, sizeof(zend_func_info) - offsetof(zend_func_info, ssa));
-	}
+	zend_jit_reset_dirty_func_infos();
 
 	zend_arena_release(&CG(arena), checkpoint);
 
@@ -7672,7 +7670,6 @@ static void zend_jit_stop_counter_handlers(void)
 	/* mprotect has an extreme overhead, avoid calls to it for every function. */
 	SHM_UNPROTECT();
 	if (!ZCSG(jit_counters_stopped)) {
-		ZCSG(jit_counters_stopped) = true;
 		for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
 			zend_accel_hash_entry *cache_entry;
 			for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
@@ -7682,6 +7679,9 @@ static void zend_jit_stop_counter_handlers(void)
 				zend_jit_stop_persistent_script(script);
 			}
 		}
+		/* Set last, so the next call redoes a loop that a killed process left half done */
+		ZEND_ATOMIC_FENCE_RELEASE();
+		ZCSG(jit_counters_stopped) = true;
 	}
 	SHM_PROTECT();
 	zend_shared_alloc_unlock();
@@ -9006,6 +9006,8 @@ static void zend_jit_trace_restart(void)
 	ZEND_JIT_EXIT_NUM = 0;
 	ZEND_JIT_EXIT_COUNTERS = 0;
 	ZCSG(jit_counters_stopped) = false;
+	/* Preloaded functions survive the restart, freed ones are not reused yet */
+	zend_jit_reset_dirty_func_infos();
 
 	zend_jit_trace_init_caches();
 }

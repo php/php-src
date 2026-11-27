@@ -2848,6 +2848,48 @@ jit_failure:
 	return FAILURE;
 }
 
+/* Shared func_infos holding process-local data of the current compilation */
+typedef struct _zend_jit_func_info_list {
+	uint32_t        count;
+	zend_func_info *func_info[ZEND_JIT_TRACE_MAX_FUNCS];
+} zend_jit_func_info_list;
+
+static zend_jit_func_info_list *zend_jit_dirty_func_infos = NULL;
+
+static void zend_jit_reset_func_info(zend_func_info *func_info)
+{
+	func_info->num = 0;
+	func_info->flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
+		| ZEND_FUNC_JIT_ON_PROF_REQUEST
+		| ZEND_FUNC_JIT_ON_HOT_COUNTERS
+		| ZEND_FUNC_JIT_ON_HOT_TRACE
+		| ZEND_FUNC_JITED;
+	memset(&func_info->ssa, 0, sizeof(zend_func_info) - offsetof(zend_func_info, ssa));
+}
+
+static void zend_jit_record_dirty_func_info(zend_func_info *func_info)
+{
+	uint32_t count = zend_jit_dirty_func_infos->count;
+
+	if (UNEXPECTED(count >= ZEND_JIT_TRACE_MAX_FUNCS)) {
+		abort();
+	}
+	zend_jit_dirty_func_infos->func_info[count] = func_info;
+	ZEND_ATOMIC_FENCE_RELEASE();
+	zend_jit_dirty_func_infos->count = count + 1;
+	/* Record before writing, so the next compilation can reset what a killed process left */
+	ZEND_ATOMIC_FENCE_RELEASE();
+}
+
+static void zend_jit_reset_dirty_func_infos(void)
+{
+	for (uint32_t i = 0; i < zend_jit_dirty_func_infos->count; i++) {
+		zend_jit_reset_func_info(zend_jit_dirty_func_infos->func_info[i]);
+	}
+	ZEND_ATOMIC_FENCE_RELEASE();
+	zend_jit_dirty_func_infos->count = 0;
+}
+
 static void zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 {
 	zend_func_info *func_info;
@@ -2857,6 +2899,8 @@ static void zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 	    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
 	    func_info = ZEND_FUNC_INFO(op_array);
 	} else {
+		/* Runs before the script is visible to other processes, so a kill leaves nothing they can read */
+		ZEND_ASSERT(JIT_G(trigger) == ZEND_JIT_ON_SCRIPT_LOAD);
 		func_info = zend_arena_calloc(&CG(arena), 1, sizeof(zend_func_info));
 		ZEND_SET_FUNC_INFO(op_array, func_info);
 	}
@@ -2868,22 +2912,19 @@ static void zend_jit_cleanup_func_info(zend_op_array *op_array)
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *caller_info, *callee_info;
 
+	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC ||
+	    JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST ||
+	    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
+		/* With ZEND_CALL_TREE, the compilation wrote only to the recorded func_info */
+		zend_jit_reset_dirty_func_infos();
+		return;
+	}
+
 	if (func_info) {
 		caller_info = func_info->caller_info;
 		callee_info = func_info->callee_info;
 
-		if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC ||
-		    JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST ||
-		    JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS) {
-			func_info->num = 0;
-			func_info->flags &= ZEND_FUNC_JIT_ON_FIRST_EXEC
-				| ZEND_FUNC_JIT_ON_PROF_REQUEST
-				| ZEND_FUNC_JIT_ON_HOT_COUNTERS
-				| ZEND_FUNC_JIT_ON_HOT_TRACE;
-			memset(&func_info->ssa, 0, sizeof(zend_func_info) - offsetof(zend_func_info, ssa));
-		} else {
-			ZEND_SET_FUNC_INFO(op_array, NULL);
-		}
+		ZEND_SET_FUNC_INFO(op_array, NULL);
 
 		while (caller_info) {
 			if (caller_info->caller_op_array) {
@@ -2927,6 +2968,17 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 			op_array = (zend_op_array*) jit_extension->op_array;
 		} else {
 			ZEND_ASSERT(!op_array->scope);
+		}
+	}
+
+	/* A process killed while compiling may have left process-local data in shared func_infos */
+	zend_jit_reset_dirty_func_infos();
+	if (trigger == ZEND_JIT_ON_FIRST_EXEC ||
+	    trigger == ZEND_JIT_ON_PROF_REQUEST ||
+	    trigger == ZEND_JIT_ON_HOT_COUNTERS) {
+		func_info = ZEND_FUNC_INFO(op_array);
+		if (func_info) {
+			zend_jit_record_dirty_func_info(func_info);
 		}
 	}
 
@@ -3275,6 +3327,9 @@ int zend_jit_script(zend_script *script)
 	if (dasm_ptr == NULL || *dasm_ptr == dasm_end) {
 		return FAILURE;
 	}
+
+	/* The analysis reads the func_infos of preloaded callees */
+	zend_jit_reset_dirty_func_infos();
 
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
