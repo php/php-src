@@ -41,6 +41,8 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #588264417. (ndossche)
   . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
     __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
+  . Fixed bug GH-24701 (Use-after-free on typed trait constants during
+    opcache preload). (sanklamm, lazerg)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
