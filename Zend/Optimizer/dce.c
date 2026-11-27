@@ -462,6 +462,7 @@ static bool dce_instr(const context *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 		opline->opcode = ZEND_FREE;
 		opline->op1.var = EX_NUM_TO_VAR(ssa->vars[free_var].var);
 		opline->op1_type = free_var_type;
+		opline->extended_value = 0;
 
 		ssa_op->op1_use = free_var;
 		ssa_op->op1_use_chain = ssa->vars[free_var].use_chain;
