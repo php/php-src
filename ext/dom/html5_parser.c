@@ -218,7 +218,9 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 if (attr->node.prefix) {
                     const char *pos = strchr((const char *) local_name, ':');
                     if (EXPECTED(pos)) {
-                        local_name = (const lxb_char_t *) pos + 1;
+                        size_t skip = (size_t) ((const lxb_char_t *) pos + 1 - local_name);
+                        local_name += skip;
+                        local_name_length -= skip;
                     }
                 }
                 const lxb_char_t *value = lxb_dom_attr_value(attr, &value_length);
