@@ -5794,29 +5794,9 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
         if ($updated) {
             $replacedXml = $doc->saveXML();
 
-            $replacedXml = preg_replace(
-                [
-                    "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    '/<appendix\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<appendix\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<sect2\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<sect2\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<chapter\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<chapter\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                ],
-                [
-                    "&$1",
-                    "<appendix xml:id=\"$2\" xmlns=\"$1\">",
-                    "<appendix xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
-                    "<sect2 xml:id=\"$2\" xmlns=\"$1\">",
-                    "<sect2 xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
-                    "<chapter xml:id=\"$2\" xmlns=\"$1\">",
-                    "<chapter xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
-                ],
-                $replacedXml
-            );
+            $replacedXml = preg_replace(["/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "/<(\/)*XI([A-Za-z]+?)/"], ["&$1", "<$1xi:$2"], $replacedXml);
 
-            $predefinedConstants[$pathName] = $replacedXml;
+            $predefinedConstants[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
     }
 
@@ -5974,29 +5954,9 @@ function replaceClassSynopses(
 
             $replacedXml = $doc->saveXML();
 
-            $replacedXml = preg_replace(
-                [
-                    "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    '/<reference\s+role="(\w+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<reference\s+role="(\w+)"\s+xmlns="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<reference\s+role="(\w+)"\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<reference\s+role="(\w+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<reference\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+role="(\w+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<reference\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s+role="(\w+)"\s*>/i',
-                ],
-                [
-                    "&$1",
-                    "<reference xml:id=\"$3\" role=\"$1\" xmlns=\"$2\">",
-                    "<reference xml:id=\"$4\" role=\"$1\" xmlns=\"$2\" xmlns:xi=\"$3\">",
-                    "<reference xml:id=\"$5\" role=\"$1\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
-                    "<reference xml:id=\"$5\" role=\"$1\" xmlns=\"$4\" xmlns:xlink=\"$2\" xmlns:xi=\"$2\">",
-                    "<reference xml:id=\"$5\" role=\"$4\" xmlns=\"$1\" xmlns:xlink=\"$2\" xmlns:xi=\"$3\">",
-                    "<reference xml:id=\"$4\" role=\"$5\" xmlns=\"$1\" xmlns:xlink=\"$2\" xmlns:xi=\"$3\">",
-                ],
-                $replacedXml
-            );
+            $replacedXml = preg_replace(["/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "/<(\/)*XI([A-Za-z]+?)/"], ["&$1", "<$1xi:$2"], $replacedXml);
 
-            $classSynopses[$pathName] = $replacedXml;
+            $classSynopses[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
     }
 
@@ -6039,6 +5999,37 @@ function getReplacedSynopsisXml(string $xml): string
             "<$1XI$2",
         ],
         $xml
+    );
+}
+
+function removeAddedXmlDeclaration(string $originalXml, string $replacedXml): string
+{
+    if (str_starts_with(ltrim($originalXml), '<?xml')) {
+        return $replacedXml;
+    }
+
+    return preg_replace('/^<\?xml[^>]*\?>\s*/', '', $replacedXml);
+}
+
+function reorderRootElementAttributes(string $xml): string
+{
+    return preg_replace_callback(
+        '/^((?:\s*(?:<\?.*?\?>|<!--.*?-->))*\s*<[\w:.-]+)((?:\s+[\w:.-]+="[^"]*")+)(\s*>)/s',
+        static function (array $matches): string {
+            preg_match_all('/[\w:.-]+="[^"]*"/', $matches[2], $attributes);
+            $attributes = $attributes[0];
+
+            $rank = static fn (string $attribute): int => match (true) {
+                str_starts_with($attribute, 'xml:id=') => 0,
+                str_starts_with($attribute, 'xmlns') => 2,
+                default => 1,
+            };
+            usort($attributes, static fn (string $a, string $b): int => $rank($a) <=> $rank($b));
+
+            return $matches[1] . ' ' . implode(' ', $attributes) . $matches[3];
+        },
+        $xml,
+        1
     );
 }
 
@@ -6232,21 +6223,9 @@ function replaceMethodSynopses(
 
             $replacedXml = $doc->saveXML();
 
-            $replacedXml = preg_replace(
-                [
-                    "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    '/<refentry\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<refentry\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                ],
-                [
-                    "&$1",
-                    "<refentry xml:id=\"$2\" xmlns=\"$1\">",
-                    "<refentry xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
-                ],
-                $replacedXml
-            );
+            $replacedXml = preg_replace(["/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/", "/<(\/)*XI([A-Za-z]+?)/"], ["&$1", "<$1xi:$2"], $replacedXml);
 
-            $methodSynopses[$pathName] = $replacedXml;
+            $methodSynopses[$pathName] = reorderRootElementAttributes(removeAddedXmlDeclaration($xml, $replacedXml));
         }
     }
 
