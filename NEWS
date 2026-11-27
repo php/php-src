@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.14
 
+- BZ2:
+  . Fixed a crash when opening a compress.bzip2:// stream for writing fails.
+    (Schwarzemann)
+
 - CLI:
   . Fixed built-in server rejecting long request paths, or paths received in
     several pieces, as malformed. (Ilia Alshanetsky)
