@@ -18,7 +18,7 @@ runs:
         disable-cache: true
         prepare: |
           cd $GITHUB_WORKSPACE
-          pkg install bison developer/icu libzip oniguruma re2c
+          pkg install bison developer/icu libzip oniguruma re2c apache-24
 
           ./buildconf -f
           CC=gcc CXX=g++ \
@@ -31,6 +31,7 @@ runs:
             --enable-werror \
             --enable-option-checking=fatal \
             --enable-fpm \
+            --with-apxs2 \
             --without-pear \
             --with-bz2 \
             --with-jpeg \

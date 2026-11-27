@@ -19,6 +19,7 @@ runs:
           --with-libdir=lib64 \
           --enable-phpdbg \
           --enable-fpm \
+          --with-apxs2 \
           --with-pdo-mysql=mysqlnd \
           --with-mysqli=mysqlnd \
           ${{ inputs.skipSlow == 'false' && '--with-pgsql' || '' }} \
