@@ -906,28 +906,34 @@ static void zend_create_closure_ex(
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
 		ptr = ZEND_MAP_PTR_GET(func->op_array.run_time_cache);
-		if (!ptr
+		if ((func->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) == ZEND_ACC_CLOSURE) {
+			/* Closures cannot store their scope in func->common.scope, as it may be immutable.
+			 * To work around this, we store the scope associated with a shared runtime
+			 * cache in a slot just before the op_array's cache.
+			 * This allows closures created in the same scope to share a single runtime cache.
+			 * Invariant: A closure's cache is always either such a shared cache or a heap cache. */
+			if (!ptr) {
+				void **mem = zend_arena_alloc(&CG(arena), sizeof(void *) + func->op_array.cache_size);
+				mem[0] = scope;
+				ptr = mem + 1;
+				memset(ptr, 0, func->op_array.cache_size);
+				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
+			} else if ((func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
+			 || ((zend_class_entry **)ptr)[-1] != scope) {
+				ptr = NULL;
+			}
+		} else if (!ptr
 			|| func->common.scope != scope
 			|| (func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 		) {
-			if (!ptr
-			 && (func->common.fn_flags & ZEND_ACC_CLOSURE)
-			 && (func->common.scope == scope ||
-			     !(func->common.fn_flags & ZEND_ACC_IMMUTABLE))) {
-				/* If a real closure is used for the first time, we create a shared runtime cache
-				 * and remember which scope it is for. */
-				if (func->common.scope != scope) {
-					func->common.scope = scope;
-				}
-				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
-				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
-				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
-			} else {
-				/* Otherwise, we use a non-shared runtime cache */
-				ptr = emalloc(func->op_array.cache_size);
-				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-			}
+			/* Functions and methods share their own runtime cache only for their own scope */
+			ptr = NULL;
+		}
+		if (!ptr) {
+			/* Otherwise, we use a non-shared runtime cache */
+			ptr = emalloc(func->op_array.cache_size);
 			memset(ptr, 0, func->op_array.cache_size);
+			closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 		}
 		ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
 	} else {
