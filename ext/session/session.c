@@ -3451,16 +3451,14 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 		case MULTIPART_EVENT_END: {
 			multipart_event_end *data = (multipart_event_end *) event_data;
 
-			if (Z_TYPE(progress->sid) && progress->key.s) {
+			if (Z_TYPE(progress->sid) && progress->key.s && !Z_ISUNDEF(progress->data)) {
 				if (PS(rfc1867_cleanup)) {
 					php_session_rfc1867_cleanup(progress);
 				} else {
-					if (!Z_ISUNDEF(progress->data)) {
-						SEPARATE_ARRAY(&progress->data);
-						add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
-						Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
-						php_session_rfc1867_update(progress, 1);
-					}
+					SEPARATE_ARRAY(&progress->data);
+					add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
+					Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+					php_session_rfc1867_update(progress, 1);
 				}
 				php_rshutdown_session_globals();
 			}
