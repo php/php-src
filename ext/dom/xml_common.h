@@ -51,6 +51,7 @@ PHP_DOM_EXPORT extern zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj);
 PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval* return_value, dom_object *domobj);
 PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
+PHP_DOM_EXPORT ZEND_COLD void php_dom_throw_read_only_node_error(php_libxml_ref_obj *document);
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
