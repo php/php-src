@@ -416,8 +416,10 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *
 	shm_var->length = len;
 	shm_var->next = total_size;
 	memcpy(&(shm_var->mem), data, len);
-	ptr->end += total_size;
+	/* Never let free overstate the space left, the segment outlives a killed writer */
 	ptr->free -= total_size;
+	ZEND_ATOMIC_FENCE_RELEASE();
+	ptr->end += total_size;
 	return 0;
 }
 /* }}} */
@@ -437,14 +439,18 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 			return -1;
 		}
 		shm_var = (sysvshm_chunk*) ((char *) ptr + pos);
+		/* A writer killed while removing a variable leaves garbage after the moved chunks */
+		if (ptr->end - pos < (zend_long) sizeof(sysvshm_chunk)
+			|| shm_var->next < (zend_long) sizeof(sysvshm_chunk)
+			|| shm_var->next > ptr->end - pos
+			|| shm_var->length < 0
+			|| shm_var->length > shm_var->next - (zend_long) XtOffsetOf(sysvshm_chunk, mem)) {
+			return -1;
+		}
 		if (shm_var->key == key) {
 			return pos;
 		}
 		pos += shm_var->next;
-
-		if (shm_var->next <= 0 || pos < ptr->start) {
-			return -1;
-		}
 	}
 	return -1;
 }
@@ -454,7 +460,7 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
-	zend_long memcpy_len;
+	zend_long memcpy_len, chunk_size;
 
 	ZEND_ASSERT(ptr);
 
@@ -462,11 +468,13 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);
 
 	memcpy_len = ptr->end-shm_varpos - chunk_ptr->next;
-	ptr->free += chunk_ptr->next;
-	ptr->end -= chunk_ptr->next;
+	chunk_size = chunk_ptr->next;
 	if (memcpy_len > 0) {
 		memmove(chunk_ptr, next_chunk_ptr, memcpy_len);
 	}
+	ptr->end -= chunk_size;
+	ZEND_ATOMIC_FENCE_RELEASE();
+	ptr->free += chunk_size;
 	return 0;
 }
 /* }}} */
