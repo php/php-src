@@ -910,7 +910,7 @@ optimize_const_unary_op:
 			case ZEND_RETURN:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
-					if (src && src->opcode == ZEND_QM_ASSIGN) {
+					if (src && src->opcode == ZEND_QM_ASSIGN && src->op1_type != IS_VAR) {
 						zend_op *op = src + 1;
 						bool optimize = true;
 
