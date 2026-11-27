@@ -207,6 +207,8 @@ X509 *php_openssl_pem_read_asn1_bio_x509(BIO *in);
 X509 *php_openssl_pem_read_bio_x509(BIO *in);
 X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in);
 STACK_OF(X509_INFO) *php_openssl_pem_read_bio_x509_info(BIO *in);
+X509_STORE_CTX *php_openssl_x509_store_ctx_new(void);
+int php_openssl_x509_lookup_load_file(X509_LOOKUP *lookup, const char *file, int type);
 EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in);
 EVP_PKEY *php_openssl_pem_read_bio_private_key(BIO *in, pem_password_cb *cb, void *u);
 PKCS7 *php_openssl_pem_read_bio_pkcs7(BIO *in);

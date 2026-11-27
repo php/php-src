@@ -749,7 +749,7 @@ int php_openssl_check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedch
 	int ret=0;
 	X509_STORE_CTX *csc;
 
-	csc = X509_STORE_CTX_new();
+	csc = php_openssl_x509_store_ctx_new();
 	if (csc == NULL) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_ERROR, "Memory allocation failure");
@@ -815,7 +815,7 @@ X509_STORE *php_openssl_setup_verify(zval *calist, uint32_t arg_num)
 
 			if ((sb.st_mode & S_IFREG) == S_IFREG) {
 				file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-				if (file_lookup == NULL || !X509_LOOKUP_load_file(file_lookup, file_path, X509_FILETYPE_PEM)) {
+				if (file_lookup == NULL || !php_openssl_x509_lookup_load_file(file_lookup, file_path, X509_FILETYPE_PEM)) {
 					php_openssl_store_errors();
 					php_error_docref(NULL, E_WARNING, "Error loading file %s", file_path);
 				} else {
@@ -836,7 +836,7 @@ X509_STORE *php_openssl_setup_verify(zval *calist, uint32_t arg_num)
 	}
 	if (nfiles == 0) {
 		file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-		if (file_lookup == NULL || !X509_LOOKUP_load_file(file_lookup, NULL, X509_FILETYPE_DEFAULT)) {
+		if (file_lookup == NULL || !php_openssl_x509_lookup_load_file(file_lookup, NULL, X509_FILETYPE_DEFAULT)) {
 			php_openssl_store_errors();
 		}
 	}
