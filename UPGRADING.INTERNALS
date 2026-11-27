@@ -99,6 +99,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . ZEND_IN_RANGE_OF(x, T) was added to check whether the value of an integer
     x is representable in the integer type T.
   . ZEND_TYPE_MIN(T) and ZEND_TYPE_MAX(T) were added.
+  . The zend_setlocale() function was added. During a request it only changes
+    the locale of the current thread, which is what the setlocale() function
+    of PHP now does. Extensions should use it instead of the setlocale()
+    function of the C library, which still changes the locale of the whole
+    process and doesn't return the locale of the current thread.
 
 - Deprecated:
   . ZEND_LONG_INT_OVFL(), ZEND_LONG_INT_UDFL(), ZEND_LONG_EXCEEDS_INT(),

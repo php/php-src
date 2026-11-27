@@ -24,6 +24,7 @@
 #include "zend_variables.h"
 #include "zend_globals.h"
 #include "zend_list.h"
+#include "zend_locale.h"
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
@@ -3016,7 +3017,7 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 #else
 		char buf[16];
 		const char *charmap = NULL;
-		const char *locale = setlocale(LC_CTYPE, NULL);
+		const char *locale = zend_setlocale(LC_CTYPE, NULL);
 
 		if (locale) {
 			const char *dot = strchr(locale, '.');
@@ -3072,8 +3073,8 @@ ZEND_API void zend_reset_lc_ctype_locale(void)
 {
 	/* Use the C.UTF-8 locale so that readline can process UTF-8 input, while not interfering
 	 * with single-byte locale-dependent functions used by PHP. */
-	if (!setlocale(LC_CTYPE, "C.UTF-8")) {
-		setlocale(LC_CTYPE, "C");
+	if (!zend_setlocale(LC_CTYPE, "C.UTF-8")) {
+		zend_setlocale(LC_CTYPE, "C");
 	}
 }
 

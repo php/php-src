@@ -11,7 +11,7 @@ if (setlocale(LC_ALL,'en_AU.utf8') === false || setlocale(LC_ALL,'en_US.utf8') =
 }
 ?>
 --ENV--
-LC_ALL=en_US.utf8;
+LC_ALL=en_US.utf8
 --FILE--
 <?php
 /* If locale is empty string "", the locale names will be set from the values of environment variables with the same names as from ENV */
