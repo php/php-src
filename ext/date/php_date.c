@@ -670,6 +670,45 @@ static const char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib
 }
 /* }}} */
 
+/* The time zone offset of t, as the format characters I O P p T e Z c r print it. */
+static timelib_time_offset *date_format_offset(const timelib_time *t)
+{
+	timelib_time_offset *offset;
+
+	if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
+		offset = timelib_time_offset_ctor();
+		offset->offset = (t->z + (t->dst * 3600));
+		offset->leap_secs = 0;
+		offset->is_dst = t->dst;
+		offset->abbr = timelib_strdup(t->tz_abbr);
+	} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
+		offset = timelib_time_offset_ctor();
+		offset->offset = (t->z);
+		offset->leap_secs = 0;
+		offset->is_dst = 0;
+		offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
+		snprintf(offset->abbr, 9, "GMT%c%02d%02d",
+		                          (offset->offset < 0) ? '-' : '+',
+		                          abs(offset->offset / 3600),
+		                          abs((offset->offset % 3600) / 60));
+	} else if (t->zone_type == TIMELIB_ZONETYPE_ID) {
+		offset = timelib_get_time_zone_info(t->sse, t->tz_info);
+	} else {
+		/* Shouldn't happen, but code defensively */
+		offset = timelib_time_offset_ctor();
+	}
+
+	return offset;
+}
+
+/* Sets *offset to the time zone offset of t the first time a local time needs it. */
+static zend_always_inline void date_format_need_offset(timelib_time_offset **offset, const timelib_time *t, bool localtime)
+{
+	if (localtime && !*offset) {
+		*offset = date_format_offset(t);
+	}
+}
+
 /* {{{ date_format - (gm)date helper */
 static zend_string *date_format(const char *format, size_t format_len, const timelib_time *t, bool localtime)
 {
@@ -684,31 +723,6 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 
 	if (!format_len) {
 		return ZSTR_EMPTY_ALLOC();
-	}
-
-	if (localtime) {
-		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
-			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z + (t->dst * 3600));
-			offset->leap_secs = 0;
-			offset->is_dst = t->dst;
-			offset->abbr = timelib_strdup(t->tz_abbr);
-		} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
-			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z);
-			offset->leap_secs = 0;
-			offset->is_dst = 0;
-			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
-			snprintf(offset->abbr, 9, "GMT%c%02d%02d",
-			                          (offset->offset < 0) ? '-' : '+',
-			                          abs(offset->offset / 3600),
-			                          abs((offset->offset % 3600) / 60));
-		} else if (t->zone_type == TIMELIB_ZONETYPE_ID) {
-			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
-		} else {
-			/* Shouldn't happen, but code defensively */
-			offset = timelib_time_offset_ctor();
-		}
 	}
 
 	for (i = 0; i < format_len; i++) {
@@ -769,22 +783,31 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 			case 'v': length = slprintf(buffer, sizeof(buffer), "%03d", (int) floor(t->us / 1000)); break;
 
 			/* timezone */
-			case 'I': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->is_dst : 0); break;
+			case 'I':
+				date_format_need_offset(&offset, t, localtime);
+				length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->is_dst : 0);
+				break;
 			case 'p':
+				date_format_need_offset(&offset, t, localtime);
 				if (!localtime || strcmp(offset->abbr, "UTC") == 0 || strcmp(offset->abbr, "Z") == 0 || strcmp(offset->abbr, "GMT+0000") == 0) {
 					length = slprintf(buffer, sizeof(buffer), "%s", "Z");
 					break;
 				}
 				ZEND_FALLTHROUGH;
 			case 'P': rfc_colon = true; ZEND_FALLTHROUGH;
-			case 'O': length = slprintf(buffer, sizeof(buffer), "%c%02d%s%02d",
+			case 'O':
+				date_format_need_offset(&offset, t, localtime);
+				length = slprintf(buffer, sizeof(buffer), "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											rfc_colon ? ":" : "",
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': length = slprintf(buffer, sizeof(buffer), "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'T':
+				date_format_need_offset(&offset, t, localtime);
+				length = slprintf(buffer, sizeof(buffer), "%s", localtime ? offset->abbr : "GMT");
+				break;
 			case 'e': if (!localtime) {
 					      length = slprintf(buffer, sizeof(buffer), "%s", "UTC");
 					  } else {
@@ -793,9 +816,11 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 								  length = slprintf(buffer, sizeof(buffer), "%s", t->tz_info->name);
 								  break;
 							  case TIMELIB_ZONETYPE_ABBR:
+								  date_format_need_offset(&offset, t, localtime);
 								  length = slprintf(buffer, sizeof(buffer), "%s", offset->abbr);
 								  break;
 							  case TIMELIB_ZONETYPE_OFFSET: {
+								  date_format_need_offset(&offset, t, localtime);
 								  int seconds = offset->offset % 60;
 								  if (seconds == 0) {
 								      length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
@@ -816,10 +841,15 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 						  }
 					  }
 					  break;
-			case 'Z': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->offset : 0); break;
+			case 'Z':
+				date_format_need_offset(&offset, t, localtime);
+				length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->offset : 0);
+				break;
 
 			/* full date/time */
-			case 'c': length = slprintf(buffer, sizeof(buffer), "%04" ZEND_LONG_FMT_SPEC "-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c':
+				date_format_need_offset(&offset, t, localtime);
+				length = slprintf(buffer, sizeof(buffer), "%04" ZEND_LONG_FMT_SPEC "-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (zend_long) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -827,7 +857,9 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = slprintf(buffer, sizeof(buffer), "%3s, %02d %3s %04" ZEND_LONG_FMT_SPEC " %02d:%02d:%02d %c%02d%02d",
+			case 'r':
+				date_format_need_offset(&offset, t, localtime);
+				length = slprintf(buffer, sizeof(buffer), "%3s, %02d %3s %04" ZEND_LONG_FMT_SPEC " %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
 											(zend_long) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -847,7 +879,7 @@ static zend_string *date_format(const char *format, size_t format_len, const tim
 
 	smart_str_0(&string);
 
-	if (localtime) {
+	if (offset) {
 		timelib_time_offset_dtor(offset);
 	}
 
