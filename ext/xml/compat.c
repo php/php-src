@@ -504,10 +504,10 @@ XML_GetErrorCode(XML_Parser parser)
 
 static const XML_Char *const error_mapping[] = {
 	(const XML_Char *)"No error",
+	(const XML_Char *)"Internal error",
 	(const XML_Char *)"No memory",
 	(const XML_Char *)"Invalid document start",
 	(const XML_Char *)"Empty document",
-	(const XML_Char *)"Not well-formed (invalid token)",
 	(const XML_Char *)"Invalid document end",
 	(const XML_Char *)"Invalid hexadecimal character reference",
 	(const XML_Char *)"Invalid decimal character reference",
