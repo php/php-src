@@ -6585,7 +6585,10 @@ done:
 								}
 							}
 						}
-						if (ssa->var_info[ssa_op->result_def].type & MAY_BE_INDIRECT) {
+						if ((ssa->var_info[ssa_op->result_def].type & MAY_BE_INDIRECT)
+						 || opline->opcode == ZEND_FETCH_OBJ_R
+						 || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
+						 || opline->opcode == ZEND_FETCH_OBJ_IS) {
 							RESET_STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
 						}
 						if (type != IS_UNKNOWN) {
