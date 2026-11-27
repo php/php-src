@@ -247,12 +247,14 @@ static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{
 	if (bind(sock->bsd_socket, (struct sockaddr *)&la, sizeof(la)) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to bind to given address", errno);
 		close(sock->bsd_socket);
+		sock->bsd_socket = -1;
 		return 0;
 	}
 
 	if (listen(sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to listen on socket", errno);
 		close(sock->bsd_socket);
+		sock->bsd_socket = -1;
 		return 0;
 	}
 
@@ -2604,6 +2606,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 			{
 				// AF_UNIX sockets via getaddrino are not implemented due to security problems
 				close(php_sock->bsd_socket);
+				php_sock->bsd_socket = -1;
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 			}
@@ -2618,6 +2621,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 			}
 		default:
 			close(php_sock->bsd_socket);
+			php_sock->bsd_socket = -1;
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
@@ -2625,6 +2629,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	if (retval != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to bind address", errno);
 		close(php_sock->bsd_socket);
+		php_sock->bsd_socket = -1;
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -2666,6 +2671,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 			{
 				// AF_UNIX sockets via getaddrino are not implemented due to security problems
 				close(php_sock->bsd_socket);
+				php_sock->bsd_socket = -1;
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 			}
@@ -2681,12 +2687,14 @@ PHP_FUNCTION(socket_addrinfo_connect)
 		default:
 			zend_argument_value_error(1, "socket type must be one of AF_UNIX, AF_INET, or AF_INET6");
 			close(php_sock->bsd_socket);
+			php_sock->bsd_socket = -1;
 			RETURN_THROWS();
 	}
 
 	if (retval != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to connect address", errno);
 		close(php_sock->bsd_socket);
+		php_sock->bsd_socket = -1;
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
