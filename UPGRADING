@@ -257,6 +257,8 @@ PHP 8.7 UPGRADE NOTES
     encoding.
   . Improved performance of in_array() and array_search() in strict mode when
     searching for a string.
+  . Improved performance of array_merge() and array_merge_recursive() when
+    some arguments are empty arrays.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.

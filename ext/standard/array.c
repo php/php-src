@@ -4110,6 +4110,9 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 	zval *src_entry;
 	zend_string *string_key;
 
+	if (zend_hash_num_elements(src) == 0) {
+		return 1;
+	}
 	if (HT_IS_PACKED(dest) && HT_IS_PACKED(src)) {
 		zend_hash_extend(dest, zend_hash_num_elements(dest) + zend_hash_num_elements(src), 1);
 		ZEND_HASH_FILL_PACKED(dest) {
@@ -4122,6 +4125,15 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 				ZEND_HASH_FILL_ADD(src_entry);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
+	} else if (HT_IS_PACKED(src)) {
+		ZEND_HASH_PACKED_FOREACH_VAL(src, src_entry) {
+			if (UNEXPECTED(Z_ISREF_P(src_entry) &&
+				Z_REFCOUNT_P(src_entry) == 1)) {
+				src_entry = Z_REFVAL_P(src_entry);
+			}
+			Z_TRY_ADDREF_P(src_entry);
+			zend_hash_next_index_insert_new(dest, src_entry);
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
 			if (UNEXPECTED(Z_ISREF_P(src_entry) &&
@@ -4299,6 +4311,10 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		RETURN_THROWS();
 	}
 
+	if (count == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	if (argc == 2) {
 		zval *ret = NULL;
 
@@ -4329,13 +4345,17 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		}
 	}
 
-	arg = args;
-	src  = Z_ARRVAL_P(arg);
+	uint32_t first = 0;
+	while (zend_hash_num_elements(Z_ARRVAL(args[first])) == 0) {
+		first++;
+	}
+	arg = args + first;
+	src = Z_ARRVAL_P(arg);
 	/* copy first array if necessary */
 	bool in_place = false;
 	if (HT_IS_PACKED(src)) {
 		/* Note: If it has holes, it might get sequentialized */
-		if (HT_IS_WITHOUT_HOLES(src) && zend_may_modify_arg_in_place(arg)) {
+		if (first == 0 && HT_IS_WITHOUT_HOLES(src) && zend_may_modify_arg_in_place(arg)) {
 			dest = src;
 			in_place = true;
 			RETVAL_ARR(dest);
@@ -4375,12 +4395,15 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (recursive) {
-		for (i = 1; i < argc; i++) {
+		for (i = first + 1; i < argc; i++) {
 			arg = args + i;
+			if (zend_hash_num_elements(Z_ARRVAL_P(arg)) == 0) {
+				continue;
+			}
 			php_array_merge_recursive(dest, Z_ARRVAL_P(arg));
 		}
 	} else {
-		for (i = 1; i < argc; i++) {
+		for (i = first + 1; i < argc; i++) {
 			arg = args + i;
 			php_array_merge(dest, Z_ARRVAL_P(arg));
 		}
