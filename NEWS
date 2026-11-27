@@ -188,6 +188,9 @@ PHP                                                                        NEWS
   . Fixed use-after-free when unsetting an entry with an open handle.
     (David Carlier)
 
+- Phpdbg:
+  . Fixed bug GH-25338 (opcode listing did not include property hooks). (crystarm)
+
 - POSIX:
   . Fixed bug GH-25530 (posix_get_last_error() returns an error from a
     previous request). (Artem Ukrainskiy)

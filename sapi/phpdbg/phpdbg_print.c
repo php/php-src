@@ -233,7 +233,7 @@ void phpdbg_print_opcodes_main(void) {
 }
 
 void phpdbg_print_opcodes_function(const char *function, size_t len) {
-	zend_function *func = zend_hash_str_find_ptr(EG(function_table), function, len);
+	zend_function *func = zend_hash_str_find_ptr_lc(EG(function_table), function, len);
 
 	if (!func) {
 		phpdbg_error("The function %s could not be found", function);
@@ -241,6 +241,34 @@ void phpdbg_print_opcodes_function(const char *function, size_t len) {
 	}
 
 	phpdbg_print_function_helper(func);
+}
+
+static zend_function *phpdbg_get_property_hook(zend_class_entry *ce, const char *function) {
+	const char *separator;
+	size_t property_name_len;
+	zend_property_hook_kind hook_kind;
+	zend_property_info *property;
+
+	if (function[0] != '$' || !(separator = strstr(function, "::"))) {
+		return NULL;
+	}
+
+	property_name_len = separator - function - 1;
+	if (property_name_len == 0) {
+		return NULL;
+	}
+
+	separator += 2;
+	if (zend_binary_strcasecmp(separator, strlen(separator), "get", sizeof("get") - 1) == 0) {
+		hook_kind = ZEND_PROPERTY_HOOK_GET;
+	} else if (zend_binary_strcasecmp(separator, strlen(separator), "set", sizeof("set") - 1) == 0) {
+		hook_kind = ZEND_PROPERTY_HOOK_SET;
+	} else {
+		return NULL;
+	}
+
+	property = zend_hash_str_find_ptr(&ce->properties_info, function + 1, property_name_len);
+	return property && property->hooks ? property->hooks[hook_kind] : NULL;
 }
 
 static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *function) {
@@ -251,7 +279,11 @@ static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *fun
 		return;
 	}
 
-	if (!(func = zend_hash_str_find_ptr(&ce->function_table, function, strlen(function)))) {
+	func = zend_hash_str_find_ptr_lc(&ce->function_table, function, strlen(function));
+	if (!func) {
+		func = phpdbg_get_property_hook(ce, function);
+	}
+	if (!func) {
 		phpdbg_error("The method %s::%s could not be found", ZSTR_VAL(ce->name), function);
 		return;
 	}
@@ -270,8 +302,35 @@ void phpdbg_print_opcodes_method(const char *class, const char *function) {
 	phpdbg_print_opcodes_method_ce(ce, function);
 }
 
+static bool phpdbg_is_declared_property_hook(
+		const zend_class_entry *ce, const zend_property_info *property, const zend_function *hook) {
+	return property->ce == ce
+		&& hook
+		&& hook->common.scope == ce
+		&& !(hook->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
+}
+
+static uint32_t phpdbg_get_declared_property_hook_count(zend_class_entry *ce) {
+	uint32_t count = 0;
+	zend_property_info *property;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property) {
+		if (!property->hooks) {
+			continue;
+		}
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			if (phpdbg_is_declared_property_hook(ce, property, property->hooks[i])) {
+				count++;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return count;
+}
+
 static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	zend_function *method;
+	zend_property_info *property;
 	bool first = 1;
 
 	phpdbg_out("%s %s: %s\n",
@@ -288,7 +347,8 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 		return;
 	}
 
-	phpdbg_out("%d methods: ", zend_hash_num_elements(&ce->function_table));
+	phpdbg_out("%d methods: ",
+		zend_hash_num_elements(&ce->function_table) + phpdbg_get_declared_property_hook_count(ce));
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		if (first) {
 			first = 0;
@@ -297,6 +357,23 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 		}
 		phpdbg_out("%s", ZSTR_VAL(method->common.function_name));
 	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property) {
+		if (!property->hooks) {
+			continue;
+		}
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			zend_function *hook = property->hooks[i];
+			if (!phpdbg_is_declared_property_hook(ce, property, hook)) {
+				continue;
+			}
+			if (first) {
+				first = 0;
+			} else {
+				phpdbg_out(", ");
+			}
+			phpdbg_out("%s", ZSTR_VAL(hook->common.function_name));
+		}
+	} ZEND_HASH_FOREACH_END();
 	if (first) {
 		phpdbg_out("-");
 	}
@@ -304,6 +381,17 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		phpdbg_print_function_helper(method);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property) {
+		if (!property->hooks) {
+			continue;
+		}
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			zend_function *hook = property->hooks[i];
+			if (phpdbg_is_declared_property_hook(ce, property, hook)) {
+				phpdbg_print_function_helper(hook);
+			}
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -343,20 +431,20 @@ void phpdbg_print_opcodes(const char *function)
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		char *function_lowercase = zend_str_tolower_dup(function, strlen(function));
+		const char *separator = strstr(function, "::");
 
-		if (strstr(function_lowercase, "::") == NULL) {
-			phpdbg_print_opcodes_function(function_lowercase, strlen(function_lowercase));
+		if (!separator) {
+			phpdbg_print_opcodes_function(function, strlen(function));
 		} else {
-			char *method_name, *class_name = strtok(function_lowercase, "::");
-			if ((method_name = strtok(NULL, "::")) == NULL) {
+			char *class_name = estrndup(function, separator - function);
+			const char *method_name = separator + 2;
+			if (method_name[0] == '\0') {
 				phpdbg_print_opcodes_class(class_name);
 			} else {
 				phpdbg_print_opcodes_method(class_name, method_name);
 			}
+			efree(class_name);
 		}
-
-		efree(function_lowercase);
 	}
 }
 
