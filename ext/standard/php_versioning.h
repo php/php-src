@@ -19,5 +19,6 @@
 
 PHPAPI char *php_canonicalize_version(const char *);
 PHPAPI int php_version_compare(const char *, const char *);
+PHPAPI int php_version_compare_ex(const char *, size_t, const char *, size_t);
 
 #endif
