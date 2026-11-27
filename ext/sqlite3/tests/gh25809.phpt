@@ -13,7 +13,6 @@ var_dump($source->backup($destination, 'main', 'nonexistent'));
 var_dump($source->backup($destination, 'nonexistent', 'main'));
 
 $file = __DIR__ . '/gh25809.db';
-@unlink($file);
 $writer = new SQLite3($file);
 $writer->exec('CREATE TABLE z (a)');
 $writer->close();
