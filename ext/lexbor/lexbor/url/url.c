@@ -3542,7 +3542,7 @@ lxb_url_host_idna_cb(const lxb_char_t *data, size_t len, void *ctx)
 lxb_inline lxb_status_t
 lxb_url_ipv4_append(lxb_url_parser_t *parser, const lxb_char_t *data,
                     const lxb_char_t *end, uint64_t *ipv,
-                    uint64_t limit, unsigned i)
+                    int *out_of, unsigned i)
 {
     lxb_status_t status;
     lxb_url_error_type_t type;
@@ -3563,11 +3563,14 @@ lxb_url_ipv4_append(lxb_url_parser_t *parser, const lxb_char_t *data,
     }
 
     if (ipv[i] > 255) {
-        type = ipv[i] < limit ? LXB_URL_ERROR_TYPE_IPV4_LARGE_FINAL_PART
-                              : LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART;
-        status = lxb_url_log_append(parser, data, type);
+        status = lxb_url_log_append(parser, data,
+                                    LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART);
         if (status != LXB_STATUS_OK) {
             return status;
+        }
+
+        if (*out_of != -1) {
+            *out_of = (int) i;
         }
     }
 
@@ -3587,6 +3590,7 @@ static lxb_status_t
 lxb_url_ipv4_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
                    const lxb_char_t *end, uint32_t *ipv4)
 {
+    int out_of;
     uint32_t ip;
     uint64_t parts[5];
     unsigned i;
@@ -3603,6 +3607,7 @@ lxb_url_ipv4_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
     i = 0;
     p = data;
     begin = data;
+    out_of = -1;
 
     /* Let's make the compiler happy. */
 
@@ -3615,9 +3620,7 @@ lxb_url_ipv4_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
                 goto failed;
             }
 
-            ++i;
-            status = lxb_url_ipv4_append(parser, begin, p, parts,
-                                         p + 1 == end ? st[5 - i] : 256, i);
+            status = lxb_url_ipv4_append(parser, begin, p, parts, &out_of, ++i);
             if (status != LXB_STATUS_OK) {
                 return status;
             }
@@ -3634,8 +3637,7 @@ lxb_url_ipv4_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
             goto failed;
         }
 
-        ++i;
-        status = lxb_url_ipv4_append(parser, begin, p, parts, st[5 - i], i);
+        status = lxb_url_ipv4_append(parser, begin, p, parts, &out_of, ++i);
         if (status != LXB_STATUS_OK) {
             return status;
         }
@@ -3646,6 +3648,10 @@ lxb_url_ipv4_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
         if (status != LXB_STATUS_OK) {
             return status;
         }
+    }
+
+    if (out_of != -1 && out_of != (int) i) {
+        return LXB_STATUS_ERROR_OVERFLOW;
     }
 
     if (parts[i] >= st[5 - i]) {
