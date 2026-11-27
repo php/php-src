@@ -843,6 +843,7 @@ ZEND_FUNCTION(get_object_vars)
 				value = zend_read_property_ex(prop_info->ce, zobj, unmangled_name, /* silent */ true, &tmp);
 				zend_string_release_ex(unmangled_name, false);
 				if (EG(exception)) {
+					zval_ptr_dtor(&tmp);
 					zend_release_properties(properties);
 					zval_ptr_dtor(return_value);
 					ZVAL_UNDEF(return_value);
