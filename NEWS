@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
     throwing a ValueError. (Marc Bennewitz)
+  . Improved performance of hash_pbkdf2(). (Sjoerd Langkemper)
 
 - Intl:
   . Added Spoofchecker::getRestrictionLevel(). (Weilin Du)
