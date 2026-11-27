@@ -1,10 +1,16 @@
 --TEST--
 JIT ASSIGN_DIM: container converted from false is overwritten while reporting undefined OP_DATA
+--EXTENSIONS--
+opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
 opcache.jit=function
+--SKIPIF--
+<?php
+if (!isset(opcache_get_status()["jit"])) die('skip Fails without JIT');
+?>
 --FILE--
 <?php
 set_error_handler(function ($_, $msg) {
