@@ -986,6 +986,7 @@ static int curl_debug(CURL *handle, curl_infotype type, char *data, size_t size,
     ZVAL_STRINGL(&args[2], data, size);
 
     php_curl_call_callback(ch, &ch->handlers.debug, NULL, /* argc */ 3, args);
+    _php_curl_verify_handlers(ch, /* reporterror */ true);
 
     zval_ptr_dtor(&args[0]);
     zval_ptr_dtor(&args[2]);
