@@ -1474,9 +1474,18 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 
 	if ((size_t)offset >= ZSTR_LEN(s)) {
-		/* Extend string if needed */
+		/* Extend string if needed. The offset is user controlled, so allocate
+		 * fallibly: if the memory limit doesn't allow the new size, the string
+		 * is left untouched and an out of memory error is raised. */
 		zend_long old_len = ZSTR_LEN(s);
-		ZVAL_NEW_STR(str, zend_string_extend(s, (size_t)offset + 1, 0));
+		zend_string *extended = zend_string_fextend(s, (size_t)offset + 1, 0, /* fallible */ true);
+		if (UNEXPECTED(!extended)) {
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
+		ZVAL_NEW_STR(str, extended);
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else {
