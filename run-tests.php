@@ -828,6 +828,11 @@ function get_default_worker_count(): ?int
         return is_string($workerCount) ? parse_default_worker_count($workerCount) : null;
     }
 
+    $mflags = getenv('MAKEFLAGS');
+    if ($mflags && preg_match('/(^|\h)-j(\d+)(\h|$)/', $mflags, $res)) {
+       return (int)$res[2];
+    }
+
     $commands = [
         'nproc 2>/dev/null',
         'getconf _NPROCESSORS_ONLN 2>/dev/null',
