@@ -128,7 +128,11 @@ ZEND_EXT_API extern zend_smm_shared_globals *smm_shared_globals;
 
 BEGIN_EXTERN_C()
 
+/* If this returns ALLOC_SUCCESS, this process has created a new segment that other processes may only
+ * use once it is fully initialized. The caller must call zend_shared_alloc_startup_done() when that is
+ * the case (on Windows, the mapping mutex stays locked until then). */
 int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size);
+void zend_shared_alloc_startup_done(void);
 void zend_shared_alloc_shutdown(void);
 
 /* allocate shared memory block */
@@ -219,6 +223,7 @@ extern const zend_shared_memory_handlers zend_alloc_win32_handlers;
 void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);
 void zend_shared_alloc_unlock_win32(void);
+void zend_shared_alloc_win32_startup_done(void);
 #endif
 
 END_EXTERN_C()
