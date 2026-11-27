@@ -1698,8 +1698,8 @@ static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *re
 		return;
 	}
 
-	zend_binary_op(&z_copy, &ref->val, value OPLINE_CC);
-	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()))) {
+	if (EXPECTED(zend_binary_op(&z_copy, &ref->val, value OPLINE_CC) == SUCCESS)
+	 && EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(&ref->val);
 		ZVAL_COPY_VALUE(&ref->val, &z_copy);
 	} else {
@@ -1718,8 +1718,8 @@ static zend_never_inline void zend_binary_assign_op_typed_prop(zend_property_inf
 		return;
 	}
 
-	zend_binary_op(&z_copy, zptr, value OPLINE_CC);
-	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
+	if (EXPECTED(zend_binary_op(&z_copy, zptr, value OPLINE_CC) == SUCCESS)
+	 && EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(zptr);
 		ZVAL_COPY_VALUE(zptr, &z_copy);
 	} else {
