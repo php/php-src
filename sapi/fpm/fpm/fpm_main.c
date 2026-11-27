@@ -1346,7 +1346,8 @@ static void init_request_info(void)
 		/* FIXME - Work out proto_num here */
 		SG(request_info).query_string = FCGI_GETENV(request, "QUERY_STRING");
 		SG(request_info).content_type = (content_type ? content_type : "" );
-		SG(request_info).content_length = (content_length ? atol(content_length) : 0);
+		zend_long parsed_content_length = (content_length ? ZEND_ATOL(content_length) : 0);
+		SG(request_info).content_length = (parsed_content_length > 0 ? parsed_content_length : 0);
 
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
 		auth = FCGI_GETENV(request, "HTTP_AUTHORIZATION");
