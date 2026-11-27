@@ -1177,13 +1177,19 @@ PHP_FUNCTION(socket_create)
 	checktype &= ~(SOCK_CLOEXEC | SOCK_NONBLOCK);
 #endif
 
-	if (checktype > 10) {
+	/* $type is narrowed to int by socket(), a value outside of its range would wrap to another type */
+	if (ZEND_LONG_EXCEEDS_INT(type) || checktype > 10) {
 		zend_argument_value_error(2, "must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
 			" SOCK_RAW, or SOCK_RDM"
 #ifdef SOCK_NONBLOCK
 			" optionally OR'ed with SOCK_CLOEXEC, SOCK_NONBLOCK"
 #endif
 		);
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(protocol)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}
 
@@ -2467,13 +2473,19 @@ PHP_FUNCTION(socket_create_pair)
 	checktype &= ~(SOCK_CLOEXEC | SOCK_NONBLOCK);
 #endif
 
-	if (checktype > 10) {
+	/* $type is narrowed to int by socket(), a value outside of its range would wrap to another type */
+	if (ZEND_LONG_EXCEEDS_INT(type) || checktype > 10) {
 		zend_argument_value_error(2, "must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
 			" SOCK_RAW, or SOCK_RDM"
 #ifdef SOCK_NONBLOCK
 			" optionally OR'ed with SOCK_CLOEXEC, SOCK_NONBLOCK"
 #endif
 		);
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(protocol)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
 		RETURN_THROWS();
 	}
 
