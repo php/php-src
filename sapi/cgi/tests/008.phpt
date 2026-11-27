@@ -31,10 +31,10 @@ $o = new test;
 file_put_contents($filename, $code);
 
 var_dump(shell_exec(<<<SHELL
-"$php" -n -s "$filename"
+"$php" -n -d cgi.security_limit_extensions='.test.php' -s "$filename"
 SHELL));
 var_dump(shell_exec(<<<SHELL
-"$php" -n -s "unknown"
+"$php" -n -d cgi.security_limit_extensions='' -s "unknown"
 SHELL));
 
 @unlink($filename);
