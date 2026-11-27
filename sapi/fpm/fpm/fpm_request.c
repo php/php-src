@@ -50,12 +50,13 @@ void fpm_request_accepting(void)
 		return;
 	}
 
+	int idle = proc->request_stage != FPM_REQUEST_ACCEPTING;
 	proc->request_stage = FPM_REQUEST_ACCEPTING;
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 
-	/* idle++, active-- */
-	fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	/* Repeated accept attempts leave an already idle worker unchanged. */
+	fpm_scoreboard_update_commit(idle, -idle, 0, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 
 void fpm_request_reading_headers(void)
@@ -82,6 +83,7 @@ void fpm_request_reading_headers(void)
 		return;
 	}
 
+	int active = proc->request_stage == FPM_REQUEST_ACCEPTING;
 	proc->request_stage = FPM_REQUEST_READING_HEADERS;
 	proc->tv = now;
 	proc->accepted = now;
@@ -98,8 +100,8 @@ void fpm_request_reading_headers(void)
 	proc->content_length = 0;
 	fpm_scoreboard_proc_release(proc);
 
-	/* idle--, active++, request++ */
-	fpm_scoreboard_update_commit(-1, 1, 0, 0, 1, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	/* Reused connections stay active, but every request is counted. */
+	fpm_scoreboard_update_commit(-active, active, 0, 0, 1, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 
 void fpm_request_info(void)
