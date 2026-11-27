@@ -21,7 +21,6 @@ function check(PgSql\Connection $db, string $table): void {
 }
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE IF EXISTS {$table}");
 pg_query($db, "CREATE TABLE {$table} (\"123\" integer)");
 check($db, $table);
 ?>
