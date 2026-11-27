@@ -197,8 +197,8 @@ PHP_FUNCTION(curl_multi_select)
 	}
 
 	error = curl_multi_wait(mh->multi, NULL, 0, (int) (timeout * 1000.0), &numfds);
+	SAVE_CURLM_ERROR(mh, error);
 	if (CURLM_OK != error) {
-		SAVE_CURLM_ERROR(mh, error);
 		RETURN_LONG(-1);
 	}
 
@@ -463,7 +463,8 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 					zend_argument_type_error(3, "must be a valid callback for option CURLMOPT_PUSHFUNCTION, %s", error_str);
 				}
 				efree(error_str);
-				return false;
+				error = CURLM_BAD_FUNCTION_ARGUMENT;
+				break;
 			}
 			zend_fcc_addref(&mh->handlers.server_push);
 
