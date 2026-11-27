@@ -129,6 +129,8 @@ PHP                                                                        NEWS
     deeply nested arrays. (Eyüp Can Akman)
   . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
+  . Fixed integer overflow in the string count of mb_convert_variables()
+    leading to a heap out-of-bounds write. (Jorg Sowa)
 
 - MySQLi:
   . Fixed bug GH-25779 (mysqli_fetch_object() crashes with JIT when the
