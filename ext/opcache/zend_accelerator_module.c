@@ -37,6 +37,9 @@
 
 #ifdef HAVE_JIT
 #include "jit/zend_jit.h"
+#include "Optimizer/zend_func_info.h"
+#include "Optimizer/zend_call_graph.h"
+#include "jit/zend_jit_internal.h"
 #endif
 
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
@@ -271,6 +274,22 @@ static ZEND_INI_MH(OnUpdateUnrollL)
 	return FAILURE;
 }
 
+/* Trace ids are uint32_t, and the size of the root traces buffer has to fit size_t */
+#define ZEND_JIT_MAX_ROOT_TRACES MIN(UINT32_MAX, SIZE_MAX / sizeof(zend_jit_trace_info))
+
+static ZEND_INI_MH(OnUpdateMaxRootTraces)
+{
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
+	if (EXPECTED(val > 0 && val <= ZEND_JIT_MAX_ROOT_TRACES)) {
+		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+		*p = val;
+		return SUCCESS;
+	}
+	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 1 and %zu", ZSTR_VAL(entry->name),
+		(size_t) ZEND_JIT_MAX_ROOT_TRACES);
+	return FAILURE;
+}
+
 static ZEND_INI_MH(OnUpdateMaxTraceLength)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
@@ -347,7 +366,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,                 zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit,          zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_prof_threshold"            , "0.005",                      PHP_INI_ALL,    OnUpdateReal,     prof_threshold,        zend_jit_globals, jit_globals)
-	STD_PHP_INI_ENTRY("opcache.jit_max_root_traces"           , "1024",                       PHP_INI_SYSTEM, OnUpdateLong,     max_root_traces,       zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_max_root_traces"           , "1024",                       PHP_INI_SYSTEM, OnUpdateMaxRootTraces, max_root_traces,       zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_max_side_traces"           , "128",                        PHP_INI_SYSTEM, OnUpdateLong,     max_side_traces,       zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_max_exit_counters"         , "8192",                       PHP_INI_SYSTEM, OnUpdateLong,     max_exit_counters,     zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_hot_loop"                  , "64",                         PHP_INI_SYSTEM, OnUpdateCounter,  hot_loop,              zend_jit_globals, jit_globals)
