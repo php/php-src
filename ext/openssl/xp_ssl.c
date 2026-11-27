@@ -93,6 +93,16 @@
 #define HAVE_SEC_LEVEL 1
 #endif
 
+/* LibreSSL implements neither TLS 1.3 external PSK nor early data (0-RTT) */
+#if defined(HAVE_TLS13) && !defined(LIBRESSL_VERSION_NUMBER)
+#define HAVE_TLS13_PSK 1
+#define HAVE_TLS13_EARLY_DATA 1
+#endif
+
+#if !defined(OPENSSL_NO_PSK) || defined(HAVE_TLS13_PSK)
+#define HAVE_TLS_PSK 1
+#endif
+
 #if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 #define HAVE_SSL3 1
 #define PHP_OPENSSL_MIN_PROTO_VERSION STREAM_CRYPTO_METHOD_SSLv3
@@ -178,8 +188,10 @@ typedef struct _php_openssl_alpn_ctx_t {
 #endif
 
 /* TLS 1.3 PSK ciphersuite IDs */
+#ifdef HAVE_TLS13_PSK
 static const unsigned char php_openssl_tls13_aes128gcmsha256_id[] = { 0x13, 0x01 };
 static const unsigned char php_openssl_tls13_aes256gcmsha384_id[] = { 0x13, 0x02 };
+#endif
 
 /* Holds PSK callbacks */
 typedef struct _php_openssl_psk_callbacks_t {
@@ -1670,6 +1682,7 @@ static int php_openssl_get_ctx_stream_data_index(void)
 	return ctx_data_index;
 }
 
+#ifdef HAVE_TLS13_PSK
 /**
  * Build a SSL_SESSION suitable for use as an external PSK in TLS 1.3.
  */
@@ -1703,18 +1716,17 @@ static SSL_SESSION *php_openssl_psk_build_session(SSL *ssl,
 		return NULL;
 	}
 
-#ifdef HAVE_TLS13
 	/* Allow 0-RTT for PSK sessions (0 on the client, so a no-op there) */
 	uint32_t max_early_data = SSL_get_max_early_data(ssl);
 	if (max_early_data > 0) {
 		SSL_SESSION_set_max_early_data(sess, max_early_data);
 	}
-#endif
 
 	return sess;
 }
+#endif /* HAVE_TLS13_PSK */
 
-
+#ifdef HAVE_TLS_PSK
 /**
  * Invoke a user PHP callback (psk_client_cb or psk_server_cb).
  */
@@ -1896,6 +1908,7 @@ static unsigned int php_openssl_psk_server_cb(SSL *ssl, const char *identity,
 }
 #endif /* OPENSSL_NO_PSK */
 
+#ifdef HAVE_TLS13_PSK
 /* TLS 1.3 PSK callbacks */
 
 static int php_openssl_psk_use_session_cb(SSL *ssl, const EVP_MD *md,
@@ -2029,6 +2042,8 @@ static int php_openssl_psk_find_session_cb(SSL *ssl, const unsigned char *identi
 	*sess = session;
 	return 1;
 }
+#endif /* HAVE_TLS13_PSK */
+#endif /* HAVE_TLS_PSK */
 
 /* PSK setup */
 
@@ -2038,6 +2053,11 @@ static zend_result php_openssl_validate_and_allocate_psk_callback(
 		bool is_client, bool is_persistent)
 {
 	const char *callback_name = is_client ? "psk_client_cb" : "psk_server_cb";
+#ifndef HAVE_TLS_PSK
+	php_stream_warn(stream, ProtocolUnsupported,
+			"%s is not supported by the SSL library against which PHP is linked", callback_name);
+	return FAILURE;
+#else
 	if (is_persistent) {
 		php_stream_warn(stream, PersistentNotSupported,
 				"%s is not supported for persistent streams", callback_name);
@@ -2070,6 +2090,7 @@ static zend_result php_openssl_validate_and_allocate_psk_callback(
 	}
 
 	return SUCCESS;
+#endif
 }
 
 static zend_result php_openssl_setup_client_psk(php_stream *stream,
@@ -2089,7 +2110,9 @@ static zend_result php_openssl_setup_client_psk(php_stream *stream,
 #ifndef OPENSSL_NO_PSK
 	SSL_CTX_set_psk_client_callback(sslsock->ctx, php_openssl_psk_client_cb);
 #endif
+#ifdef HAVE_TLS13_PSK
 	SSL_CTX_set_psk_use_session_callback(sslsock->ctx, php_openssl_psk_use_session_cb);
+#endif
 
 	return SUCCESS;
 }
@@ -2111,7 +2134,9 @@ static zend_result php_openssl_setup_server_psk(php_stream *stream,
 #ifndef OPENSSL_NO_PSK
 	SSL_CTX_set_psk_server_callback(sslsock->ctx, php_openssl_psk_server_cb);
 #endif
+#ifdef HAVE_TLS13_PSK
 	SSL_CTX_set_psk_find_session_callback(sslsock->ctx, php_openssl_psk_find_session_cb);
+#endif
 
 	if (!GET_VER_OPT("session_id_context")) {
 		static const unsigned char default_psk_sid_ctx[] = "PHP_PSK";
@@ -2192,8 +2217,10 @@ static zend_result php_openssl_setup_server_early_data(php_stream *stream,
 
 	if (max_early_data > 0) {
 		SSL_CTX_set_max_early_data(sslsock->ctx, (uint32_t) max_early_data);
+#ifdef HAVE_TLS13_EARLY_DATA
 		/* Accept as much as we advertise (recv limit defaults to 16 KB otherwise) */
 		SSL_CTX_set_recv_max_early_data(sslsock->ctx, (uint32_t) max_early_data);
+#endif
 		/* 0-RTT requires resumption, so ensure the server cache is not left off */
 		if (SSL_CTX_get_session_cache_mode(sslsock->ctx) == SSL_SESS_CACHE_OFF) {
 			SSL_CTX_set_session_cache_mode(sslsock->ctx, SSL_SESS_CACHE_SERVER);

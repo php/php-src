@@ -4,6 +4,10 @@ GH-25172: TLS session reuse must not share callbacks with a persistent stream
 openssl
 --CREDITS--
 cxxz16
+--SKIPIF--
+<?php
+if (str_contains(OPENSSL_VERSION_TEXT, 'LibreSSL')) die("skip LibreSSL does not support PSK");
+?>
 --FILE--
 <?php
 function reuse_on_persistent(array $options, int $method): void {

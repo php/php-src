@@ -145,6 +145,7 @@ PHP                                                                        NEWS
     `session_new_cb`. (DanielEScherzer)
   . Fixed bug GH-20920 (LibreSSL build regression with PHP 8.5).
     (Eugene Gvozdetsky, Theo Buehler, Jakub Zelenka)
+  . Fixed bug GH-25667 (LibreSSL build broken since PHP 8.6). (Jakub Zelenka)
 
 - PDO_Firebird:
   . Fixed stack buffer overflow with long connection user names, passwords,

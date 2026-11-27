@@ -5,6 +5,7 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
+if (str_contains(OPENSSL_VERSION_TEXT, 'LibreSSL')) die("skip LibreSSL does not support TLS 1.3 session resumption");
 ?>
 --FILE--
 <?php
