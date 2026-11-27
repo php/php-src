@@ -385,7 +385,10 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				}
 
 				rc = SQLDescribeParam(S->stmt, (SQLUSMALLINT) param->paramno+1, &sqltype, &precision, &scale, &nullable);
-				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+				if (
+					(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
+					|| sqltype == SQL_UNKNOWN_TYPE
+				) {
 					/* MS Access, for instance, doesn't support SQLDescribeParam,
 					 * so we need to guess */
 					switch (PDO_PARAM_TYPE(param->param_type)) {
