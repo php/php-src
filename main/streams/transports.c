@@ -161,7 +161,16 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 						int backlog = 32;
 
 						if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
-							backlog = zval_get_long(zbacklog);
+							zend_long zbacklog_value = zval_get_long(zbacklog);
+
+							/* clamp instead of letting a larger value wrap to a small queue */
+							if (ZEND_LONG_INT_OVFL(zbacklog_value)) {
+								backlog = INT_MAX;
+							} else if (ZEND_LONG_INT_UDFL(zbacklog_value)) {
+								backlog = INT_MIN;
+							} else {
+								backlog = (int) zbacklog_value;
+							}
 						}
 
 						if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
