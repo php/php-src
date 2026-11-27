@@ -226,6 +226,9 @@ struct _zend_class_entry {
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
 
+	uint32_t num_friends;
+	zend_class_name *friend_names;
+
 	zend_string *doc_comment;
 
 	union {
