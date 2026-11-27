@@ -1342,10 +1342,12 @@ PHP_METHOD(ArrayObject, unserialize)
 		intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
 
 		if (Z_TYPE_P(array) == IS_ARRAY) {
-			zval_ptr_dtor(&intern->array);
+			zval garbage;
+			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			ZVAL_COPY_VALUE(&intern->array, array);
 			ZVAL_NULL(array);
 			SEPARATE_ARRAY(&intern->array);
+			zval_ptr_dtor(&garbage);
 		} else {
 			spl_array_set_array(object, intern, array, 0L, 1);
 		}
