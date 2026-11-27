@@ -237,15 +237,15 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 	if (!S->stmt) {
 		return 0;
 	}
+	if (S->stepping) {
+		zend_throw_error(NULL, "Cannot fetch from a PDOStatement while it is executing");
+		return 0;
+	}
 	if (S->pre_fetched) {
 		S->pre_fetched = 0;
 		return 1;
 	}
 	if (S->done) {
-		return 0;
-	}
-	if (S->stepping) {
-		zend_throw_error(NULL, "Cannot fetch from a PDOStatement while it is executing");
 		return 0;
 	}
 	i = pdo_sqlite_stmt_step(S);

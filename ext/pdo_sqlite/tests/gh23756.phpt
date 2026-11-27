@@ -1,5 +1,7 @@
 --TEST--
 GH-23756 (crash when closeCursor() is called from a collation callback)
+--CREDITS--
+djarfluka
 --EXTENSIONS--
 pdo_sqlite
 --FILE--
