@@ -186,6 +186,10 @@ PHP                                                                        NEWS
   . Fixed a crash when executing a prepared statement again after a failed
     execute() with libmysqlclient. (Ilia Alshanetsky)
 
+- PDO_ODBC:
+  . Fixed bug GH-25390 (fetching a long text / ntext value allocates the
+    declared column size when the driver returns SQL_NO_TOTAL). (licvido,
+    chep6915)
 - PDO_SQLite:
   . Fixed bug GH-25588 (Use-after-free of a string parameter omitted on a later
     execute() or rebound while fetching). (Ilia Alshanetsky)
