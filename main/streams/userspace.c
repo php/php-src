@@ -844,9 +844,15 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	int ret = -1;
 
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_STAT, false);
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
+
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_STAT " is not implemented!",
