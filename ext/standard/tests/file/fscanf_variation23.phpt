@@ -557,51 +557,63 @@ bool(false)
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(6) "Array
+"
 }
 bool(false)
 

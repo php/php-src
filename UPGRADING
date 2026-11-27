@@ -90,6 +90,9 @@ PHP 8.7 UPGRADE NOTES
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
+  . sscanf() and fscanf() %c conversions now correctly read whitespace
+    characters, restoring ANSI C behavior. Previously, they stopped at
+    whitespace.
 
 ========================================
 2. New Features
