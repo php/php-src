@@ -4459,6 +4459,11 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(size < 0)) {
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 	cdata1 = (zend_ffi_cdata*)Z_OBJ_P(zv1);
 	type1 = ZEND_FFI_TYPE(cdata1->type);
 	if (type1->kind == ZEND_FFI_TYPE_POINTER) {
@@ -4514,6 +4519,11 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		Z_PARAM_ZVAL(zv2);
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(size < 0)) {
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
 
 	ZVAL_DEREF(zv1);
 	if (Z_TYPE_P(zv1) == IS_STRING) {
@@ -4589,6 +4599,11 @@ ZEND_METHOD(FFI, memset) /* {{{ */
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(size < 0)) {
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 	if (type->kind == ZEND_FFI_TYPE_POINTER) {
@@ -4624,7 +4639,7 @@ ZEND_METHOD(FFI, string) /* {{{ */
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 	if (!size_is_null) {
-		if (size < 0) {
+		if (UNEXPECTED(size < 0)) {
 			zend_argument_value_error(2, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
