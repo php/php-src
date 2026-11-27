@@ -36,6 +36,8 @@ PHPAPI void php_register_variable_safe(const char *var, const char *val, size_t 
 PHPAPI void php_register_variable_ex(const char *var, zval *val, zval *track_vars_array);
 PHPAPI void php_register_known_variable(const char *var, size_t var_len, zval *value, zval *track_vars_array);
 
+SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler);
+
 PHPAPI void php_build_argv(const char *s, zval *track_vars_array);
 PHPAPI zend_result php_hash_environment(void);
 END_EXTERN_C()
