@@ -1429,7 +1429,7 @@ static zend_result php_openssl_set_server_specific_opts(php_stream *stream, SSL_
 }
 /* }}} */
 
-static zend_result php_openssl_set_cipher_list(php_stream *stream, SSL_CTX *ctx) /* {{{ */
+static zend_result php_openssl_set_cipher_list(php_stream *stream, SSL_CTX *ctx)
 {
 	zval *val;
 	char *cipherlist = NULL;
@@ -1446,7 +1446,6 @@ static zend_result php_openssl_set_cipher_list(php_stream *stream, SSL_CTX *ctx)
 
 	return SUCCESS;
 }
-/* }}} */
 
 #ifdef HAVE_TLS_ALPN
 static int php_openssl_server_alpn_callback(SSL *ssl_handle,
