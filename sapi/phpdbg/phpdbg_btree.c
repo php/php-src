@@ -234,6 +234,7 @@ void phpdbg_btree_clean_recursive(phpdbg_btree_branch *branch, zend_ulong depth,
 		if (branch->branches[use_branch]) {
 			phpdbg_btree_clean_recursive(branch->branches[use_branch], depth, persistent);
 		}
+		branch++;
 	}
 
 	pefree(start, persistent);
