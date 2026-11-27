@@ -41,6 +41,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-25313 (Assertion !EG(exception) in ZEND_FE_FREE when unpacking
     a generator into a by-ref parameter throws). (ndossche)
   . Fix OSS-Fuzz #588264417. (ndossche)
+  . Fixed bug GH-24701 (Use-after-free on typed trait constants during
+    opcache preload). (sanklamm, lazerg)
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
