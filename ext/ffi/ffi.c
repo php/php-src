@@ -359,7 +359,11 @@ static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *typ
 	zend_ffi_field *field;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&type->record.fields, field) {
-		switch (ZEND_FFI_TYPE(field->type)->kind) {
+		zend_ffi_type_kind field_kind = ZEND_FFI_TYPE(field->type)->kind;
+		if (field_kind == ZEND_FFI_TYPE_ENUM) {
+			field_kind = ZEND_FFI_TYPE(field->type)->enumeration.kind;
+		}
+		switch (field_kind) {
 			case ZEND_FFI_TYPE_FLOAT:
 				t->elements[(*i)++] = &ffi_type_float;
 				break;
@@ -4620,6 +4624,10 @@ ZEND_METHOD(FFI, string) /* {{{ */
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 	if (!size_is_null) {
+		if (size < 0) {
+			zend_argument_value_error(2, "must be greater than or equal to 0");
+			RETURN_THROWS();
+		}
 		if (type->kind == ZEND_FFI_TYPE_POINTER) {
 			ptr = *(void**)cdata->ptr;
 		} else {

@@ -17,7 +17,7 @@ Deprecated: Creation of dynamic property GMP::$1 is deprecated in %s on line %d
 
 Deprecated: Creation of dynamic property GMP::$1 is deprecated in %s on line %d
 object(GMP)#%d (%d) {
-  [1]=>
+  ["1"]=>
   int(123)
   ["num"]=>
   string(1) "0"
