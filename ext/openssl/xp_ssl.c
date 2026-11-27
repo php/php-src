@@ -2732,6 +2732,44 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 					return PHP_STREAM_OPTION_RETURN_OK;
 
+				case STREAM_XPORT_OP_SEND:
+					if (sslsock->ssl_active) {
+						if (xparam->inputs.flags & STREAM_OOB) {
+							php_error_docref(NULL, E_WARNING, "Cannot write OOB data on an encrypted stream");
+							xparam->outputs.returncode = -1;
+						} else if (xparam->inputs.buflen == 0) {
+							xparam->outputs.returncode = 0;
+						} else {
+							xparam->outputs.returncode = (int) php_openssl_sockop_write(stream,
+									xparam->inputs.buf, MIN(xparam->inputs.buflen, INT_MAX));
+						}
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+					break;
+
+				case STREAM_XPORT_OP_RECV:
+					if (sslsock->ssl_active) {
+						if (xparam->inputs.flags & STREAM_OOB) {
+							php_error_docref(NULL, E_WARNING, "Cannot read OOB data on an encrypted stream");
+							xparam->outputs.returncode = -1;
+						} else if (xparam->inputs.flags & STREAM_PEEK) {
+							int n;
+
+							ERR_clear_error();
+							n = SSL_peek(sslsock->ssl_handle, xparam->inputs.buf,
+									(int) MIN(xparam->inputs.buflen, INT_MAX));
+							if (n <= 0) {
+								n = SSL_get_error(sslsock->ssl_handle, n) == SSL_ERROR_ZERO_RETURN ? 0 : -1;
+							}
+							xparam->outputs.returncode = n;
+						} else {
+							xparam->outputs.returncode = (int) php_openssl_sockop_read(stream,
+									xparam->inputs.buf, MIN(xparam->inputs.buflen, INT_MAX));
+						}
+						return PHP_STREAM_OPTION_RETURN_OK;
+					}
+					break;
+
 				default:
 					/* fall through */
 					break;
