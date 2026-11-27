@@ -1906,8 +1906,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			break;
 
 		/* String options */
-		case CURLOPT_CAINFO:
-		case CURLOPT_CAPATH:
 		case CURLOPT_COOKIE:
 		case CURLOPT_EGDSOCKET:
 		case CURLOPT_INTERFACE:
@@ -2002,6 +2000,8 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		}
 
 		/* Curl nullable string options */
+		case CURLOPT_CAINFO:
+		case CURLOPT_CAPATH:
 		case CURLOPT_CUSTOMREQUEST:
 		case CURLOPT_FTPPORT:
 		case CURLOPT_RANGE:
