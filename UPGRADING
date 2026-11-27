@@ -257,6 +257,11 @@ PHP 8.7 UPGRADE NOTES
     encoding.
   . Improved performance of in_array() and array_search() in strict mode when
     searching for a string.
+  . Improved performance of base64_decode() on x86-64 (SSSE3, AVX2,
+    AVX-512 VBMI2) and arm64 (NEON), especially for short inputs and for
+    line-wrapped input such as MIME or PEM, which no longer falls back to
+    the scalar decoder. Improved performance of base64_encode() on arm64
+    and on CPUs with AVX-512 VBMI.
 
 - MBString:
   . Improved performance of mb_strlen for UTF-8 strings.

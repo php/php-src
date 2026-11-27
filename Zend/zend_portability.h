@@ -792,7 +792,7 @@ extern "C++" {
 
 #ifdef ZEND_INTRIN_AVX512_VBMI_RESOLVER
 # ifdef HAVE_FUNC_ATTRIBUTE_TARGET
-#  define ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(func) ZEND_API func __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw,avx512vbmi")))
+#  define ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(func) ZEND_API func __attribute__((target("avx512f,avx512cd,avx512vl,avx512dq,avx512bw,avx512vbmi,avx512vbmi2,popcnt")))
 # else
 #  define ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(func) func
 # endif
