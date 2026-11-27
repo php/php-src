@@ -159,6 +159,8 @@ PHP                                                                        NEWS
   . Fixed function JIT ASSIGN_DIM reporting an undefined value or key out of
     order, or when the VM does not, on non-array containers. (Jorg Sowa)
   . Fix JIT register allocation for ASSIGN to traced reference. (ndossche)
+  . Fixed a double free when a destructor throws while freeing a temporary
+    whose result the optimizer discarded. (Ilia Alshanetsky)
 
 - OpenSSL:
   . Fixed bug GH-20920 (LibreSSL build regression with PHP 8.5).
