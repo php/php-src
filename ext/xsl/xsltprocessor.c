@@ -323,6 +323,19 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		return NULL;
 	}
 
+	if (UNEXPECTED(intern->transform_depth > 0)) {
+		zend_string *name = get_active_function_or_method_name();
+		zend_throw_error(NULL, "Cannot call %s() while a transformation is in progress", ZSTR_VAL(name));
+		zend_string_release(name);
+		return NULL;
+	}
+
+	object = Z_LIBXML_NODE_P(docp);
+	if (!intern->hasKeys && php_libxml_is_node_read_only(object->document, (xmlNodePtr) doc)) {
+		php_dom_throw_read_only_node_error(object->document);
+		return NULL;
+	}
+
 	intern->transform_depth++;
 
 	if (intern->profiling) {
@@ -409,7 +422,13 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	if (secPrefsError == 1) {
 		php_error_docref(NULL, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
 	} else {
+		php_libxml_ref_obj *document = intern->doc->document;
+		document->read_only_depth++;
+		intern->xpath_callbacks.read_only_depth++;
 		newdocp = xsltApplyStylesheetUser(style, doc, /* params (handled manually) */ NULL, /* output */ NULL, f, ctxt);
+		intern->xpath_callbacks.read_only_depth--;
+		document->read_only_depth--;
+		php_dom_xpath_callbacks_release_read_only(&intern->xpath_callbacks);
 	}
 
 out:

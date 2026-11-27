@@ -114,11 +114,13 @@ typedef struct _php_libxml_ref_obj {
 	unsigned int refcount;
 	php_libxml_class_type class_type : 8;
 	php_libxml_quirks_mode quirks_mode : 8;
+	unsigned int read_only_depth;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
 	xmlNodePtr node;
 	unsigned int refcount;
+	unsigned int read_only_depth;
 	void *_private;
 } php_libxml_node_ptr;
 
@@ -164,6 +166,16 @@ static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_
 	if (doc_ptr) {
 		php_libxml_invalidate_cache_tag(&doc_ptr->cache_tag);
 	}
+}
+
+PHP_LIBXML_API bool php_libxml_is_tree_read_only(const php_libxml_ref_obj *document, const xmlNode *node);
+
+static zend_always_inline bool php_libxml_is_node_read_only(const php_libxml_ref_obj *document, const xmlNode *node)
+{
+	if (node == NULL || (document != NULL && EXPECTED(document->read_only_depth == 0))) {
+		return false;
+	}
+	return php_libxml_is_tree_read_only(document, node);
 }
 
 static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
