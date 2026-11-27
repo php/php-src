@@ -77,7 +77,9 @@ static ssize_t php_stream_input_read(php_stream *stream, char *buf, size_t count
 	php_stream_input_t *input = stream->abstract;
 	ssize_t read;
 
-	if (!SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
+	/* a stream kept from a previous request must not read the body of the current one */
+	if (input->body == SG(request_info).request_body
+			&& !SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
 		/* read requested data from SAPI */
 		size_t read_bytes = sapi_read_post_block(buf, count);
 
