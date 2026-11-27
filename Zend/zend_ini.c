@@ -166,7 +166,7 @@ ZEND_API void zend_copy_ini_directives(void) /* {{{ */
 	EG(modified_ini_directives) = NULL;
 	EG(error_reporting_ini_entry) = NULL;
 	EG(ini_directives) = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, free_ini_entry, true);
+	zend_hash_init(EG(ini_directives), zend_hash_num_elements(registered_zend_ini_directives), NULL, free_ini_entry, true);
 	zend_hash_copy(EG(ini_directives), registered_zend_ini_directives, copy_ini_entry);
 }
 /* }}} */

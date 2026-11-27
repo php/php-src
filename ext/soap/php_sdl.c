@@ -1300,7 +1300,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 			zend_hash_move_forward(&ctx.services);
 		}
 
-		if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
+		if (ctx.sdl->bindings == NULL || zend_hash_num_elements(ctx.sdl->bindings) == 0) {
 			soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
 		}
 

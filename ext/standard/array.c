@@ -3199,7 +3199,7 @@ PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *arra
 	}
 
 	if (EXPECTED(!HT_HAS_ITERATORS(hash))) {
-		if (hash->nNumUsed != hash->nNumOfElements) {
+		if (!HT_IS_WITHOUT_HOLES(hash)) {
 			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
 				zv = hash->arPacked + idx;
 				if (Z_TYPE_P(zv) == IS_UNDEF) continue;
@@ -3227,7 +3227,7 @@ PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *arra
 	} else {
 		zend_long iter_pos = zend_hash_iterators_lower_pos(hash, 0);
 
-		if (hash->nNumUsed != hash->nNumOfElements) {
+		if (!HT_IS_WITHOUT_HOLES(hash)) {
 			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
 				zv = hash->arPacked + idx;
 				if (Z_TYPE_P(zv) == IS_UNDEF) continue;
@@ -3853,7 +3853,7 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 {
 	zend_long pos;
 	Bucket *bucket;
-	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
+	ZEND_ASSERT(offset >= 0 && offset <= zend_hash_num_elements(ht));
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* There's no need to iterate over the array to filter out holes if there are no holes */
 		return ht->arData + offset;
@@ -3879,7 +3879,7 @@ static inline zval* find_packed_val_at_offset(HashTable* ht, zend_long offset)
 {
 	zend_long pos;
 	zval *zv;
-	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
+	ZEND_ASSERT(offset >= 0 && offset <= zend_hash_num_elements(ht));
 	if (HT_IS_WITHOUT_HOLES(ht)) {
 		/* There's no need to iterate over the array to filter out holes if there are no holes */
 		return ht->arPacked + offset;
@@ -5029,7 +5029,7 @@ PHP_FUNCTION(array_unique)
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
+	if (zend_hash_num_elements(Z_ARRVAL_P(array)) <= 1) {	/* nothing to do */
 		ZVAL_COPY(return_value, array);
 		return;
 	}
@@ -5083,7 +5083,7 @@ PHP_FUNCTION(array_unique)
 	}
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
+	arTmp = pemalloc((zend_hash_num_elements(Z_ARRVAL_P(array)) + 1) * sizeof(struct bucketindex), GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
 	if (HT_IS_PACKED(Z_ARRVAL_P(array))) {
 		zval *zv = Z_ARRVAL_P(array)->arPacked;
 		for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++, zv++) {
@@ -5352,7 +5352,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			goto out;
 		}
 		hash = Z_ARRVAL(args[i]);
-		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), GC_FLAGS(hash) & IS_ARRAY_PERSISTENT);
+		list = (Bucket *) pemalloc((zend_hash_num_elements(hash) + 1) * sizeof(Bucket), GC_FLAGS(hash) & IS_ARRAY_PERSISTENT);
 		lists[i] = list;
 		ptrs[i] = list;
 		if (HT_IS_PACKED(hash)) {
@@ -5372,13 +5372,13 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			}
 		}
 		ZVAL_UNDEF(&list->val);
-		if (hash->nNumOfElements > 1) {
+		if (zend_hash_num_elements(hash) > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements,
+				zend_sort((void *) lists[i], zend_hash_num_elements(hash),
 						sizeof(Bucket), (compare_func_t) intersect_data_compare_func,
 						(swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
-				zend_sort((void *) lists[i], hash->nNumOfElements,
+				zend_sort((void *) lists[i], zend_hash_num_elements(hash),
 						sizeof(Bucket), (compare_func_t) intersect_key_compare_func,
 						(swap_func_t)zend_hash_bucket_swap);
 			}
@@ -5956,7 +5956,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			goto out;
 		}
 		hash = Z_ARRVAL(args[i]);
-		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), GC_FLAGS(hash) & IS_ARRAY_PERSISTENT);
+		list = (Bucket *) pemalloc((zend_hash_num_elements(hash) + 1) * sizeof(Bucket), GC_FLAGS(hash) & IS_ARRAY_PERSISTENT);
 		lists[i] = list;
 		ptrs[i] = list;
 		if (HT_IS_PACKED(hash)) {
@@ -5976,13 +5976,13 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 		}
 		ZVAL_UNDEF(&list->val);
-		if (hash->nNumOfElements > 1) {
+		if (zend_hash_num_elements(hash) > 1) {
 			if (behavior == DIFF_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements,
+				zend_sort((void *) lists[i], zend_hash_num_elements(hash),
 						sizeof(Bucket), (compare_func_t) diff_data_compare_func,
 						(swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
-				zend_sort((void *) lists[i], hash->nNumOfElements,
+				zend_sort((void *) lists[i], zend_hash_num_elements(hash),
 						sizeof(Bucket), (compare_func_t) diff_key_compare_func,
 						(swap_func_t)zend_hash_bucket_swap);
 			}
