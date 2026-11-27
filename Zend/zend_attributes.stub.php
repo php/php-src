@@ -90,7 +90,7 @@ final class Deprecated
 /**
  * @strict-properties
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION)]
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION|Attribute::TARGET_CLASS)]
 final class NoDiscard
 {
     public readonly ?string $message;

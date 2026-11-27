@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_attributes.stub.php instead.
- * Stub hash: dc2b1de9f4d91162f0e9ab236272f79019c5b5ab */
+ * Stub hash: 305e50f24064870fafe0f48d80028212b2e8be72 */
 
 #include "zend_attributes.h"
 
@@ -274,7 +274,7 @@ static zend_class_entry *register_class_NoDiscard(void)
 	zend_string *attribute_name_Attribute_class_NoDiscard_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_NoDiscard_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NoDiscard_0, 1);
 	zend_string_release_ex(attribute_name_Attribute_class_NoDiscard_0, true);
-	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
+	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS);
 
 	return class_entry;
 }

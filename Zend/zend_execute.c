@@ -1982,6 +1982,24 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_functio
 	zend_string_release(message_suffix);
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_ce(zend_class_entry *ce)
+{
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_nodiscard_suffix_from_attribute(ce->attributes, ce, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = ce->type == ZEND_INTERNAL_CLASS ? E_WARNING : E_USER_WARNING;
+
+	zend_error(code, "The returned object of class %pS should either be used or intentionally ignored by casting it as (void)%pS",
+		ce->name,
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name)
 {
 	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
