@@ -1686,9 +1686,12 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 	switch (cipher_mode) {
 		case EVP_CIPH_GCM_MODE:
 		case EVP_CIPH_CCM_MODE:
-		/* We check for EVP_CIPH_SIV_MODE and EVP_CIPH_SIV_MODE, because older OpenSSL and LibreSSL do not support them. */
+		/* We check for EVP_CIPH_SIV_MODE and EVP_CIPH_GCM_SIV_MODE, because older OpenSSL and LibreSSL do not support them. */
 #ifdef EVP_CIPH_SIV_MODE
 		case EVP_CIPH_SIV_MODE:
+#endif
+#ifdef EVP_CIPH_GCM_SIV_MODE
+		case EVP_CIPH_GCM_SIV_MODE:
 #endif
 #ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
@@ -1701,6 +1704,11 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
 #ifdef EVP_CIPH_SIV_MODE
 			mode->aad_supports_vector = cipher_mode == EVP_CIPH_SIV_MODE;
+#endif
+#ifdef EVP_CIPH_GCM_SIV_MODE
+			/* GCM-SIV only takes a 96-bit nonce, but OpenSSL accepts any IV length for it and reads
+			 * 12 bytes from the IV buffer, see https://github.com/openssl/openssl/commit/b8997895c2e8. */
+			mode->aead_fixed_iv_len = cipher_mode == EVP_CIPH_GCM_SIV_MODE;
 #endif
 			break;
 #ifdef NID_chacha20_poly1305
@@ -1719,6 +1727,12 @@ zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv
 	char *iv_new;
 
 	if (mode->is_aead) {
+		if (mode->aead_fixed_iv_len && *piv_len != iv_required_len) {
+			php_error_docref(NULL, E_WARNING,
+					"IV passed is %zd bytes long, cipher expects an IV of precisely %zd bytes",
+					*piv_len, iv_required_len);
+			return FAILURE;
+		}
 		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_ivlen_flag, *piv_len, NULL) <= 0) {
 			php_error_docref(NULL, E_WARNING, "Setting of IV length for AEAD mode failed");
 			return FAILURE;
