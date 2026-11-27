@@ -105,6 +105,55 @@ static _Atomic(zend_locale *) locales = NULL;
 /* Locale of the current thread, NULL for the process locale */
 ZEND_TLS zend_locale *thread_locale = NULL;
 
+#if defined(__FreeBSD__) || defined(__DragonFly__)
+# include <ctype.h>
+
+/* 0 for the process locale and for the C locale, which works with any limit */
+static int zend_locale_sb_limit(const zend_locale *locale)
+{
+	int limit = 0;
+
+	if (locale && strcmp(locale->names[LC_CTYPE], "C") != 0 && strcmp(locale->names[LC_CTYPE], "POSIX") != 0) {
+		__runes_for_locale(locale->locale, &limit);
+	}
+
+	return limit;
+}
+
+/* isalpha() and the other single byte functions of ctype.h ignore the bytes
+ * from a limit on that setlocale() sets, but not uselocale():
+ * https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950
+ * So it's set here, when a thread changes its locale. All threads share the
+ * limit: it's the highest that the locale of one of them needs, and that of
+ * the process locale if none needs one. A UTF-8 locale needs 128, a single
+ * byte locale 256. While threads use both, the limit is too high for the
+ * UTF-8 ones: isalpha() there wrongly treats bytes from 128 on as
+ * characters. One limit can't be right for both. */
+static void zend_locale_update_sb_limit(const zend_locale *from, const zend_locale *to)
+{
+	/* Number of threads that need each limit, [0] isn't read */
+	static uint32_t users[_CACHED_RUNES + 1];
+	int old = zend_locale_sb_limit(from), limit = zend_locale_sb_limit(to);
+
+	if (old != limit) {
+		tsrm_env_lock();
+		users[old]--;
+		users[limit]++;
+		limit = _CACHED_RUNES;
+		while (limit && !users[limit]) {
+			limit--;
+		}
+		if (!limit) {
+			__runes_for_locale(LC_GLOBAL_LOCALE, &limit);
+		}
+		__mb_sb_limit = limit;
+		tsrm_env_unlock();
+	}
+}
+#else
+# define zend_locale_update_sb_limit(from, to)
+#endif
+
 /* The name setlocale() returns for a locale. The name "" is the locale of the
  * environment and needs the environment lock. */
 static const char *zend_locale_resolve_name(int category, const char *name)
@@ -303,6 +352,7 @@ ZEND_API const char *zend_setlocale(int category, const char *locale)
 	if (!EG(active)) {
 		if (locale && thread_locale) {
 			uselocale(LC_GLOBAL_LOCALE);
+			zend_locale_update_sb_limit(thread_locale, NULL);
 			thread_locale = NULL;
 		}
 		return setlocale(category, locale);
@@ -349,6 +399,7 @@ ZEND_API const char *zend_setlocale(int category, const char *locale)
 	}
 
 	uselocale(found->locale);
+	zend_locale_update_sb_limit(thread_locale, found);
 	thread_locale = found;
 
 	return found->names[category];
