@@ -116,6 +116,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . The PHP_PREAD_TEST and PHP_PWRITE_TEST M4 macros have been removed, along
+    with the HAVE_PREAD, HAVE_PWRITE, PHP_PREAD_64 and PHP_PWRITE_64 symbols.
+    pread() and pwrite() are POSIX and can be used unconditionally on non-Windows
+    platforms.
 
 ========================
 3. Module changes

@@ -262,14 +262,6 @@ extern char **environ;
 
 extern const char php_build_date[];
 
-#ifdef PHP_PWRITE_64
-ssize_t pwrite(int, void *, size_t, off64_t);
-#endif
-
-#ifdef PHP_PREAD_64
-ssize_t pread(int, void *, size_t, off64_t);
-#endif
-
 BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI size_t php_write(void *buf, size_t size);
