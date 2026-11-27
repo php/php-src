@@ -1224,8 +1224,9 @@ static HashTable *sxe_get_gc(zend_object *object, zval **table, int *n) /* {{{ *
 	php_sxe_object *sxe;
 	sxe = php_sxe_fetch_object(object);
 
-	*table = NULL;
-	*n = 0;
+	/* sxe->tmp is handed out by reference and can hold the element itself */
+	*table = &sxe->tmp;
+	*n = 1;
 	return sxe->properties;
 }
 /* }}} */
