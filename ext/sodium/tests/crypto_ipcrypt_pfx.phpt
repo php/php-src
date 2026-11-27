@@ -33,6 +33,17 @@ var_dump(filter_var($enc6, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false);
 $gen_key = sodium_crypto_ipcrypt_pfx_keygen();
 var_dump(strlen($gen_key) === SODIUM_CRYPTO_IPCRYPT_PFX_KEYBYTES);
 
+/* Known answer: draft-denis-ipcrypt A.2.1 vector 3 */
+$kat_key = sodium_hex2bin("0123456789abcdeffedcba98765432101032547698badcfeefcdab8967452301");
+$kat = sodium_crypto_ipcrypt_pfx_encrypt("192.0.2.1", $kat_key);
+var_dump($kat);
+var_dump(sodium_crypto_ipcrypt_pfx_decrypt($kat, $kat_key));
+
+/* Same /24 stays in the same encrypted /24 (A.2.2) */
+$pfx_key = sodium_hex2bin("2b7e151628aed2a6abf7158809cf4f3ca9f5ba40db214c3798f2e1c23456789a");
+var_dump(sodium_crypto_ipcrypt_pfx_encrypt("10.0.0.47", $pfx_key));
+var_dump(sodium_crypto_ipcrypt_pfx_encrypt("10.0.0.129", $pfx_key));
+
 /* PFX error: wrong key length */
 try {
     sodium_crypto_ipcrypt_pfx_encrypt("10.0.0.1", "short");
@@ -61,6 +72,10 @@ bool(true)
 string(3) "::1"
 bool(true)
 bool(true)
+string(14) "100.115.72.131"
+string(9) "192.0.2.1"
+string(14) "19.214.210.244"
+string(13) "19.214.210.80"
 sodium_crypto_ipcrypt_pfx_encrypt(): Argument #2 ($key) must be SODIUM_CRYPTO_IPCRYPT_PFX_KEYBYTES bytes long
 sodium_crypto_ipcrypt_pfx_encrypt(): Argument #1 ($ip) must be a valid IP address
 sodium_crypto_ipcrypt_pfx_decrypt(): Argument #2 ($key) must be SODIUM_CRYPTO_IPCRYPT_PFX_KEYBYTES bytes long
