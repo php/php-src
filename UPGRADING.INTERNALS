@@ -66,6 +66,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The sapi_get_target_uid() function was removed.
   . The sapi_get_target_gid() function was removed.
   . The sapi_activate_headers_only() function was removed.
+  . The sapi_register_default_post_reader() function was removed. The default
+    POST reader indirection was vestigial. Register POST entries instead.
+  . The php_startup_sapi_content_types() function was removed.
+  . The php_setup_sapi_content_types() function was removed.
   . Removed zend_hrtime_posix_clock_id. zend_hrtime() always uses
     CLOCK_MONOTONIC on POSIX platforms.
   . The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
@@ -100,6 +104,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . ZEND_IN_RANGE_OF(x, T) was added to check whether the value of an integer
     x is representable in the integer type T.
   . ZEND_TYPE_MIN(T) and ZEND_TYPE_MAX(T) were added.
+  . php_post_entries is now exposed as a symbol. Anything replacing POST
+    handlers should use this when switching back to PHP's defaults, rather
+    than having a copy of it.
 
 - Deprecated:
   . ZEND_LONG_INT_OVFL(), ZEND_LONG_INT_UDFL(), ZEND_LONG_EXCEEDS_INT(),
@@ -166,6 +173,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The force_http_10 method has been removed.
   . The get_fd method has been removed.
   . The get_target_uid and get_target_gid methods have been removed.
+  . The default_post_reader method has been removed.
 
 - Per-thread TSRM resources are now released best-effort at normal thread exit,
   because native TLS resource destructors can only run on their owning thread and
