@@ -3692,6 +3692,48 @@ ZEND_METHOD(ReflectionMethod, isDestructor)
 }
 /* }}} */
 
+typedef struct _reflection_operator_entry {
+	const char *symbol;
+	size_t symbol_len;
+	const char *method;
+	size_t method_len;
+} reflection_operator_entry;
+
+static const reflection_operator_entry reflection_operator_table[] = {
+	{ "+",  sizeof("+") - 1,  "__add", sizeof("__add") - 1 },
+	{ "-",  sizeof("-") - 1,  "__sub", sizeof("__sub") - 1 },
+	{ "*",  sizeof("*") - 1,  "__mul", sizeof("__mul") - 1 },
+	{ "/",  sizeof("/") - 1,  "__div", sizeof("__div") - 1 },
+	{ "%",  sizeof("%") - 1,  "__mod", sizeof("__mod") - 1 },
+	{ "**", sizeof("**") - 1, "__pow", sizeof("__pow") - 1 },
+};
+
+/* {{{ Returns whether this method is a typed operator method on an Operable class */
+ZEND_METHOD(ReflectionMethod, isOperatorMethod)
+{
+	const reflection_object *intern;
+	const zend_function *mptr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(mptr);
+
+	if (!intern->ce || !instanceof_function(intern->ce, zend_ce_operable)) {
+		RETURN_FALSE;
+	}
+
+	for (size_t i = 0; i < sizeof(reflection_operator_table) / sizeof(reflection_operator_table[0]); i++) {
+		if (zend_binary_strcasecmp(
+				ZSTR_VAL(mptr->common.function_name), ZSTR_LEN(mptr->common.function_name),
+				reflection_operator_table[i].method, reflection_operator_table[i].method_len) == 0) {
+			RETURN_TRUE;
+		}
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ Returns a bitfield of the modifiers for this method */
 ZEND_METHOD(ReflectionMethod, getModifiers)
 {
@@ -4533,6 +4575,42 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	}
 	if (!has_obj) {
 		zval_ptr_dtor(&obj_tmp);
+	}
+}
+/* }}} */
+
+/* {{{ Returns an associative array of operator symbol => ReflectionMethod for Operable classes */
+ZEND_METHOD(ReflectionClass, getOperatorMethods)
+{
+	const reflection_object *intern;
+	zend_class_entry *ce;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	array_init(return_value);
+
+	if (!instanceof_function(ce, zend_ce_operable)) {
+		return;
+	}
+
+	for (size_t i = 0; i < sizeof(reflection_operator_table) / sizeof(reflection_operator_table[0]); i++) {
+		zend_function *mptr = zend_hash_str_find_ptr(
+			&ce->function_table,
+			reflection_operator_table[i].method,
+			reflection_operator_table[i].method_len
+		);
+		if (mptr) {
+			zval method;
+			reflection_method_factory(ce, mptr, NULL, &method);
+			add_assoc_zval_ex(
+				return_value,
+				reflection_operator_table[i].symbol,
+				reflection_operator_table[i].symbol_len,
+				&method
+			);
+		}
 	}
 }
 /* }}} */

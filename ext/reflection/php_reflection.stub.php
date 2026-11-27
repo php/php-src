@@ -208,6 +208,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @tentative-return-type */
     public function isDestructor(): bool {}
 
+    public function isOperatorMethod(): bool {}
+
     /** @tentative-return-type */
     public function getClosure(?object $object = null): Closure {}
 
@@ -303,6 +305,11 @@ class ReflectionClass implements Reflector
 
     /** @tentative-return-type */
     public function getMethods(?int $filter = null): array {}
+
+    /**
+     * @return array<string, ReflectionMethod>
+     */
+    public function getOperatorMethods(): array {}
 
     /** @tentative-return-type */
     public function hasProperty(string $name): bool {}

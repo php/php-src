@@ -30,6 +30,13 @@ extern ZEND_API zend_class_entry *zend_ce_arrayaccess;
 extern ZEND_API zend_class_entry *zend_ce_serializable;
 extern ZEND_API zend_class_entry *zend_ce_countable;
 extern ZEND_API zend_class_entry *zend_ce_stringable;
+extern ZEND_API zend_class_entry *zend_ce_operable;
+extern ZEND_API zend_class_entry *zend_ce_operand_side;
+
+typedef enum _zend_enum_OperandSide {
+	ZEND_ENUM_OperandSide_Left = 1,
+	ZEND_ENUM_OperandSide_Right = 2,
+} zend_enum_OperandSide;
 
 typedef struct _zend_user_iterator {
 	zend_object_iterator     it;
@@ -69,6 +76,7 @@ ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
 ZEND_API void zend_register_interfaces(void);
+ZEND_API void zend_register_operand_side_ce(void);
 
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);

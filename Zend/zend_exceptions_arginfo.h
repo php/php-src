@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_exceptions.stub.php instead.
- * Stub hash: ba1562ca8fe2fe48c40bc52d10545aa989afd86c */
+ * Stub hash: 01021fe977b76c5e766597d16f28220824b1bc97 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -273,6 +273,16 @@ static zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_
 
 	INIT_CLASS_ENTRY(ce, "TypeError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_InvalidOperatorError(zend_class_entry *class_entry_TypeError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "InvalidOperatorError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_TypeError, 0);
 
 	return class_entry;
 }

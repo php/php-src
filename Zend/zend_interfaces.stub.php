@@ -83,3 +83,13 @@ final class InternalIterator implements Iterator
 
     public function rewind(): void {}
 }
+
+interface Operable
+{
+}
+
+enum OperandSide
+{
+    case Left;
+    case Right;
+}

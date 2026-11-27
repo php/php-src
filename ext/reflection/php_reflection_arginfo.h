@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: 6191049a28b4c5fe134fc37cd8969a33d00c51de
+ * Stub hash: cbacf073a62000559d3828eb28951cd729d25b1e
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -161,6 +161,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod_isDestructor arginfo_class_ReflectionFunctionAbstract_inNamespace
 
+#define arginfo_class_ReflectionMethod_isOperatorMethod arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionMethod_getClosure, 0, 0, Closure, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
 ZEND_END_ARG_INFO()
@@ -231,6 +233,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClass_getMethods, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_getOperatorMethods arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
 
 #define arginfo_class_ReflectionClass_hasProperty arginfo_class_ReflectionClass_hasMethod
 
@@ -802,6 +806,7 @@ ZEND_METHOD(ReflectionMethod, isAbstract);
 ZEND_METHOD(ReflectionMethod, isFinal);
 ZEND_METHOD(ReflectionMethod, isConstructor);
 ZEND_METHOD(ReflectionMethod, isDestructor);
+ZEND_METHOD(ReflectionMethod, isOperatorMethod);
 ZEND_METHOD(ReflectionMethod, getClosure);
 ZEND_METHOD(ReflectionMethod, getModifiers);
 ZEND_METHOD(ReflectionMethod, invoke);
@@ -826,6 +831,7 @@ ZEND_METHOD(ReflectionClass, getConstructor);
 ZEND_METHOD(ReflectionClass, hasMethod);
 ZEND_METHOD(ReflectionClass, getMethod);
 ZEND_METHOD(ReflectionClass, getMethods);
+ZEND_METHOD(ReflectionClass, getOperatorMethods);
 ZEND_METHOD(ReflectionClass, hasProperty);
 ZEND_METHOD(ReflectionClass, getProperty);
 ZEND_METHOD(ReflectionClass, getProperties);
@@ -1097,6 +1103,7 @@ static const zend_function_entry class_ReflectionMethod_methods[] = {
 	ZEND_ME(ReflectionMethod, isFinal, arginfo_class_ReflectionMethod_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isConstructor, arginfo_class_ReflectionMethod_isConstructor, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isDestructor, arginfo_class_ReflectionMethod_isDestructor, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isOperatorMethod, arginfo_class_ReflectionMethod_isOperatorMethod, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, getClosure, arginfo_class_ReflectionMethod_getClosure, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, getModifiers, arginfo_class_ReflectionMethod_getModifiers, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, invoke, arginfo_class_ReflectionMethod_invoke, ZEND_ACC_PUBLIC)
@@ -1126,6 +1133,7 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, hasMethod, arginfo_class_ReflectionClass_hasMethod, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getMethod, arginfo_class_ReflectionClass_getMethod, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getMethods, arginfo_class_ReflectionClass_getMethods, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getOperatorMethods, arginfo_class_ReflectionClass_getOperatorMethods, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, hasProperty, arginfo_class_ReflectionClass_hasProperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getProperty, arginfo_class_ReflectionClass_getProperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getProperties, arginfo_class_ReflectionClass_getProperties, ZEND_ACC_PUBLIC)

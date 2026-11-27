@@ -28,6 +28,8 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_interfaces.h"
+#include "zend_enum.h"
 
 #include <locale.h>
 #ifdef HAVE_LANGINFO_H
@@ -1182,15 +1184,266 @@ ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(const zval *op) /* 
 }
 /* }}} */
 
+static bool zend_is_arithmetic_operator_str(const char *operator)
+{
+	switch (operator[0]) {
+		case '+':
+		case '-':
+		case '/':
+		case '%':
+			return operator[1] == '\0';
+		case '*':
+			return operator[1] == '\0' || (operator[1] == '*' && operator[2] == '\0');
+		default:
+			return false;
+	}
+}
+
+static bool zend_is_operable_zval(const zval *zv)
+{
+	if (Z_ISREF_P(zv)) {
+		zv = Z_REFVAL_P(zv);
+	}
+	return Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), zend_ce_operable);
+}
+
 static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(const char *operator, const zval *op1, const zval *op2) /* {{{ */ {
 	if (EG(exception)) {
 		return;
 	}
 
-	zend_type_error("Unsupported operand types: %s %s %s",
-		zend_zval_type_name(op1), operator, zend_zval_type_name(op2));
+	if (zend_is_arithmetic_operator_str(operator)
+		&& (zend_is_operable_zval(op1) || zend_is_operable_zval(op2))) {
+		zend_throw_error(zend_ce_invalid_operator_error,
+			"Unsupported operand types: %s %s %s",
+			zend_zval_type_name(op1), operator, zend_zval_type_name(op2));
+	} else {
+		zend_type_error("Unsupported operand types: %s %s %s",
+			zend_zval_type_name(op1), operator, zend_zval_type_name(op2));
+	}
 }
 /* }}} */
+
+static const char *zend_operable_method_name(uint8_t opcode, size_t *len)
+{
+	switch (opcode) {
+		case ZEND_ADD: *len = sizeof("__add") - 1; return "__add";
+		case ZEND_SUB: *len = sizeof("__sub") - 1; return "__sub";
+		case ZEND_MUL: *len = sizeof("__mul") - 1; return "__mul";
+		case ZEND_DIV: *len = sizeof("__div") - 1; return "__div";
+		case ZEND_MOD: *len = sizeof("__mod") - 1; return "__mod";
+		case ZEND_POW: *len = sizeof("__pow") - 1; return "__pow";
+		default: return NULL;
+	}
+}
+
+static zend_always_inline zend_class_entry *zend_operable_resolve_ce(
+	zend_string *name, zend_class_entry *scope)
+{
+	if (EXPECTED(ZSTR_HAS_CE_CACHE(name))) {
+		zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
+		if (EXPECTED(ce != NULL)) {
+			return ce;
+		}
+	}
+
+	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
+		return scope;
+	}
+	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
+		return scope->parent;
+	}
+
+	/* Stack-allocated lowercase lookup avoids emalloc/efree on hot paths
+	 * (e.g. permanent interned names without a CE cache slot, or unloaded
+	 * classes in a union type). */
+	size_t len = ZSTR_LEN(name);
+	if (UNEXPECTED(len == 0)) {
+		return NULL;
+	}
+	const char *str = ZSTR_VAL(name);
+	if (UNEXPECTED(str[0] == '\\')) {
+		if (len == 1) {
+			return NULL;
+		}
+		str++;
+		len--;
+	}
+
+	char lc_buf[256];
+	if (EXPECTED(len < sizeof(lc_buf))) {
+		zend_str_tolower_copy(lc_buf, str, len);
+		zend_class_entry *ce = zend_hash_str_find_ptr(EG(class_table), lc_buf, len);
+		if (ce) {
+			if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+				return NULL;
+			}
+			if (ZSTR_HAS_CE_CACHE(name) && ZSTR_VALID_CE_CACHE(name)
+					&& (!CG(in_compilation) || (ce->ce_flags & ZEND_ACC_IMMUTABLE))) {
+				ZSTR_SET_CE_CACHE(name, ce);
+			}
+		}
+		return ce;
+	}
+
+	return zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+}
+
+static bool zend_operable_type_accepts(zend_type type, zend_class_entry *scope, const zval *arg)
+{
+	if (ZEND_TYPE_IS_INTERSECTION(type)) {
+		const zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (!zend_operable_type_accepts(*list_type, scope, arg)) {
+				return false;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		return true;
+	}
+
+	uint32_t mask = ZEND_TYPE_PURE_MASK(type);
+	if (Z_TYPE_P(arg) == IS_LONG) {
+		/* Under strict_types=1, int satisfies both int and float */
+		if ((mask & (MAY_BE_LONG | MAY_BE_DOUBLE)) != 0) {
+			return true;
+		}
+	} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
+		if ((mask & MAY_BE_DOUBLE) != 0) {
+			return true;
+		}
+	}
+
+	if (Z_TYPE_P(arg) != IS_OBJECT) {
+		return false;
+	}
+
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		const zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (zend_operable_type_accepts(*list_type, scope, arg)) {
+				return true;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		return false;
+	}
+
+	if (ZEND_TYPE_HAS_NAME(type)) {
+		zend_string *name = ZEND_TYPE_NAME(type);
+		zend_class_entry *arg_ce = Z_OBJCE_P(arg);
+		if (EXPECTED(arg_ce->name == name)) {
+			return true;
+		}
+		zend_class_entry *target_ce = zend_operable_resolve_ce(name, scope);
+		return target_ce != NULL && instanceof_function(arg_ce, target_ce);
+	}
+
+	return false;
+}
+
+static zend_function *zend_operable_find_method(
+	zend_object *obj, const char *method_name, size_t method_len,
+	const zval *other, bool require_side, bool allow_commutative_swap)
+{
+	if (!instanceof_function(obj->ce, zend_ce_operable)) {
+		return NULL;
+	}
+
+	zend_function *fn = zend_hash_str_find_ptr(&obj->ce->function_table, method_name, method_len);
+	if (!fn) {
+		return NULL;
+	}
+
+	if (require_side && fn->common.num_args != 2) {
+		if (!allow_commutative_swap || fn->common.num_args != 1) {
+			return NULL;
+		}
+	}
+
+	if (!zend_operable_type_accepts(fn->common.arg_info[0].type, fn->common.scope, other)) {
+		return NULL;
+	}
+
+	return fn;
+}
+
+/*
+ * Returns:
+ *   1 if an Operable method was dispatched (result is populated, or EG(exception) is set)
+ *   0 if no Operable method matched (caller should fall through to internal handlers / error)
+ */
+static int zend_try_operable_binary_op(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	if (Z_TYPE_P(op1) != IS_OBJECT && Z_TYPE_P(op2) != IS_OBJECT) {
+		return 0;
+	}
+
+	size_t method_len = 0;
+	const char *method_name = zend_operable_method_name(opcode, &method_len);
+	if (!method_name) {
+		return 0;
+	}
+
+	zend_object *target = NULL;
+	zend_function *fn = NULL;
+	zval *other = NULL;
+	bool is_right = false;
+
+	/* Step 2: Left operand (Operable) */
+	if (Z_TYPE_P(op1) == IS_OBJECT) {
+		fn = zend_operable_find_method(Z_OBJ_P(op1), method_name, method_len, op2, false, false);
+		if (fn) {
+			target = Z_OBJ_P(op1);
+			other = op2;
+			is_right = false;
+		}
+	}
+
+	/* Step 3 & 4: Right operand (Operable with OperandSide, or commutative swap for + and * only) */
+	if (!fn && Z_TYPE_P(op2) == IS_OBJECT) {
+		bool allow_commutative = (opcode == ZEND_ADD || opcode == ZEND_MUL);
+		fn = zend_operable_find_method(Z_OBJ_P(op2), method_name, method_len, op1, true, allow_commutative);
+		if (fn) {
+			target = Z_OBJ_P(op2);
+			other = op1;
+			is_right = true;
+		}
+	}
+
+	if (!fn) {
+		return 0;
+	}
+
+	zval params[2];
+	uint32_t param_count = 1;
+	ZVAL_COPY_VALUE(&params[0], other);
+
+	if (fn->common.num_args == 2) {
+		zend_object *side_obj = zend_enum_get_case_by_id(
+			zend_ce_operand_side, is_right ? ZEND_ENUM_OperandSide_Right : ZEND_ENUM_OperandSide_Left);
+		ZVAL_OBJ(&params[1], side_obj);
+		param_count = 2;
+	}
+
+	zval retval;
+	ZVAL_UNDEF(&retval);
+	zend_call_known_instance_method(fn, target, &retval, param_count, params);
+
+	if (EG(exception)) {
+		zval_ptr_dtor(&retval);
+		if (result != op1 && result != op2) {
+			ZVAL_UNDEF(result);
+		}
+		return 1;
+	}
+
+	ZEND_ASSERT(!Z_ISREF(retval));
+
+	if (result == op1 || result == op2) {
+		zval_ptr_dtor(result);
+	}
+	ZVAL_COPY_VALUE(result, &retval);
+	return 1;
+}
 
 static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
@@ -1237,6 +1490,10 @@ static zend_never_inline zend_result ZEND_FASTCALL add_function_slow(zval *resul
 	ZVAL_DEREF(op2);
 	if (add_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
+	}
+
+	if (zend_try_operable_binary_op(ZEND_ADD, result, op1, op2)) {
+		return EG(exception) ? FAILURE : SUCCESS;
 	}
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD);
@@ -1301,6 +1558,10 @@ static zend_never_inline zend_result ZEND_FASTCALL sub_function_slow(zval *resul
 	ZVAL_DEREF(op2);
 	if (sub_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
+	}
+
+	if (zend_try_operable_binary_op(ZEND_SUB, result, op1, op2)) {
+		return EG(exception) ? FAILURE : SUCCESS;
 	}
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB);
@@ -1370,6 +1631,10 @@ static zend_never_inline zend_result ZEND_FASTCALL mul_function_slow(zval *resul
 	ZVAL_DEREF(op2);
 	if (mul_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
+	}
+
+	if (zend_try_operable_binary_op(ZEND_MUL, result, op1, op2)) {
+		return EG(exception) ? FAILURE : SUCCESS;
 	}
 
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL);
@@ -1486,6 +1751,10 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 		return SUCCESS;
 	}
 
+	if (zend_try_operable_binary_op(ZEND_POW, result, op1, op2)) {
+		return EG(exception) ? FAILURE : SUCCESS;
+	}
+
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 	zval op1_copy, op2_copy;
@@ -1573,6 +1842,10 @@ ZEND_API zend_result ZEND_FASTCALL div_function(zval *result, zval *op1, zval *o
 		goto div_by_zero;
 	}
 
+	if (zend_try_operable_binary_op(ZEND_DIV, result, op1, op2)) {
+		return EG(exception) ? FAILURE : SUCCESS;
+	}
+
 	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
 
 	zval result_copy, op1_copy, op2_copy;
@@ -1607,6 +1880,14 @@ div_by_zero:
 ZEND_API zend_result ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long op1_lval, op2_lval;
+
+	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG || Z_TYPE_P(op2) != IS_LONG)) {
+		ZVAL_DEREF(op1);
+		ZVAL_DEREF(op2);
+		if (zend_try_operable_binary_op(ZEND_MOD, result, op1, op2)) {
+			return EG(exception) ? FAILURE : SUCCESS;
+		}
+	}
 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, "%");
 

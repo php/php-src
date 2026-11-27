@@ -43,6 +43,7 @@ ZEND_API zend_class_entry *zend_ce_error;
 ZEND_API zend_class_entry *zend_ce_compile_error;
 ZEND_API zend_class_entry *zend_ce_parse_error;
 ZEND_API zend_class_entry *zend_ce_type_error;
+ZEND_API zend_class_entry *zend_ce_invalid_operator_error;
 ZEND_API zend_class_entry *zend_ce_argument_count_error;
 ZEND_API zend_class_entry *zend_ce_value_error;
 ZEND_API zend_class_entry *zend_ce_arithmetic_error;
@@ -862,6 +863,9 @@ void zend_register_default_exception(void) /* {{{ */
 
 	zend_ce_type_error = register_class_TypeError(zend_ce_error);
 	zend_init_exception_class_entry(zend_ce_type_error);
+
+	zend_ce_invalid_operator_error = register_class_InvalidOperatorError(zend_ce_type_error);
+	zend_init_exception_class_entry(zend_ce_invalid_operator_error);
 
 	zend_ce_argument_count_error = register_class_ArgumentCountError(zend_ce_type_error);
 	zend_init_exception_class_entry(zend_ce_argument_count_error);

@@ -3542,6 +3542,198 @@ static zend_class_entry *zend_lazy_class_load(const zend_class_entry *pce)
 		} while (0)
 #endif
 
+static bool zend_is_operator_method_name(const zend_string *lcname)
+{
+	return zend_string_equals_literal(lcname, "__add")
+		|| zend_string_equals_literal(lcname, "__sub")
+		|| zend_string_equals_literal(lcname, "__mul")
+		|| zend_string_equals_literal(lcname, "__div")
+		|| zend_string_equals_literal(lcname, "__mod")
+		|| zend_string_equals_literal(lcname, "__pow");
+}
+
+static bool zend_validate_operator_param_type(zend_type type)
+{
+	if (!ZEND_TYPE_IS_SET(type)) {
+		return false;
+	}
+
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
+		return false;
+	}
+
+	/* Reject nullability (?T or T|null) and any disallowed primitive mask.
+	 * Only int (MAY_BE_LONG) and float (MAY_BE_DOUBLE) are allowed as primitives. */
+	uint32_t mask = ZEND_TYPE_PURE_MASK(type);
+	if (mask & ~(MAY_BE_LONG | MAY_BE_DOUBLE)) {
+		return false;
+	}
+
+	/* Handle union and intersection (DNF) types recursively */
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		const zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (!zend_validate_operator_param_type(*list_type)) {
+				return false;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		return true;
+	}
+
+	/* If it has a class/interface name (including self/parent), it's valid
+	 * as long as it isn't "iterable" (which is a mask) or disallowed. */
+	if (ZEND_TYPE_HAS_NAME(type)) {
+		return true;
+	}
+
+	/* Otherwise it must be a non-empty allowed primitive mask (int / float). */
+	return mask != 0;
+}
+
+static bool zend_is_exact_operand_side_type(zend_type type)
+{
+	if (!ZEND_TYPE_IS_SET(type)
+		|| ZEND_TYPE_ALLOW_NULL(type)
+		|| ZEND_TYPE_HAS_LIST(type)
+		|| ZEND_TYPE_PURE_MASK(type) != 0
+		|| !ZEND_TYPE_HAS_NAME(type)) {
+		return false;
+	}
+
+	return zend_string_equals_literal_ci(ZEND_TYPE_NAME(type), "OperandSide");
+}
+
+static void zend_validate_operable_class(zend_class_entry *ce)
+{
+	if (!instanceof_function(ce, zend_ce_operable)) {
+		return;
+	}
+
+	/* Enums cannot implement Operable */
+	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Enum %s cannot implement Operable",
+			ZSTR_VAL(ce->name));
+	}
+
+	/* Non-interface classes must be declared readonly */
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && !(ce->ce_flags & ZEND_ACC_READONLY_CLASS)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Class %s implements Operable and must be declared readonly",
+			ZSTR_VAL(ce->name));
+	}
+
+	zend_string *lcname;
+	zend_function *fn;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fn) {
+		if (!zend_is_operator_method_name(lcname)) {
+			continue;
+		}
+
+		/* Skip methods already validated on an Operable ancestor */
+		if (fn->common.scope != ce && instanceof_function(fn->common.scope, zend_ce_operable)) {
+			continue;
+		}
+
+		/* Must be public and non-static */
+		if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC) || (fn->common.fn_flags & ZEND_ACC_STATIC)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() must be public and non-static",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		/* Cannot return by reference */
+		if (fn->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() cannot return by reference",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		/* Parameter count: 1 or 2, no variadics, no default values, no pass-by-reference */
+		if (fn->common.fn_flags & ZEND_ACC_VARIADIC) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() cannot be variadic",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		if (fn->common.num_args < 1 || fn->common.num_args > 2) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() must take 1 or 2 parameters",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		if (fn->common.required_num_args != fn->common.num_args) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() parameters cannot have default values",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		for (uint32_t i = 0; i < fn->common.num_args; i++) {
+			if (ZEND_ARG_SEND_MODE(&fn->common.arg_info[i]) != ZEND_SEND_BY_VAL) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Operator method %s::%s() parameters cannot be passed by reference",
+					ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+			}
+		}
+
+		/* Validate first parameter type */
+		zend_arg_info *arg1 = &fn->common.arg_info[0];
+		if (!ZEND_TYPE_IS_SET(arg1->type)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() must declare a parameter type",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		if (!zend_validate_operator_param_type(arg1->type)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() has an unsupported operand parameter type",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		/* Validate optional second parameter (must be exactly OperandSide) */
+		if (fn->common.num_args == 2) {
+			zend_arg_info *arg2 = &fn->common.arg_info[1];
+			if (!zend_is_exact_operand_side_type(arg2->type)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"The second parameter of operator method %s::%s() must be OperandSide",
+					ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+			}
+		}
+
+		/* Validate return type (required; void, never, and mixed are rejected) */
+		if (!(fn->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() must declare a return type",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		zend_type ret_type = fn->common.arg_info[-1].type;
+		uint32_t ret_mask = ZEND_TYPE_PURE_MASK(ret_type);
+		if (ret_mask == MAY_BE_ANY || (ret_mask & (MAY_BE_VOID | MAY_BE_NEVER))) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Operator method %s::%s() cannot return void, never, or mixed",
+				ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+		}
+
+		/* Concrete operator methods must be declared final unless the class
+		 * itself is final. */
+		if (!(ce->ce_flags & ZEND_ACC_FINAL)
+			&& !(fn->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL))) {
+			if (fn->common.scope == ce) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Operator method %s::%s() on non-final class must be declared final",
+					ZSTR_VAL(ce->name), ZSTR_VAL(fn->common.function_name));
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Operable class %s cannot inherit non-final operator method %s::%s()",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(fn->common.scope->name),
+					ZSTR_VAL(fn->common.function_name));
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name, const zend_string *key) /* {{{ */
 {
 	/* Load parent/interface dependencies first, so we can still gracefully abort linking
@@ -3760,6 +3952,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (ce->ce_flags & ZEND_ACC_ENUM) {
 			zend_verify_enum(ce);
 		}
+		zend_validate_operable_class(ce);
 		if (ce->num_hooked_prop_variance_checks) {
 			const zend_property_info *prop_info;
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
@@ -4042,6 +4235,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 				zend_verify_abstract_class(ce);
 			}
+			zend_validate_operable_class(ce);
 			zend_inheritance_check_override(ce);
 			ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
 			ce->ce_flags |= ZEND_ACC_LINKED;
