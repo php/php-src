@@ -63,10 +63,6 @@ xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlC
 	ret->ExternalID = xmlStrdup(ExternalID);
 	ret->SystemID = xmlStrdup(SystemID);
 	if (parent_dtd != NULL) {
-		/* Don't store parent_dtd: orphan notation can outlive the DTD when
-		 * removeChild($doctype) frees it. parentNode/isConnected return spec-
-		 * mandated null/false unconditionally; ownerDocument keeps working
-		 * via ret->doc. */
 		ret->doc = parent_dtd->doc;
 	}
 	return (xmlNodePtr) ret;
