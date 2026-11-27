@@ -187,6 +187,8 @@ PHP                                                                        NEWS
     keeps a reference and the result is discarded). (Tomasz Kowalczyk)
   . Fixed bug GH-25802 (pg_get_notify() result is never === false with opcache
     enabled). (Tomasz Kowalczyk)
+  . Fixed bug GH-25825 (pg_meta_data() numeric column names are not integer keys
+    with opcache enabled). (Tomasz Kowalczyk)
 
 - Phar:
   . Fixed bug GH-25528 (Phar::setSignatureAlgorithm(): OpenSSL signing reads a

@@ -924,7 +924,7 @@ namespace {
     function pg_flush(PgSql\Connection $connection): int|bool {}
 
     /**
-     * @return array<string, array>|false
+     * @return array<int|string, array>|false
      * @refcount 1
      */
     function pg_meta_data(PgSql\Connection $connection, string $table_name, bool $extended = false): array|false {}
