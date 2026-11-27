@@ -94,6 +94,20 @@ static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name
 	return fbc;
 }
 
+static ZEND_COLD void ZEND_FASTCALL zend_jit_undefined_function(void)
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = EX(opline);
+	zval *function_name = RT_CONSTANT(opline, opline->op2);
+
+	if (UNEXPECTED((opline + 1)->opcode == ZEND_CALLABLE_CONVERT)) {
+		zend_throw_error(NULL, "Failed to create closure from undefined function %pS()",
+			Z_STR_P(function_name));
+	} else {
+		zend_throw_error(NULL, "Call to undefined function %pS()", Z_STR_P(function_name));
+	}
+}
+
 static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);

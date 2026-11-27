@@ -85,7 +85,7 @@ empty direct
 array(0) {
 }
 empty dynamic-call control
-Error: Call to undefined function cand_86013_missing()
+Error: Failed to create closure from undefined function cand_86013_missing()
 direct array_map static call
 array(1) {
   [0]=>

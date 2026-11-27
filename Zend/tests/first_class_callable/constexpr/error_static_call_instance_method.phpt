@@ -17,7 +17,7 @@ var_dump(Closure);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Non-static method Foo::myMethod() cannot be called statically in %s:%d
+Fatal error: Uncaught Error: Failed to create closure from non-static method Foo::myMethod() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
