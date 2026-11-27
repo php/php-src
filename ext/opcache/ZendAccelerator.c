@@ -3236,9 +3236,14 @@ accel_remap_huge_pages(void *start, size_t size, size_t real_size)
 }
 
 static int accel_dl_iterate_phdr_callback(struct dl_phdr_info *info, size_t size, void *data) {
-	if (info->dlpi_name == NULL || strcmp(info->dlpi_name, "") == 0) {
-		*((uintptr_t*)data) = info->dlpi_addr;
-		return 1;
+	uintptr_t addr = (uintptr_t)accel_dl_iterate_phdr_callback;
+	for (ElfW(Half) idx = 0; idx < info->dlpi_phnum; idx++) {
+		const ElfW(Phdr) *phdr = &info->dlpi_phdr[idx];
+		uintptr_t start = info->dlpi_addr + phdr->p_vaddr;
+		if (phdr->p_type == PT_LOAD && addr >= start && addr < start + phdr->p_memsz) {
+			*((uintptr_t*)data) = info->dlpi_addr;
+			return 1;
+		}
 	}
 	return 0;
 }
