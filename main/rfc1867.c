@@ -694,7 +694,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	size_t array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
 	int skip_upload = 0, anonymous_index = 0;
-	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	bool throw_exceptions = SG(request_parse_body_context).throw_exceptions;
@@ -792,9 +791,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	/* Initialize $_FILES[] */
 	zend_hash_init(&PG(rfc1867_protected_variables), 8, NULL, NULL, 0);
 
-	ALLOC_HASHTABLE(uploaded_files);
-	zend_hash_init(uploaded_files, 8, NULL, free_filename, 0);
-	SG(rfc1867_uploaded_files) = uploaded_files;
+	/* request_parse_body() may parse the body again, keep tracking earlier uploads */
+	if (!SG(rfc1867_uploaded_files)) {
+		ALLOC_HASHTABLE(SG(rfc1867_uploaded_files));
+		zend_hash_init(SG(rfc1867_uploaded_files), 8, NULL, free_filename, 0);
+	}
 
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_FILES]) != IS_ARRAY) {
 		/* php_auto_globals_create_files() might have already done that */

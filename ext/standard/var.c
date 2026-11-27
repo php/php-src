@@ -542,6 +542,13 @@ PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* 
 	zend_string *key;
 	zval *val;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return FAILURE;
+	}
+#endif
+
 again:
 	switch (Z_TYPE_P(struc)) {
 		case IS_FALSE:
@@ -628,6 +635,11 @@ again:
 			}
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, EXPORT, zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
+			if (UNEXPECTED(EG(exception))) {
+				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
+				zend_release_properties(myht);
+				return FAILURE;
+			}
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
@@ -672,9 +684,14 @@ again:
 								return FAILURE;
 							}
 						}
-						php_object_element_export(val, index, key, level, buf);
+						zend_result result = php_object_element_export(val, index, key, level, buf);
 						if (val == &tmp) {
 							zval_ptr_dtor(val);
+						}
+						if (UNEXPECTED(result == FAILURE)) {
+							ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
+							zend_release_properties(myht);
+							return FAILURE;
 						}
 					} ZEND_HASH_FOREACH_END();
 				}

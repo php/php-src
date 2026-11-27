@@ -402,6 +402,19 @@ ZEND_API int zend_atomic_int_load(const zend_atomic_int *obj);
 # define ZEND_ATOMIC_FENCE_ACQUIRE() ((void)0)
 #endif
 
+static zend_always_inline uint32_t zend_atomic_load_acquire_32(const uint32_t *ptr)
+{
+#if defined(__GNUC__) || defined(__clang__) || defined(HAVE_GNUC_ATOMICS)
+	return __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
+#else
+	uint32_t val = *(const volatile uint32_t *)ptr;
+	ZEND_ATOMIC_FENCE_ACQUIRE();
+	return val;
+#endif
+}
+
+#define ZEND_ATOMIC_LOAD_ACQUIRE_32(ptr) zend_atomic_load_acquire_32(ptr)
+
 END_EXTERN_C()
 
 #endif

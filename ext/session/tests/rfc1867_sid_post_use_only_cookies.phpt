@@ -1,0 +1,34 @@
+--TEST--
+session rfc1867 upload progress ignores session ID from POST data with default session.use_only_cookies
+--INI--
+upload_max_filesize=1024
+session.upload_progress.cleanup=0
+session.upload_progress.freq=0
+--EXTENSIONS--
+session
+--SKIPIF--
+<?php include('skipif.inc'); ?>
+--POST_RAW--
+Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
+-----------------------------20896060251896012921717172737
+Content-Disposition: form-data; name="PHPSESSID"
+
+rfc1867-sid-post-use-only-cookies
+-----------------------------20896060251896012921717172737
+Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
+
+rfc1867_sid_post_use_only_cookies.php
+-----------------------------20896060251896012921717172737
+Content-Disposition: form-data; name="file1"; filename="file1.txt"
+
+1
+-----------------------------20896060251896012921717172737--
+--FILE--
+<?php
+session_id("rfc1867-sid-post-use-only-cookies");
+session_start();
+var_dump(isset($_SESSION["upload_progress_" . basename(__FILE__)]));
+session_destroy();
+?>
+--EXPECT--
+bool(false)

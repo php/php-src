@@ -6,6 +6,13 @@ if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (PHP_INT_SIZE != 8) die('skip this test is for 64bit platforms only');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 if (PHP_OS === 'FreeBSD') die('skip Worker does not handle OOM gracefully');
+if (getenv('SKIP_MSAN')) die('skip Crashes CI with MSAN');
+// The header is duplicated, so the peak memory usage exceeds 8 GiB, which takes
+// down smaller machines (e.g. 7 GB CI runners) with the OOM killer.
+$memInfo = @file_get_contents('/proc/meminfo');
+if ($memInfo && preg_match('/MemAvailable:\s+(\d+) kB/', $memInfo, $m) && $m[1] < 9 * 1024 * 1024) {
+    die('skip Insufficient available memory (less than 9 GiB)');
+}
 ?>
 --CONFLICTS--
 all

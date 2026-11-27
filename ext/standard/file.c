@@ -348,13 +348,10 @@ PHP_FUNCTION(get_meta_tags)
 				} else {
 					add_assoc_string(return_value, name, "");
 				}
-
-				efree(name);
-				if (value) efree(value);
-			} else if (have_content) {
-				efree(value);
 			}
 
+			if (name) efree(name);
+			if (value) efree(value);
 			name = value = NULL;
 
 			/* Reset all of our flags */
@@ -850,6 +847,11 @@ PHP_FUNCTION(pclose)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_FROM_ZVAL(stream, res);
+
+	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a valid stream resource", stream->res->handle);
+		RETURN_LONG(-1);
+	}
 
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);

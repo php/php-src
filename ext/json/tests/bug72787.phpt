@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECTF--
-json_decode(): Argument #3 ($depth) must be less than %d
+json_decode(): Argument #3 ($depth) must be less than or equal to %d

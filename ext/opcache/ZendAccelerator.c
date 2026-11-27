@@ -333,6 +333,84 @@ static inline int accel_restart_is_active(void)
 	return 0;
 }
 
+#ifndef ZEND_WIN32
+/* A request becomes a reader of SHM only in RINIT, holding the reader lock (byte 1)
+ * until accel_post_deactivate(). A restart takes the write lock on byte 1, so it waits
+ * for the readers, and requests wait in RINIT while the restart runs. */
+static bool accel_lock_reader_byte(int cmd, int type)
+{
+	struct flock lock;
+
+	lock.l_type = type;
+	lock.l_whence = SEEK_SET;
+	lock.l_start = 1;
+	lock.l_len = 1;
+
+	return fcntl(lock_file, cmd, &lock) != -1;
+}
+#endif
+
+#if defined(ZTS) && !defined(ZEND_WIN32)
+/* fcntl() locks belong to the process, so under ZTS they cannot tell which threads
+ * use SHM (GH-8739). The threads of this process that use SHM are counted here, and
+ * the process holds the reader lock (byte 1) whenever the count is not zero, so other
+ * processes still see it. A restart needs a zero count and a write lock on byte 1.
+ * The 0 <-> 1 transitions and the restart are serialized by accel_zts_readers_mutex,
+ * other changes of the count are lock-free. */
+static MUTEX_T accel_zts_readers_mutex = NULL;
+static zend_atomic_int accel_zts_readers;
+static time_t accel_zts_next_warning;
+
+/* Adds (+1, only from RINIT) or releases (-1) a reference of the calling thread.
+ * Does not use ZCG() as it is also called from accel_globals_dtor(). */
+static bool accel_zts_readers_add(int delta)
+{
+	int count;
+
+#ifndef HAVE_NO_ATOMICS
+	count = zend_atomic_int_load_ex(&accel_zts_readers);
+	while (count > 0 && count + delta > 0) {
+		if (zend_atomic_int_compare_exchange_ex(&accel_zts_readers, &count, count + delta)) {
+			return true;
+		}
+	}
+#endif
+
+	tsrm_mutex_lock(accel_zts_readers_mutex);
+	count = zend_atomic_int_load_ex(&accel_zts_readers);
+	/* waits while another process restarts the cache (it holds the write lock) */
+	if (count == 0 && !accel_lock_reader_byte(F_SETLKW, F_RDLCK)) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
+		tsrm_mutex_unlock(accel_zts_readers_mutex);
+		return false;
+	}
+	while (!zend_atomic_int_compare_exchange_ex(&accel_zts_readers, &count, count + delta));
+	if (count + delta == 0) {
+		/* the last reader of this process; unlock before another thread may relock */
+		accel_lock_reader_byte(F_SETLK, F_UNLCK);
+	}
+	tsrm_mutex_unlock(accel_zts_readers_mutex);
+	return true;
+}
+#endif
+
+#ifndef ZEND_WIN32
+/* Makes the request a reader of SHM; called only from RINIT */
+static bool accel_reader_enter(void)
+{
+#ifdef ZTS
+	return accel_zts_readers_add(1);
+#else
+	/* waits while another process restarts the cache (it holds the write lock) */
+	if (!accel_lock_reader_byte(F_SETLKW, F_RDLCK)) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
+		return false;
+	}
+	return true;
+#endif
+}
+#endif
+
 /* Creates a read lock for SHM access */
 static inline zend_result accel_activate_add(void)
 {
@@ -341,17 +419,9 @@ static inline zend_result accel_activate_add(void)
 	INCREMENT(mem_usage);
 	SHM_PROTECT();
 #else
-	struct flock mem_usage_lock;
-
-	mem_usage_lock.l_type = F_RDLCK;
-	mem_usage_lock.l_whence = SEEK_SET;
-	mem_usage_lock.l_start = 1;
-	mem_usage_lock.l_len = 1;
-
-	if (fcntl(lock_file, F_SETLK, &mem_usage_lock) == -1) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC(+1):  %s (%d)", strerror(errno), errno);
-		return FAILURE;
-	}
+	/* A request becomes a reader only in RINIT, see accel_reader_enter(). A request
+	 * that was not admitted there must not start to use SHM later. */
+	return FAILURE;
 #endif
 	return SUCCESS;
 }
@@ -365,6 +435,12 @@ static inline void accel_deactivate_sub(void)
 		DECREMENT(mem_usage);
 		ZCG(counted) = false;
 		SHM_PROTECT();
+	}
+#elif defined(ZTS)
+	/* releases the reference taken in RINIT (accel_activate_add() never succeeds under ZTS) */
+	if (ZCG(counted)) {
+		accel_zts_readers_add(-1);
+		ZCG(counted) = false;
 	}
 #else
 	struct flock mem_usage_unlock;
@@ -382,7 +458,9 @@ static inline void accel_deactivate_sub(void)
 
 static inline void accel_unlock_all(void)
 {
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) || defined(ZTS)
+	/* Under ZTS never unlock the whole file: fcntl() locks belong to the process, and the
+	 * SHM write lock (byte 0) and the restart lock (byte 2) may be held by other threads. */
 	accel_deactivate_sub();
 #else
 	if (lock_file == -1) {
@@ -450,8 +528,9 @@ static void accel_interned_strings_restore_state(void)
 				/* Discard non-global CE_CACHE slots on reset. */
 				uintptr_t idx = (GC_REFCOUNT(s) - 1) / sizeof(void *);
 				if (idx >= ZCSG(map_ptr_last)) {
-					GC_SET_REFCOUNT(s, 2);
 					GC_DEL_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
+					ZEND_ATOMIC_FENCE_RELEASE();
+					GC_SET_REFCOUNT(s, 2);
 				}
 			}
 
@@ -560,6 +639,7 @@ finish:
 	if (ZSTR_HAS_CE_CACHE(str) && !ZSTR_HAS_CE_CACHE(s)) {
 		ZEND_ASSERT(GC_FLAGS(str) & IS_STR_PERMANENT);
 		GC_SET_REFCOUNT(s, GC_REFCOUNT(str));
+		ZEND_ATOMIC_FENCE_RELEASE();
 		GC_ADD_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
 	}
 
@@ -955,6 +1035,59 @@ static inline bool accel_is_inactive(void)
 
 	return false;
 }
+
+#ifndef ZEND_WIN32
+/* Replaces accel_is_inactive(); called under zend_shared_alloc_lock(). On success the
+ * write lock on byte 1 is held until accel_restart_end(): no process can hold the
+ * reader lock or take it. Under ZTS the readers mutex is held as well: no thread of
+ * this process can become a reader (the count is zero and may only grow from zero
+ * under the mutex). */
+static bool accel_restart_begin(void)
+{
+#ifndef ZTS
+	if (accel_lock_reader_byte(F_SETLK, F_WRLCK)) {
+		return true;
+	}
+	/* force_restart_timeout kills the readers */
+	(void) accel_is_inactive();
+	return false;
+#else
+	int readers;
+	time_t now;
+
+	tsrm_mutex_lock(accel_zts_readers_mutex);
+	readers = zend_atomic_int_load_ex(&accel_zts_readers);
+	if (readers == 0 && accel_lock_reader_byte(F_SETLK, F_WRLCK)) {
+		return true;
+	}
+	tsrm_mutex_unlock(accel_zts_readers_mutex);
+
+	now = time(NULL);
+	if (readers == 0) {
+		/* readers in other processes: as without ZTS, force_restart_timeout kills them,
+		 * here with all their threads */
+		(void) accel_is_inactive();
+	} else if (ZCG(accel_directives).force_restart_timeout && ZCSG(force_restart_time)
+			&& now >= ZCSG(force_restart_time) && now >= accel_zts_next_warning) {
+		/* Threads cannot be killed and this process must not kill itself: the restart
+		 * waits for the running requests, new ones run uncached meanwhile */
+		zend_accel_error(ACCEL_LOG_WARNING, "Restart delayed for %ld seconds by %d threads of process %d still using the cache",
+			(long)(now - ZCSG(force_restart_time) + ZCG(accel_directives).force_restart_timeout), readers, getpid());
+		accel_zts_next_warning = now + ZCG(accel_directives).force_restart_timeout;
+	}
+	return false;
+#endif
+}
+
+static void accel_restart_end(void)
+{
+	accel_lock_reader_byte(F_SETLK, F_UNLCK);
+#ifdef ZTS
+	accel_zts_next_warning = 0;
+	tsrm_mutex_unlock(accel_zts_readers_mutex);
+#endif
+}
+#endif
 
 static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
 {
@@ -1515,10 +1648,10 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 	}
 }
 
+/* Must perform the same check as phar_compile_file(). */
 static zend_always_inline bool is_phar_file(zend_string *filename)
 {
-	return filename && ZSTR_LEN(filename) >= sizeof(".phar") &&
-		!memcmp(ZSTR_VAL(filename) + ZSTR_LEN(filename) - (sizeof(".phar")-1), ".phar", sizeof(".phar")-1) &&
+	return filename && strstr(ZSTR_VAL(filename), ".phar") &&
 		!strstr(ZSTR_VAL(filename), "://");
 }
 
@@ -2725,7 +2858,11 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 	if (ZCSG(restart_pending)) {
 		zend_shared_alloc_lock();
 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
+#ifndef ZEND_WIN32
+			if (accel_restart_begin()) {
+#else
 			if (accel_is_inactive()) {
+#endif
 				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting!");
 				ZCSG(restart_pending) = false;
 				switch ZCSG(restart_reason) {
@@ -2765,12 +2902,28 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 					ZCSG(last_restart_time)++;
 				}
 				accel_restart_leave();
+#ifndef ZEND_WIN32
+				accel_restart_end();
+#endif
 			}
 		}
 		zend_shared_alloc_unlock();
 	}
 
 	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled);
+
+#ifndef ZEND_WIN32
+	/* This is the only place where a request starts to use SHM */
+	if (ZCG(accelerator_enabled)) {
+		if (accel_reader_enter()) {
+			ZCG(counted) = true;
+			/* SHM-backed keys may be added to the PCRE cache again */
+			ZCG(pcre_reseted) = false;
+		} else {
+			ZCG(accelerator_enabled) = false;
+		}
+	}
+#endif
 
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -2825,6 +2978,8 @@ zend_result accel_post_deactivate(void)
 	zend_shared_alloc_safe_unlock(); /* be sure we didn't leave cache locked */
 	accel_unlock_all();
 	ZCG(counted) = false;
+	/* the reference is released: do not use SHM until the next RINIT */
+	ZCG(accelerator_enabled) = false;
 
 	return SUCCESS;
 }
@@ -2999,6 +3154,16 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	/* The thread is retired without its request cleanup (e.g. another extension
+	 * bailed out in post_deactivate): release its reference, otherwise restarts would
+	 * wait for it forever. Uses only the given globals: ts_free_id() calls this for
+	 * all threads from the current one. */
+	if (accel_globals->counted && accel_zts_readers_mutex) {
+		accel_globals->counted = false;
+		accel_zts_readers_add(-1);
+	}
+#endif
 	zend_string_free(accel_globals->key);
 	if (accel_globals->preloaded_internal_run_time_cache) {
 		pefree(accel_globals->preloaded_internal_run_time_cache, 1);
@@ -3324,6 +3489,13 @@ static zend_result accel_post_startup(void)
 
 		/* from this point further, shared memory is supposed to be OK */
 
+#if defined(ZTS) && !defined(ZEND_WIN32)
+		/* before preloading runs its request and before SAPIs fork their children */
+		accel_zts_readers_mutex = tsrm_mutex_alloc();
+		ZEND_ATOMIC_INT_INIT(&accel_zts_readers, 0);
+		accel_zts_next_warning = 0;
+#endif
+
 		/* remember the last restart time in the process memory */
 		ZCG(last_restart_time) = ZCSG(last_restart_time);
 
@@ -3427,7 +3599,18 @@ static void (*orig_post_shutdown_cb)(void);
 
 static void accel_post_shutdown(void)
 {
+	/* Call original shutdown prior to detaching SHM, so it can access its memory safely. */
+	if (orig_post_shutdown_cb) {
+		orig_post_shutdown_cb();
+	}
+
 	zend_shared_alloc_shutdown();
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	if (accel_zts_readers_mutex) {
+		tsrm_mutex_free(accel_zts_readers_mutex);
+		accel_zts_readers_mutex = NULL;
+	}
+#endif
 }
 
 void accel_shutdown(void)
@@ -4783,6 +4966,9 @@ static zend_result accel_preload(const char *config, bool in_child)
 
 		zend_shared_alloc_save_state();
 		accel_interned_strings_save_state();
+#ifdef HAVE_JIT
+		zend_jit_save_restart_point();
+#endif
 
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();

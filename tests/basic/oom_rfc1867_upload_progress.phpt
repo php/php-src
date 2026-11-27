@@ -22,12 +22,12 @@ $sessionIni = [
     'session.upload_progress.min_freq=0',
 ];
 
-/* The progress handler only engages once it has seen both the session id and
- * the progress key, so those two parts come first. */
+/* php-cgi inherits $_ENV; the progress handler takes the session id from the cookie. */
+$_ENV['HTTP_COOKIE'] = 'PHPSESSID=abcdef0123456789abcdef0123456789';
+
+/* The progress handler only engages once it has seen the progress key, so that part comes first. */
 function oom_rfc1867_progress_preamble($fh): void
 {
-    oom_rfc1867_part($fh, 'Content-Disposition: form-data; name="PHPSESSID"',
-        'abcdef0123456789abcdef0123456789');
     oom_rfc1867_part($fh, 'Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"', 'k');
 }
 
@@ -73,8 +73,6 @@ oom_rfc1867_request(function ($fh) {
  * progress key on MULTIPART_EVENT_FORMDATA, so the soft limit is reached
  * inside the handler rather than in the parser. */
 oom_rfc1867_request(function ($fh) {
-    oom_rfc1867_part($fh, 'Content-Disposition: form-data; name="PHPSESSID"',
-        'abcdef0123456789abcdef0123456789');
     fwrite($fh, '--' . OOM_RFC1867_BOUNDARY . "\r\n"
         . "Content-Disposition: form-data; name=\"PHP_SESSION_UPLOAD_PROGRESS\"\r\n\r\n");
     oom_rfc1867_fill($fh, 1024 * 1024);

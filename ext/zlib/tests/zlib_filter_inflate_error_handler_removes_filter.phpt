@@ -20,11 +20,15 @@ $filter = stream_filter_append($fp, 'zlib.inflate', STREAM_FILTER_READ);
 var_dump(fread($fp, 10));
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 fwrite(): zlib: data error
-bool(true)
+
+Warning: stream_filter_remove(): Cannot remove filter while it is being applied in %s on line %d
+bool(false)
 bool(false)
 fread(): zlib: data error
-bool(true)
+
+Warning: stream_filter_remove(): Cannot remove filter while it is being applied in %s on line %d
+bool(false)
 bool(false)
 Done

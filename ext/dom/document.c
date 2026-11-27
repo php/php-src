@@ -1213,6 +1213,9 @@ static void dom_document_adopt_node(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		|| nodep->type == XML_DOCUMENT_TYPE_NODE
 		|| nodep->type == XML_DTD_NODE
 		|| nodep->type == XML_ENTITY_NODE
+		|| nodep->type == XML_ELEMENT_DECL
+		|| nodep->type == XML_ATTRIBUTE_DECL
+		|| nodep->type == XML_ENTITY_DECL
 		|| nodep->type == XML_NOTATION_NODE)) {
 		php_dom_throw_error(NOT_SUPPORTED_ERR, dom_get_strict_error(dom_object_nodep->document));
 		RETURN_FALSE;
@@ -2313,9 +2316,14 @@ static void dom_document_register_node_class(INTERNAL_FUNCTION_PARAMETERS, bool 
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
-		if (UNEXPECTED(ce != NULL && (ce->ce_flags & ZEND_ACC_ABSTRACT))) {
-			zend_argument_value_error(2, "must not be an abstract class");
-			RETURN_THROWS();
+		if (ce != NULL) {
+			if (UNEXPECTED(ce->ce_flags & ZEND_ACC_ABSTRACT)) {
+				zend_argument_value_error(2, "must not be an abstract class");
+				RETURN_THROWS();
+			}
+			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
+				RETURN_THROWS();
+			}
 		}
 		DOM_GET_THIS_INTERN(intern);
 		dom_set_doc_classmap(intern->document, basece, ce);

@@ -1714,7 +1714,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				if (i < op_array->last_var) {
 					ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					ssa_var_info[i].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_INDIRECT | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				}
 			}
 			if (i < parent_vars_count) {
@@ -2357,6 +2357,7 @@ propagate_arg:
 				/* Add statically inferred restrictions */
 				if (ssa_ops[idx].op1_def >= 0) {
 					if (opline->opcode == ZEND_SEND_VAR_EX
+					 && opline->op2_type != IS_CONST
 					 && frame
 					 && frame->call
 					 && frame->call->func
@@ -2933,9 +2934,12 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			if (support_opline
 			 && opline->opcode == ZEND_ASSIGN
 			 && opline->op1_type == IS_CV
-			 && ssa_op->op1_def >= 0
-			 && ssa->vars[ssa_op->op1_def].alias != NO_ALIAS) {
-				/* avoid register allocation in case of possibility of indirect modification*/
+			 && ((ssa_op->op1_def >= 0
+			   && ssa->vars[ssa_op->op1_def].alias != NO_ALIAS)
+			  || (p->op1_type != IS_UNKNOWN
+			   && (p->op1_type & IS_TRACE_REFERENCE)))) {
+				/* avoid register allocation in case of possibility of indirect modification
+				 * or assignment through a (possibly typed) reference */
 				support_opline = 0;
 			}
 
@@ -3480,6 +3484,20 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 		if (STACK_FLAGS(stack, i) & ~(ZREG_LOAD|ZREG_STORE|ZREG_LAST_USE)) {
 			return 1;
 		} else if (STACK_REG(stack, i) != ZREG_NONE) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/* While a trace is being compiled, a register-allocated variable is tracked by
+ * its IR reference only (STACK_REG() is still ZREG_NONE). */
+static bool zend_jit_trace_stack_has_unstored_refs(zend_jit_trace_stack *stack, uint32_t stack_size)
+{
+	uint32_t i;
+
+	for (i = 0; i < stack_size; i++) {
+		if (STACK_REF(stack, i) && !(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))) {
 			return 1;
 		}
 	}
@@ -4479,7 +4497,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 						} else if (opline->result_type != IS_UNUSED
 						 && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)
-						 && !(res_info & MAY_BE_STRING)) {
+						 && !(op1_info & MAY_BE_STRING)) {
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 						}
 						goto done;
@@ -7160,7 +7178,8 @@ done:
 			if (trace_buffer->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 				if (!(t->flags & ZEND_JIT_TRACE_USES_INITIAL_IP)
 				 || (ra
-				  && zend_jit_trace_stack_needs_deoptimization(stack, op_array->last_var + op_array->T))) {
+				  && (zend_jit_trace_stack_needs_deoptimization(stack, op_array->last_var + op_array->T)
+				   || zend_jit_trace_stack_has_unstored_refs(stack, op_array->last_var + op_array->T)))) {
 					/* Deoptimize to the first instruction of the loop */
 					uint32_t exit_point = zend_jit_trace_get_exit_point(trace_buffer[1].opline, ZEND_JIT_EXIT_TO_VM);
 
@@ -8750,7 +8769,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		return 1;
 	/* Lock-free check if the side trace was already JIT-ed or blacklist-ed in another process */
 	} else if (t->exit_info[exit_num].flags & (ZEND_JIT_EXIT_JITED|ZEND_JIT_EXIT_BLACKLISTED)) {
-		return 0;
+		return EX(opline) == zend_jit_traces[t->root].opline;
 	}
 
 	ZEND_ASSERT(EX(func)->type == ZEND_USER_FUNCTION);

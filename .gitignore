@@ -127,7 +127,6 @@ config.h.in
 # ------------------------------------------------------------------------------
 /ext/phar/phar.phar
 /ext/phar/phar.php
-/pear/install-pear-nozlib.phar
 /sapi/cgi/php-cgi
 /sapi/fpm/php-fpm
 /sapi/phpdbg/phpdbg

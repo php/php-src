@@ -31,3 +31,6 @@
 
 # Vendored libraries
 /ext/dom/lexbor/lexbor linguist-vendored
+
+# The phar has some binary
+/pear/install-pear-nozlib.phar binary

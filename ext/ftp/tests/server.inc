@@ -412,6 +412,10 @@ if ($pid) {
                 fclose($fs);
 
 
+        }elseif (preg_match('/^PASV/', $buf, $matches) && isset($pasv_reply_at_buffer_end)) {
+            // The address ends at the 510th byte and the port is cut off.
+            fputs($s, "227 " . str_repeat("x", 496) . "127,0,0,1,4,210)\r\n");
+
         }elseif (preg_match('/^PASV/', $buf, $matches)) {
             $pasv=true;
             $host = "127.0.0.1";
@@ -542,6 +546,13 @@ if ($pid) {
             fclose($fs);
         }elseif (preg_match('/^SIZE \/bug73457/', $buf)) {
             fputs($s, "213 10\r\n");
+        }elseif (preg_match('/^SIZE \/pasvbufferend/', $buf)) {
+            fputs($s, "213 10\r\n");
+        }elseif (preg_match('/^SIZE \/mdtmnodigits/', $buf)) {
+            // A longer line with digits, read into the same buffer before MDTM.
+            fputs($s, "213 10 bytes (19991005213102)\r\n");
+        }elseif (preg_match('/^MDTM \/mdtmnodigits/', $buf)) {
+            fputs($s, "213 unknown\r\n");
         }elseif (preg_match("/^SITE/", $buf)) {
             fputs($s, "500 Syntax error, command unrecognized.\r\n");
         }else {

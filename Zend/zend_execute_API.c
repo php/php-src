@@ -823,9 +823,11 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		return FAILURE; /* executor is already inactive */
 	}
 	if (ZEND_HAS_OOM()) {
-		/* Callers expect SUCCESS || EG(exception), so let's throw right now */
+		/* Throws UnwindExit if the OOM is pending. If not pending, acts as if executor is inactive. */
 		zend_handle_delayed_oom();
-		return FAILURE;
+		if (!EG(exception)) {
+			return FAILURE;
+		}
 	}
 	if (EG(exception)) {
 		if (fci_cache) {
@@ -1960,7 +1962,10 @@ ZEND_API zend_result zend_set_local_var(zend_string *name, zval *value, bool for
 					if (ZSTR_H(*str) == h &&
 					    zend_string_equal_content(*str, name)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
+						zval garbage;
+						ZVAL_COPY_VALUE(&garbage, var);
 						ZVAL_COPY_VALUE(var, value);
+						zval_ptr_dtor(&garbage);
 						return SUCCESS;
 					}
 					str++;
@@ -2002,8 +2007,10 @@ ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *
 					if (ZSTR_H(*str) == h &&
 					    zend_string_equals_cstr(*str, name, len)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
-						zval_ptr_dtor(var);
+						zval garbage;
+						ZVAL_COPY_VALUE(&garbage, var);
 						ZVAL_COPY_VALUE(var, value);
+						zval_ptr_dtor(&garbage);
 						return SUCCESS;
 					}
 					str++;

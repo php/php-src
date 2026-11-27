@@ -762,12 +762,14 @@ static inline zend_long safe_shift_left(zend_long n, zend_long s) {
 }
 
 static inline bool shift_left_overflows(zend_long n, zend_long s) {
-	/* This considers shifts that shift in the sign bit to be overflowing as well */
-	if (n >= 0) {
-		return s >= SIZEOF_ZEND_LONG * 8 - 1 || safe_shift_left(n, s) < n;
-	} else {
-		return s >= SIZEOF_ZEND_LONG * 8 || safe_shift_left(n, s) > n;
+	if (UNEXPECTED((zend_ulong)s >= SIZEOF_ZEND_LONG * 8)) {
+		return true;
 	}
+	if (UNEXPECTED(s == SIZEOF_ZEND_LONG * 8 - 1)) {
+		return n != 0 && n != -1;
+	}
+	zend_long shifted = (zend_long)((zend_ulong)n << (zend_ulong)s);
+	return (shifted >> s) != n;
 }
 
 /* If b does not divide a exactly, return the two adjacent values between which the real result
@@ -4932,6 +4934,9 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 }
 /* }}} */
 
+/* Key types whose conversion to an array offset may emit a diagnostic */
+#define MAY_BE_THROWING_KEY (MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
+
 ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, const zend_ssa *ssa, uint32_t t1, uint32_t t2)
 {
 	if (opline->op1_type == IS_CV) {
@@ -5211,7 +5216,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				return 1;
 			}
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_TRUE|MAY_BE_FALSE|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE)) || opline->op2_type == IS_UNUSED ||
-				(t2 & (MAY_BE_UNDEF|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+				(t2 & (MAY_BE_UNDEF|MAY_BE_THROWING_KEY));
 		case ZEND_ASSIGN_OBJ:
 			if (t1 & (MAY_BE_ANY-MAY_BE_OBJECT)) {
 				return 1;
@@ -5263,9 +5268,9 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_ROPE_END:
 			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT);
 		case ZEND_INIT_ARRAY:
-			return (opline->op2_type != IS_UNUSED) && (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (opline->op2_type != IS_UNUSED) && (t2 & MAY_BE_THROWING_KEY);
 		case ZEND_ADD_ARRAY_ELEMENT:
-			return (opline->op2_type == IS_UNUSED) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (opline->op2_type == IS_UNUSED) || (t2 & MAY_BE_THROWING_KEY);
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
 		case ZEND_COUNT:
@@ -5292,9 +5297,11 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_FETCH_IS:
 			return (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_THROWING_KEY);
 		case ZEND_FETCH_DIM_IS:
-			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_THROWING_KEY)
+				/* "Illegal string offset" warning for leading-numeric string offsets */
+				|| ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING));
 		case ZEND_CAST:
 			switch (opline->extended_value) {
 				case IS_LONG:
@@ -5315,7 +5322,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			if ((t2 & MAY_BE_ANY) != MAY_BE_ARRAY) {
 				return 1;
 			}
-			if ((t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			if (t1 & MAY_BE_THROWING_KEY) {
 				return 1;
 			}
 			return 0;
@@ -5340,7 +5347,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			if (t1 & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 				return 1;
 			}
-			if (t2 & (MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+			if (t2 & MAY_BE_THROWING_KEY) {
 				return 1;
 			}
 			if (opline->op2_type == IS_UNUSED) {

@@ -98,6 +98,83 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
+echo "\n#### Splatting arrays with string key ####\n";
+$a = ['unknown' => "hello"];
+echo "Userland class:\n";
+echo "Using new:\n";
+try {
+    $o = new TestUserWithoutConstructor(...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+echo "Using zend_object_init_with_constructor():\n";
+try {
+    $o = zend_object_init_with_constructor("TestUserWithoutConstructor", ...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+echo "Internal class:\n";
+echo "Using new:\n";
+try {
+    $o = new _ZendTestMagicCall(...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+echo "Using zend_object_init_with_constructor():\n";
+try {
+    $o = zend_object_init_with_constructor("_ZendTestMagicCall", ...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+
+echo "\n#### Splatting arrays with int key ####\n";
+$a = [1 => "hello"];
+echo "Userland class:\n";
+echo "Using new:\n";
+try {
+    $o = new TestUserWithoutConstructor(...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+echo "Using zend_object_init_with_constructor():\n";
+try {
+    $o = zend_object_init_with_constructor("TestUserWithoutConstructor", ...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+echo "Internal class:\n";
+echo "Using new:\n";
+try {
+    $o = new _ZendTestMagicCall(...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+echo "Using zend_object_init_with_constructor():\n";
+try {
+    $o = zend_object_init_with_constructor("_ZendTestMagicCall", ...$a);
+    var_dump($o);
+    unset($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECT--
 #### Passing no args ####
@@ -147,3 +224,33 @@ Using new:
 Error: Unknown named parameter $unknown_param
 Using zend_object_init_with_constructor():
 Error: Unknown named parameter $unknown_param
+
+#### Splatting arrays with string key ####
+Userland class:
+Using new:
+Error: Unknown named parameter $unknown
+Using zend_object_init_with_constructor():
+Error: Unknown named parameter $unknown
+Internal class:
+Using new:
+Error: Unknown named parameter $unknown
+Using zend_object_init_with_constructor():
+Error: Unknown named parameter $unknown
+
+#### Splatting arrays with int key ####
+Userland class:
+Using new:
+object(TestUserWithoutConstructor)#2 (0) {
+}
+Destructor for TestUserWithoutConstructor
+Using zend_object_init_with_constructor():
+object(TestUserWithoutConstructor)#2 (0) {
+}
+Destructor for TestUserWithoutConstructor
+Internal class:
+Using new:
+object(_ZendTestMagicCall)#2 (0) {
+}
+Using zend_object_init_with_constructor():
+object(_ZendTestMagicCall)#2 (0) {
+}

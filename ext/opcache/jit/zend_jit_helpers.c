@@ -922,10 +922,6 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 						ZVAL_NULL(EX_VAR(opline->result.var));
 					}
 				}
-				if (opline->opcode == ZEND_ASSIGN_DIM
-				 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
-					zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-				}
 				return NULL;
 			}
 			ZEND_FALLTHROUGH;
@@ -1003,13 +999,6 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 		default:
 			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();
-			if (EG(opline_before_exception)
-			 && (EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
-			 && ((EG(opline_before_exception)+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
-				zend_execute_data *execute_data = EG(current_execute_data);
-
-				zval_ptr_dtor_nogc(EX_VAR((EG(opline_before_exception)+1)->op1.var));
-			}
 			return NULL;
 	}
 
@@ -1123,17 +1112,44 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
-					break;
+			{
+				bool trailing_data = false;
+				/* Allow errors to warn on leading-numeric strings, like the VM */
+				if (IS_LONG != is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset,
+						NULL, /* allow errors */ true, NULL, &trailing_data)) {
+					ZVAL_NULL(result);
+					return;
 				}
-				ZVAL_NULL(result);
-				return;
+				if (UNEXPECTED(trailing_data)) {
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+						GC_ADDREF(str);
+					}
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+						zend_string_efree(str);
+						ZVAL_NULL(result);
+						return;
+					}
+				}
+				break;
+			}
 			case IS_UNDEF:
+				/* The string may be destroyed while throwing the notice */
+				if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+					GC_ADDREF(str);
+				}
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+				if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+					zend_string_efree(str);
+					ZVAL_NULL(result);
+					return;
+				}
+				ZEND_FALLTHROUGH;
 			case IS_DOUBLE:
 			case IS_NULL:
 			case IS_FALSE:
 			case IS_TRUE:
+				offset = zval_get_long_func(dim, /* is_strict */ false);
 				break;
 			case IS_REFERENCE:
 				dim = Z_REFVAL_P(dim);
@@ -1145,8 +1161,6 @@ try_string_offset:
 				ZVAL_NULL(result);
 				return;
 		}
-
-		offset = zval_get_long_func(dim, /* is_strict */ false);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -1472,6 +1486,20 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_rw_helper(zval *object_ptr, zva
 //	zend_jit_fetch_dim_obj_helper(object_ptr, dim, result, BP_VAR_UNSET);
 //}
 
+static zval* ZEND_FASTCALL zend_jit_assign_dim_fetch_w_helper(zend_array *ht, zval *dim)
+{
+	zval *retval = zend_jit_fetch_dim_w_helper(ht, dim);
+
+	if (UNEXPECTED(!retval)) {
+		zend_execute_data *execute_data = EG(current_execute_data);
+		/* Throwing replaces EX(opline) with HANDLE_EXCEPTION */
+		const zend_op *opline = EG(exception) ? EG(opline_before_exception) : EX(opline);
+
+		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+	}
+	return retval;
+}
+
 static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim, zval *value, zval *result)
 {
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
@@ -1510,13 +1538,6 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 		return;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		const zend_op *op_data = EG(current_execute_data)->opline + 1;
-		ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
-		zend_jit_undefined_op_helper(op_data->op1.var);
-		value = &EG(uninitialized_zval);
-	}
-
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		zend_throw_error(NULL, "[] operator not supported for strings");
 		if (result) {
@@ -1546,16 +1567,30 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			return;
 		}
 
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+			/* EX(opline) no longer points to ASSIGN_DIM after a throw; the VM skips the warning too. */
+			if (EXPECTED(!EG(exception))) {
+				const zend_op *op_data = EG(current_execute_data)->opline + 1;
+				ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
+				if (!zend_jit_undefined_op_helper_write(arr, op_data->op1.var)) {
+					if (result) {
+						if (EG(exception)) {
+							ZVAL_UNDEF(result);
+						} else {
+							ZVAL_NULL(result);
+						}
+					}
+					return;
+				}
+			}
+			value = &EG(uninitialized_zval);
+		}
+
 		ZVAL_COPY_DEREF(var, value);
 		if (result) {
 			ZVAL_COPY(result, var);
 		}
 	} else {
-		if (dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
-			const zend_op *opline = EG(current_execute_data)->opline;
-			zend_jit_undefined_op_helper(opline->op2.var);
-			dim = &EG(uninitialized_zval);
-		}
 		zend_throw_error(NULL, "Cannot use a scalar value as an array");
 		if (result) {
 			ZVAL_UNDEF(result);

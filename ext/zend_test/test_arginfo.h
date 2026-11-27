@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: de4bd0213b06d7be9e5a55ef7757ca137b03fa0e */
+ * Stub hash: 20856900222b20ff71d57bf575ad7034ffc34bf4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -119,6 +119,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_object_init_with_constructo
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_object_init_with_constructor_array, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_ini_parse_quantity, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -199,6 +204,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_handle_post_data, 0, 3
 ZEND_END_ARG_INFO()
 
 #define arginfo_zend_new_singleton_array arginfo_zend_test_array_return
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_local_var, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
@@ -314,6 +324,7 @@ static ZEND_FUNCTION(zend_test_attribute_with_named_argument);
 static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_object_init_with_constructor);
+static ZEND_FUNCTION(zend_object_init_with_constructor_array);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
@@ -343,6 +354,7 @@ static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(zend_test_handle_post_data);
 static ZEND_FUNCTION(zend_new_singleton_array);
+static ZEND_FUNCTION(zend_test_set_local_var);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -428,6 +440,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_object_init_with_constructor, arginfo_zend_object_init_with_constructor)
+	ZEND_FE(zend_object_init_with_constructor_array, arginfo_zend_object_init_with_constructor_array)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
@@ -465,6 +478,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(zend_test_handle_post_data, arginfo_zend_test_handle_post_data)
 	ZEND_FE(zend_new_singleton_array, arginfo_zend_new_singleton_array)
+	ZEND_FE(zend_test_set_local_var, arginfo_zend_test_set_local_var)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

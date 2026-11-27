@@ -19,10 +19,10 @@ $kernel32 = FFI::cdef(<<<C
     unsigned long SleepEx(unsigned long milliseconds, int alertable);
 C, 'kernel32.dll');
 $ffi = FFI::cdef(<<<C
-    typedef void ($callconv *PAPCFUNC)(uintptr_t);
-    typedef void *($callconv *GetCurrentThread_t)(void);
-    typedef unsigned long ($callconv *QueueUserAPC_t)(PAPCFUNC callback, void *thread, uintptr_t data);
-    typedef unsigned long ($callconv *SleepEx_t)(unsigned long milliseconds, int alertable);
+    typedef void $callconv (*PAPCFUNC)(uintptr_t);
+    typedef void *$callconv (*GetCurrentThread_t)(void);
+    typedef unsigned long $callconv (*QueueUserAPC_t)(PAPCFUNC callback, void *thread, uintptr_t data);
+    typedef unsigned long $callconv (*SleepEx_t)(unsigned long milliseconds, int alertable);
 C);
 $GetCurrentThread = $ffi->cast('GetCurrentThread_t', $kernel32->GetCurrentThread);
 $QueueUserAPC = $ffi->cast('QueueUserAPC_t', $kernel32->QueueUserAPC);

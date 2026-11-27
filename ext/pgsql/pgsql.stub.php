@@ -643,7 +643,6 @@ namespace {
      */
     function pg_fetch_array(PgSql\Result $result, ?int $row = null, int $mode = PGSQL_BOTH): array|false {}
 
-    /** @refcount 1 */
     function pg_fetch_object(PgSql\Result $result, ?int $row = null, string $class = "stdClass", array $constructor_args = []): object|false {}
 
     /**
@@ -907,7 +906,7 @@ namespace {
     function pg_result_status(PgSql\Result $result, int $mode = PGSQL_STATUS_LONG): string|int {}
 
     /**
-     * @return array<int|string, int|string>
+     * @return array<int|string, int|string>|false
      * @refcount 1
      */
     function pg_get_notify(PgSql\Connection $connection, int $mode = PGSQL_ASSOC): array|false {}
@@ -925,7 +924,7 @@ namespace {
     function pg_flush(PgSql\Connection $connection): int|bool {}
 
     /**
-     * @return array<string, array>|false
+     * @return array<int|string, array>|false
      * @refcount 1
      */
     function pg_meta_data(PgSql\Connection $connection, string $table_name, bool $extended = false): array|false {}

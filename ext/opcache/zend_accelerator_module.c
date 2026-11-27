@@ -93,7 +93,12 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
-	if (accel_startup_ok) {
+	/* Under ZTS, every thread started later re-applies the INI entries at
+	 * ZEND_INI_STAGE_STARTUP to fill its own globals. Accepting that is safe: the
+	 * value comes from the global INI directives, so it is the one OPcache was
+	 * set up with. NTS does not have this problem: STARTUP handlers run before
+	 * accel_startup_ok is set, and accel_shutdown() clears it again. */
+	if (accel_startup_ok && stage != ZEND_INI_STAGE_STARTUP) {
 		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.interned_strings_buffer] in an individual pool's configuration?\n");
 		} else {
@@ -362,6 +367,12 @@ ZEND_INI_END()
 static int filename_is_in_cache(zend_string *filename)
 {
 	zend_string *key;
+	int ret = 0;
+
+	/* The hash may be cleaned by a restart: only look it up while holding the read lock */
+	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
+		return 0;
+	}
 
 	key = accel_make_persistent_key(filename);
 	if (key != NULL) {
@@ -369,20 +380,20 @@ static int filename_is_in_cache(zend_string *filename)
 		if (persistent_script && !persistent_script->corrupted) {
 			if (ZCG(accel_directives).validate_timestamps) {
 				zend_file_handle handle;
-				int ret;
 
 				zend_stream_init_filename_ex(&handle, filename);
 				ret = validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS
 					? 1 : 0;
 				zend_destroy_file_handle(&handle);
-				return ret;
+			} else {
+				ret = 1;
 			}
-
-			return 1;
 		}
 	}
 
-	return 0;
+	accelerator_shm_read_unlock();
+
+	return ret;
 }
 
 static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)

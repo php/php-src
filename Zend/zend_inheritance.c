@@ -404,7 +404,7 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 
 	ht = (HashTable*)CG(current_linking_class)->inheritance_cache;
 
-	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE) || !(ce->ce_flags & ZEND_ACC_LINKED)) {
 		// TODO: dependency on not-immutable class ???
 		if (ht) {
 			zend_hash_destroy(ht);
@@ -2898,6 +2898,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 		}
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->properties_info, prop_name, property_info) {
 			uint32_t flags = property_info->flags;
+
+			/* ZEND_ACC_PUBLIC_SET is removed at compile-time. */
+			if ((flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_MASK|ZEND_ACC_PPP_SET_MASK)) == (ZEND_ACC_READONLY|ZEND_ACC_PUBLIC)) {
+				flags |= ZEND_ACC_PUBLIC_SET;
+			}
 
 			/* next: check for conflicts with current class */
 			if ((colliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {

@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-TypeError: curl_multi_setopt(): Argument #2 ($option) must be a valid callback for option CURLMOPT_PUSHFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_multi_setopt(): Argument #3 ($value) must be a valid callback for option CURLMOPT_PUSHFUNCTION, function "undefined" not found or invalid function name

@@ -2440,6 +2440,7 @@ send_again:
 					Z_TRY_ADDREF_P(arg);
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						ZVAL_NEW_REF(top, arg);
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
@@ -2447,7 +2448,10 @@ send_again:
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
-						ZVAL_NEW_REF(top, arg);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							zend_string_release(name);
+							break;
+						}
 					} else {
 						ZVAL_COPY_VALUE(top, arg);
 					}
@@ -2464,8 +2468,10 @@ send_again:
 					top = ZEND_CALL_ARG(EX(call), arg_num);
 					ZVAL_DEREF(arg);
 					Z_TRY_ADDREF_P(arg);
+					ZEND_CALL_NUM_ARGS(EX(call))++;
 
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						ZVAL_NEW_REF(top, arg);
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 							" by unpacking a Traversable, passing by-value instead", arg_num,
@@ -2473,12 +2479,12 @@ send_again:
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
-						ZVAL_NEW_REF(top, arg);
+						if (UNEXPECTED(EG(exception) != NULL)) {
+							break;
+						}
 					} else {
 						ZVAL_COPY_VALUE(top, arg);
 					}
-
-					ZEND_CALL_NUM_ARGS(EX(call))++;
 				}
 
 				funcs->move_forward(iter);
@@ -3201,7 +3207,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 			Z_OPLINE_NUM_P(fast_call) = (uint32_t)-1;
 			ZEND_VM_JMP_EX(&EX(func)->op_array.opcodes[try_catch->finally_op], 0);
 
-		} else if (op_num < try_catch->finally_end) {
+		} else if (op_num <= try_catch->finally_end) {
+			/* Exception thrown in the finally block, or at its FAST_RET
+			 * (by an interrupt) */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[try_catch->finally_end].op1.var);
 
 			/* cleanup incomplete RETURN statement */
@@ -3281,7 +3289,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 			/* further blocks will not be relevant... */
 			break;
 		}
-		if (throw_op_num < try_catch->catch_op || throw_op_num < try_catch->finally_end) {
+		if (throw_op_num < try_catch->catch_op || throw_op_num <= try_catch->finally_end) {
 			current_try_catch_offset = i;
 		}
 	}
@@ -3403,7 +3411,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPC
 	if (Z_OPLINE_NUM_P(fast_call) != (uint32_t)-1) {
 		const zend_op *fast_ret = EX(func)->op_array.opcodes + Z_OPLINE_NUM_P(fast_call);
 
-		ZEND_VM_JMP_EX(fast_ret + 1, 0);
+		/* Handle interrupts before jumping: fast_ret + 1 is inside the try
+		 * block, so an exception thrown there would run the finally block
+		 * again. An exception thrown at FAST_RET belongs to the finally
+		 * block. */
+		ZEND_VM_INTERRUPT_CHECK();
+		ZEND_VM_SET_OPCODE_NO_INTERRUPT(fast_ret + 1);
+		ZEND_VM_CONTINUE();
 	}
 
 	/* special case for unhandled exceptions */
@@ -3901,7 +3915,11 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_he
 
 			}
 		}
-		ZEND_VM_ENTER();
+		/* Like ZEND_VM_ENTER() but don't check for interrupts yet to avoid recursion if the
+		 * interrupt handler re-sets the vm_interrupt flag. */
+		execute_data = EG(current_execute_data);
+		LOAD_OPLINE();
+		ZEND_VM_LEAVE();
 	}
 	ZEND_VM_CONTINUE();
 }

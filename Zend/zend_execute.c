@@ -2956,7 +2956,17 @@ try_string_offset:
 					if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset,
 							NULL, /* allow errors */ true, NULL, &trailing_data)) {
 						if (UNEXPECTED(trailing_data)) {
+							/* The string may be destroyed while throwing the warning.
+							 * Temporarily increase the refcount to detect this situation. */
+							if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+								GC_ADDREF(str);
+							}
 							zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+							if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+								zend_string_efree(str);
+								ZVAL_NULL(result);
+								return;
+							}
 						}
 						goto out;
 					}
@@ -4713,7 +4723,10 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 				}
 
 				if (kind == ZEND_LIVE_TMPVAR) {
-					zval_ptr_dtor_nogc(var);
+					zval tmp;
+					ZVAL_COPY_VALUE(&tmp, var);
+					ZVAL_UNDEF(var);
+					zval_ptr_dtor_nogc(&tmp);
 				} else if (kind == ZEND_LIVE_NEW) {
 					zend_object *obj;
 					ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
@@ -4724,7 +4737,10 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
-					zval_ptr_dtor_nogc(var);
+					zval tmp;
+					ZVAL_COPY_VALUE(&tmp, var);
+					ZVAL_UNDEF(var);
+					zval_ptr_dtor_nogc(&tmp);
 				} else if (kind == ZEND_LIVE_ROPE) {
 					zend_string **rope = (zend_string **)var;
 					zend_op *last = EX(func)->op_array.opcodes + op_num;

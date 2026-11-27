@@ -287,6 +287,7 @@ namespace {
     function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
+    function zend_object_init_with_constructor_array(string $class, array $args): mixed {}
 
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
@@ -341,6 +342,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_handle_post_data(mixed $stream, string $content_type, int $content_length): void {}
 
     function zend_new_singleton_array(): array {}
+
+    function zend_test_set_local_var(string $name, mixed $value): bool {}
 }
 
 namespace ZendTestNS {

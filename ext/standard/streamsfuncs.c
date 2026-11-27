@@ -1344,7 +1344,23 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_THROWS();
 	}
 
-	if (php_stream_filter_flush(filter, 1) == FAILURE) {
+	if (!filter->chain || !filter->chain->stream) {
+		php_error_docref(NULL, E_WARNING, "Unable to flush filter, not removing");
+		RETURN_FALSE;
+	}
+
+	php_stream *stream = filter->chain->stream;
+	uint32_t no_remove_flag = filter->chain == &stream->readfilters ?
+			PHP_STREAM_FLAG_NO_READ_FILTER_REMOVE : PHP_STREAM_FLAG_NO_WRITE_FILTER_REMOVE;
+	if (stream->flags & no_remove_flag) {
+		php_error_docref(NULL, E_WARNING, "Cannot remove filter while it is being applied");
+		RETURN_FALSE;
+	}
+
+	stream->flags |= no_remove_flag;
+	zend_result flushed = php_stream_filter_flush(filter, 1);
+	stream->flags &= ~no_remove_flag;
+	if (flushed == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to flush filter, not removing");
 		RETURN_FALSE;
 	}

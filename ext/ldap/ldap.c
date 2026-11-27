@@ -3365,7 +3365,9 @@ PHP_FUNCTION(ldap_set_option)
 			int rc;
 
 			if (Z_TYPE_P(newval) != IS_ARRAY) {
-				zend_argument_type_error(3, "must be of type array for the LDAP_OPT_CLIENT_CONTROLS option, %s given", zend_zval_value_name(newval));
+				zend_argument_type_error(3, "must be of type array for the %s option, %s given",
+					option == LDAP_OPT_SERVER_CONTROLS ? "LDAP_OPT_SERVER_CONTROLS" : "LDAP_OPT_CLIENT_CONTROLS",
+					zend_zval_value_name(newval));
 				RETURN_THROWS();
 			}
 
@@ -4129,10 +4131,12 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		}
 
 		if (lretdata) {
-			ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			if (retdata) {
+				ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			}
 			ldap_memfree(lretdata->bv_val);
 			ldap_memfree(lretdata);
-		} else {
+		} else if (retdata) {
 			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retdata);
 		}
 

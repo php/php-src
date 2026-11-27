@@ -11,8 +11,7 @@ runs:
         mysql --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
     - name: Setup MSSQL
       shell: pwsh
-      run: |
-        choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=Password12!"
+      run: .github/scripts/windows/setup-mssql.ps1
     - name: Setup PostgreSQL
       shell: pwsh
       run: |

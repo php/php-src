@@ -100,7 +100,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 #endif
 
 	flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
-	if ((flags & IR_BB_LOOP_WITH_ENTRY)
+	if ((flags & (IR_BB_LOOP_WITH_ENTRY|IR_BB_LOOP_WITH_ENTRY_IN_PREDS))
 	 && !(ctx->binding && ir_binding_find(ctx, ref))) {
 		/* Don't move loop invariant code across an OSR ENTRY if we can't restore it */
 		return lca;
@@ -135,7 +135,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 				break;
 			}
 			flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
-			if ((flags & IR_BB_LOOP_WITH_ENTRY)
+			if ((flags & (IR_BB_LOOP_WITH_ENTRY|IR_BB_LOOP_WITH_ENTRY_IN_PREDS))
 			 && !(ctx->binding && ir_binding_find(ctx, ref))) {
 				break;
 			}
