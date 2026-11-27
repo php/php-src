@@ -124,7 +124,7 @@ typedef struct {
 
 typedef struct {
 	uint32_t num_types;
-	zend_type types[1];
+	zend_type types[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_type_list;
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
@@ -380,7 +380,7 @@ struct _zend_string {
 	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
 	size_t            len;
-	char              val[1];
+	char              val[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 };
 
 typedef struct _Bucket {
@@ -604,7 +604,7 @@ struct _zend_object {
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
-	zval              properties_table[1];
+	zval              properties_table[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 };
 
 struct _zend_resource {
@@ -617,7 +617,7 @@ struct _zend_resource {
 typedef struct {
 	size_t num;
 	size_t num_allocated;
-	struct _zend_property_info *ptr[1];
+	struct _zend_property_info *ptr[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_property_info_list;
 
 typedef union {

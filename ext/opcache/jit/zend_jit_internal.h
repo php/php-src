@@ -168,7 +168,7 @@ typedef struct _zend_jit_op_array_hot_extension {
 	zend_func_info func_info;
 	const zend_op_array *op_array;
 	int16_t    *counter;
-	zend_vm_opcode_handler_t orig_handlers[1];
+	zend_vm_opcode_handler_t orig_handlers[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_jit_op_array_hot_extension;
 
 #define zend_jit_op_array_hash(op_array) \
@@ -352,7 +352,7 @@ typedef struct _zend_jit_op_array_trace_extension {
 	zend_func_info func_info;
 	const zend_op_array *op_array;
 	size_t offset; /* offset from "zend_op" to corresponding "op_info" */
-	zend_op_trace_info trace_info[1];
+	zend_op_trace_info trace_info[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_jit_op_array_trace_extension;
 
 #define ZEND_OP_TRACE_INFO(opline, offset) \
@@ -574,7 +574,7 @@ struct _zend_jit_trace_stack_frame {
 	int                         used_stack;
 	int                         old_checked_stack;
 	int                         old_peek_checked_stack;
-	zend_jit_trace_stack        stack[1];
+	zend_jit_trace_stack        stack[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 };
 
 #define TRACE_FRAME_SHIFT_NUM_ARGS            16

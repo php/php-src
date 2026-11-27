@@ -137,7 +137,7 @@ typedef struct zp_names {
 	zend_string *variadic_param;
 	zend_string *extra_named_params;
 	zend_string *inner_closure;
-	zend_string *params[1]; /* argc elements */
+	zend_string *params[1] ZEND_ATTRIBUTE_FLEX_ARRAY; /* argc elements */
 } zp_names;
 
 static bool zp_name_exists(const zp_names *names, uint32_t argc, const zend_string *name)

@@ -188,7 +188,7 @@ struct _zend_ast {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
 	uint32_t lineno;    /* Line number */
-	zend_ast *child[1]; /* Array of children (using struct hack) */
+	zend_ast *child[1] ZEND_ATTRIBUTE_FLEX_ARRAY; /* Array of children (using struct hack) */
 };
 
 /* Same as zend_ast, but with children count, which is updated dynamically */
@@ -197,7 +197,7 @@ typedef struct _zend_ast_list {
 	zend_ast_attr attr;
 	uint32_t lineno;
 	uint32_t children;
-	zend_ast *child[1];
+	zend_ast *child[1] ZEND_ATTRIBUTE_FLEX_ARRAY;
 } zend_ast_list;
 
 /* Lineno is stored in val.u2.lineno */
