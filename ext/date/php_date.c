@@ -407,7 +407,6 @@ PHP_RINIT_FUNCTION(date)
 		efree(DATEG(timezone));
 	}
 	DATEG(timezone) = NULL;
-	DATEG(tzcache) = NULL;
 	DATEG(last_errors) = NULL;
 
 	return SUCCESS;
@@ -498,6 +497,11 @@ static timelib_tzinfo *php_date_parse_tzfile(const char *formal_tzname, const ti
 {
 	timelib_tzinfo *tzi;
 	int dummy_error_code;
+
+	/* Startup memory is released before the first request, so don't cache it */
+	if (!EG(active)) {
+		return timelib_parse_tzfile(formal_tzname, tzdb, &dummy_error_code);
+	}
 
 	if(!DATEG(tzcache)) {
 		ALLOC_HASHTABLE(DATEG(tzcache));
