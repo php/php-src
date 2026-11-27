@@ -1938,6 +1938,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 		SG(sapi_headers).http_status_line = NULL;
 		zend_try {
 			old_error_handler(error_num, error_filename, error_lineno, message);
+			SG(sapi_headers).http_status_line = _old_http_status_line;
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
 			EG(current_execute_data) = _old_current_execute_data;
