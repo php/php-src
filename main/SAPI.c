@@ -543,23 +543,6 @@ SAPI_API void sapi_initialize_empty_request(void)
 	SG(request_info).content_type_dup = NULL;
 }
 
-
-static int sapi_extract_response_code(const char *header_line)
-{
-	int code = 200;
-	const char *ptr;
-
-	for (ptr = header_line; *ptr; ptr++) {
-		if (*ptr == ' ' && *(ptr + 1) != ' ') {
-			code = atoi(ptr + 1);
-			break;
-		}
-	}
-
-	return code;
-}
-
-
 static void sapi_update_response_code(int ncode)
 {
 	/* if the status code did not change, we do not want
@@ -652,10 +635,84 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 	}
 }
 
+/* Validates header line, extracts status code if present, sets cpos to position of colon or invalid character found. */
+static inline bool sapi_header_validate(const sapi_header_op_enum op, const char *line, const size_t len, int *response_code, size_t *cpos) {
+	size_t pos = *cpos;
+	if (len >= 5 && memcmp(line, "HTTP/", 5) == 0) {
+		/* https://datatracker.ietf.org/doc/html/rfc9112#name-status-line
+		 * HTTP/<version> <status-code> [reason-phrase] where:
+		 * - "HTTP" is case-sensitive
+		 * - <version>       = <1-9>[.DIGIT] (single digit each)
+		 * - <status-code>   = <100-599> followed by a single space character
+		 * - [reason-phrase] = any sequence of printable characters except CRLF
+		 *
+		 * Note that reason-phrase is optional, but the space preceeding it is not.
+		 * Our implementation has already trimmed any trailing whitespace at this point,
+		 * but this is fine for input validation purposes. Header sending code later is
+		 * responsible for ensuring presence of reason-phrase or trailing space. */
+
+		/* Historically, we've allowed just "HTTP/" and "HTTP/1.X" (documented)
+		 * at least as long as a status code was also passed. */
+		if (len == 5 && *response_code) {
+			return true;
+		}
+		if (len < 8 || line[5] < '1' || line[5] > '9' || line[6] != '.' || !ZEND_IS_DIGIT(line[7])) {
+			return false;
+		} else if (len == 8 && *response_code) {
+			return true;
+		}
+		if (len < 12 || line[8] != ' ' || line[9] < '1' || line[9] > '5' ||
+			!ZEND_IS_DIGIT(line[10]) || !ZEND_IS_DIGIT(line[11]) ||
+			(len > 12 && line[12] != ' ')) {
+			return false;
+		}
+		if (!*response_code && op != SAPI_HEADER_DELETE_PREFIX) {
+			*response_code = (line[9]-'0')*100 + (line[10]-'0')*10 + (line[11]-'0');
+		}
+		pos = 13; /* Optional reason-phrase starts here */
+	} else {
+		/* https://datatracker.ietf.org/doc/html/rfc9110#name-field-names (field-name = token)
+		 * https://datatracker.ietf.org/doc/html/rfc9110#section-5.6.2 (token = 1*tchar)
+		 * tchar = ALPHA | DIGIT | VCHAR except delimiters: !#$%&'*+-.^_`|~ */
+		for (; pos < len; pos++) {
+			char c = line[*cpos = pos];
+			if ((c >= 'A' && c <= 'Z') || (c >= '^' && c <= 'z') || ZEND_IS_DIGIT(c) ||
+				(c >= '!' && c <= '.' && c != '"' && c != '(' && c != ')' && c != ',') ||
+				c == '|' || c == '~') {
+				continue;
+			} else if (c == ':') {
+				if (pos == 0 || op == SAPI_HEADER_DELETE) {
+					return false;
+				}
+				break;
+			}
+			return false;
+		}
+
+		if (line[pos++] != ':' && op != SAPI_HEADER_DELETE) {
+			return false;
+		}
+	}
+
+	/* https://datatracker.ietf.org/doc/html/rfc9112#name-status-line
+	 * https://datatracker.ietf.org/doc/html/rfc9110#name-field-values
+	 * Interpretation of leading whitespace being part of the value or not differs,
+	 * but for validation purposes it's all the same. */
+	for (; pos < len; pos++) {
+		unsigned char c = (unsigned char) line[pos];
+		if (c == '\t' || (c >= ' ' && c <= '~') || c >= 0x80)  {
+			continue;
+		}
+		*cpos = pos;
+		return false;
+	}
+
+	return true;
+}
+
 SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 {
 	sapi_header_struct sapi_header;
-	char *colon_offset;
 	char *header_line;
 	size_t header_line_len, header_len;
 	int http_response_code;
@@ -687,8 +744,21 @@ SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 				if (!p->line || !p->line_len) {
 					return FAILURE;
 				}
-				header_line = estrndup(p->line, p->line_len);
 				header_line_len = p->line_len;
+
+				/* Cut off trailing whitespace/crlf */
+				while (header_line_len && (
+					p->line[header_line_len-1] == ' ' ||
+					p->line[header_line_len-1] == '\t' ||
+					p->line[header_line_len-1] == '\r' ||
+					p->line[header_line_len-1] == '\n'
+				)) header_line_len--;
+				if (!header_line_len) {
+					return SUCCESS;
+				}
+				header_line = estrndup(p->line, header_line_len);
+				header_line[header_line_len] = 0;
+
 				if (op == SAPI_HEADER_DELETE_PREFIX) {
 					header_len = p->header_len;
 					http_response_code = 0;
@@ -710,20 +780,28 @@ SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 			return FAILURE;
 	}
 
-	/* cut off trailing spaces, linefeeds and carriage-returns */
-	if (header_line_len && isspace((unsigned char)header_line[header_line_len - 1])) {
-		do {
-			header_line_len--;
-		} while(header_line_len && isspace((unsigned char)header_line[header_line_len - 1]));
-		header_line[header_line_len]='\0';
+	size_t cpos = 0; /* Holds position of colon (used later) or detected illegal character. */
+	if (!sapi_header_validate(op, header_line, header_line_len, &http_response_code, &cpos)) {
+		unsigned char errchr = (unsigned char) header_line[cpos];
+		efree(header_line);
+		if (errchr == '\n' || errchr == '\r') {
+			sapi_module.sapi_error(E_WARNING, "Header may not contain more than a single header, new line detected");
+		} else if (errchr == '\0') {
+			sapi_module.sapi_error(E_WARNING, "Header may not contain NUL bytes");
+		} else if (errchr == 'H' && cpos == 0) {
+			sapi_module.sapi_error(E_WARNING, "Invalid HTTP status line");
+		} else if (errchr == ':') {
+			sapi_module.sapi_error(E_WARNING, op == SAPI_HEADER_DELETE
+				? "Header to delete may not contain colon."
+				: "Header name may not be empty"
+			);
+		} else {
+			sapi_module.sapi_error(E_WARNING, "Invalid character detected in header");
+		}
+		return FAILURE;
 	}
 
 	if (op == SAPI_HEADER_DELETE || op == SAPI_HEADER_DELETE_PREFIX) {
-		if (op == SAPI_HEADER_DELETE && strchr(header_line, ':')) {
-			efree(header_line);
-			sapi_module.sapi_error(E_WARNING, "Header to delete may not contain colon.");
-			return FAILURE;
-		}
 		if (sapi_module.header_handler) {
 			sapi_header.header = header_line;
 			sapi_header.header_len = header_line_len;
@@ -732,102 +810,72 @@ SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 		sapi_remove_header(&SG(sapi_headers).headers, header_line, header_line_len, header_len);
 		efree(header_line);
 		return SUCCESS;
-	} else {
-		/* new line/NUL character safety check */
-		size_t i;
-		for (i = 0; i < header_line_len; i++) {
-			/* RFC 7230 ch. 3.2.4 deprecates folding support */
-			if (header_line[i] == '\n' || header_line[i] == '\r') {
-				efree(header_line);
-				sapi_module.sapi_error(E_WARNING, "Header may not contain "
-						"more than a single header, new line detected");
-				return FAILURE;
-			}
-			if (header_line[i] == '\0') {
-				efree(header_line);
-				sapi_module.sapi_error(E_WARNING, "Header may not contain NUL bytes");
-				return FAILURE;
-			}
-		}
 	}
 
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
 
 	/* Check the header for a few cases that we have special support for in SAPI */
-	if (header_line_len>=5
-		&& !strncasecmp(header_line, "HTTP/", 5)) {
-		/* filter out the response code */
-		sapi_update_response_code(sapi_extract_response_code(header_line));
+	if (header_line_len >= 5 && header_line[4] == '/') { /* status-line */
+		sapi_update_response_code(http_response_code);
 		/* sapi_update_response_code doesn't free the status line if the code didn't change */
 		if (SG(sapi_headers).http_status_line) {
 			efree(SG(sapi_headers).http_status_line);
 		}
 		SG(sapi_headers).http_status_line = header_line;
 		return SUCCESS;
-	} else {
-		colon_offset = strchr(header_line, ':');
-		if (colon_offset) {
-			*colon_offset = 0;
-			if (!strcasecmp(header_line, "Content-Type")) {
-				char *ptr = colon_offset+1, *mimetype = NULL, *newheader;
-				size_t len = header_line_len - (ptr - header_line), newlen;
-				while (*ptr == ' ') {
-					ptr++;
-					len--;
-				}
-
-				mimetype = estrdup(ptr);
-				newlen = sapi_apply_default_charset(&mimetype, len);
-				if (!SG(sapi_headers).mimetype){
-					SG(sapi_headers).mimetype = estrdup(mimetype);
-				}
-
-				if (newlen != 0) {
-					newlen += sizeof("Content-type: ");
-					newheader = emalloc(newlen);
-					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
-					strlcat(newheader, mimetype, newlen);
-					sapi_header.header = newheader;
-					sapi_header.header_len = (uint32_t)(newlen - 1);
-					efree(header_line);
-				}
-				efree(mimetype);
-				SG(sapi_headers).send_default_content_type = 0;
-			} else if (!strcasecmp(header_line, "Content-Length")) {
-				/* Script is setting Content-length. The script cannot reasonably
-				 * know the size of the message body after compression, so it's best
-				 * to disable compression altogether. This contributes to making scripts
-				 * portable between setups that have and don't have zlib compression
-				 * enabled globally. See req #44164 */
-				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
-				zend_alter_ini_entry_chars(key,
-					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-				zend_string_release_ex(key, 0);
-			} else if (!strcasecmp(header_line, "Location")) {
-				if ((SG(sapi_headers).http_response_code < 300 ||
-					SG(sapi_headers).http_response_code > 399) &&
-					SG(sapi_headers).http_response_code != 201) {
-					/* Return a Found Redirect if one is not already specified */
-					if (http_response_code) { /* user specified redirect code */
-						sapi_update_response_code(http_response_code);
-					} else if (SG(request_info).proto_num > 1000 &&
-					   SG(request_info).request_method &&
-					   strcmp(SG(request_info).request_method, "HEAD") &&
-					   strcmp(SG(request_info).request_method, "GET")) {
-						sapi_update_response_code(303);
-					} else {
-						sapi_update_response_code(302);
-					}
-				}
-			} else if (!strcasecmp(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
-				sapi_update_response_code(401); /* authentication-required */
+	} else if (header_line[cpos] == ':') {
+		if (!zend_binary_strcasecmp(header_line, cpos, "Content-Type", sizeof("Content-Type")-1)) {
+			char *ptr = header_line + cpos + 1;
+			size_t len = header_line_len - (ptr - header_line), newlen;
+			while (*ptr == ' ') {
+				ptr++;
+				len--;
 			}
-			if (sapi_header.header==header_line) {
-				*colon_offset = ':';
+
+			char *mimetype = estrdup(ptr);
+			newlen = sapi_apply_default_charset(&mimetype, len);
+			if (!SG(sapi_headers).mimetype){
+				SG(sapi_headers).mimetype = estrdup(mimetype);
+			}
+
+			if (newlen != 0) {
+				newlen += sizeof("Content-type: ");
+				char *newheader = emalloc(newlen);
+				PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
+				strlcat(newheader, mimetype, newlen);
+				sapi_header.header = newheader;
+				sapi_header.header_len = (uint32_t)(newlen - 1);
+				efree(header_line);
+			}
+			efree(mimetype);
+			SG(sapi_headers).send_default_content_type = 0;
+		} else if (!zend_binary_strcasecmp(header_line, cpos, "Content-Length", sizeof("Content-Length")-1)) {
+			/* Script is setting Content-length. The script cannot reasonably
+			 * know the size of the message body after compression, so it's best
+			 * to disable compression altogether. This contributes to making scripts
+			 * portable between setups that have and don't have zlib compression
+			 * enabled globally. See req #44164 */
+			zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
+			zend_alter_ini_entry_chars(key, "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			zend_string_release_ex(key, 0);
+		} else if (!http_response_code) {
+			if (!zend_binary_strcasecmp(header_line, cpos, "WWW-Authenticate", sizeof("WWW-Authenticate")-1)) {
+				http_response_code = 401; /* authentication-required */
+			} else if (!zend_binary_strcasecmp(header_line, cpos, "Location", sizeof("Location")-1) &&
+				(SG(sapi_headers).http_response_code < 300 || SG(sapi_headers).http_response_code > 399) &&
+				SG(sapi_headers).http_response_code != 201) {
+				if (SG(request_info).proto_num > 1000 && SG(request_info).request_method &&
+					strcmp(SG(request_info).request_method, "HEAD") &&
+					strcmp(SG(request_info).request_method, "GET")) {
+					http_response_code = 303; /* "See Other"; instructs a GET request */
+				} else {
+					http_response_code = 302;
+				}
 			}
 		}
 	}
+
 	if (http_response_code) {
 		sapi_update_response_code(http_response_code);
 	}
