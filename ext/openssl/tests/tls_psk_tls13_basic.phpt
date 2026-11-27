@@ -6,6 +6,7 @@ openssl
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
 if (!defined('STREAM_CRYPTO_METHOD_TLSv1_3_SERVER')) die("skip TLS 1.3 not available");
+if (str_contains(OPENSSL_VERSION_TEXT, 'LibreSSL')) die("skip LibreSSL does not support PSK");
 ?>
 --FILE--
 <?php

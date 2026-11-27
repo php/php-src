@@ -6,6 +6,7 @@ openssl
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
 if (OPENSSL_VERSION_NUMBER < 0x10101000) die("skip OpenSSL >= 1.1.1 required");
+if (str_contains(OPENSSL_VERSION_TEXT, 'LibreSSL')) die("skip LibreSSL does not support PSK");
 ?>
 --FILE--
 <?php
