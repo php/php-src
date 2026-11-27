@@ -693,7 +693,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0;
 	size_t array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
-	int skip_upload = 0, anonymous_index = 0;
+	int anonymous_index = 0;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	bool throw_exceptions = SG(request_parse_body_context).throw_exceptions;
@@ -822,6 +822,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		char *cd = NULL, *param = NULL, *filename = NULL, *tmp = NULL;
 		size_t blen = 0, wlen = 0;
 		zend_off_t offset;
+		int skip_upload = 0;
 
 		zend_llist_clean(&header);
 
