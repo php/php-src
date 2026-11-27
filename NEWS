@@ -266,6 +266,8 @@ PHP                                                                        NEWS
     type on 32-bit platforms). (Kamil Tekiela)
   . Fixed bug GH-25464 (Segfault reading from php://memory after
     stream_filter_remove() on a read filter). (David Carlier)
+  . Fixed bug GH-22845 (Use-after-free when a user filter stashes its bucket
+    brigade resource). (Ilia Alshanetsky)
 
 - XSL:
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
