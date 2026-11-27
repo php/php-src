@@ -3352,6 +3352,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 			if (str_len > ZSTR_LEN(lc_needle)) {
 				new_str = zend_string_safe_falloc(count, str_len - ZSTR_LEN(lc_needle), ZSTR_LEN(haystack), 0, /* fallible */ true);
 				if (UNEXPECTED(!new_str)) {
+					zend_string_release_ex(lc_needle, 0);
 					return NULL;
 				}
 			} else {
