@@ -409,7 +409,7 @@ static PHP_GINIT_FUNCTION(libxml)
 #if defined(COMPILE_DL_LIBXML) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	ZVAL_UNDEF(&libxml_globals->stream_context);
+	libxml_globals->stream_context = NULL;
 	libxml_globals->error_buffer.s = NULL;
 	libxml_globals->error_list = NULL;
 	libxml_globals->entity_loader_callback = empty_fcall_info_cache;
@@ -417,7 +417,11 @@ static PHP_GINIT_FUNCTION(libxml)
 
 PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
 {
-	return php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context)) ? NULL : &LIBXML(stream_context), false);
+	if (LIBXML(stream_context)) {
+		return LIBXML(stream_context);
+	} else {
+		return php_stream_context_get_default(false);
+	}
 }
 
 /* Channel libxml file io layer through the PHP streams subsystem.
@@ -973,14 +977,11 @@ PHP_LIBXML_API void php_libxml_shutdown(void)
 	}
 }
 
-PHP_LIBXML_API void php_libxml_switch_context(const zval *context, zval *oldcontext)
+PHP_LIBXML_API php_stream_context *php_libxml_switch_context(php_stream_context *context)
 {
-	if (oldcontext) {
-		ZVAL_COPY_VALUE(oldcontext, &LIBXML(stream_context));
-	}
-	if (context) {
-		ZVAL_COPY_VALUE(&LIBXML(stream_context), context);
-	}
+	php_stream_context *old_context = LIBXML(stream_context);
+	LIBXML(stream_context) = context;
+	return old_context;
 }
 
 static PHP_MINIT_FUNCTION(libxml)
@@ -1072,7 +1073,7 @@ static zend_result php_libxml_post_deactivate(void)
 	xmlSetStructuredErrorFunc(NULL, NULL);
 
 	/* the steam_context resource will be released by resource list destructor */
-	ZVAL_UNDEF(&LIBXML(stream_context));
+	LIBXML(stream_context) = NULL;
 	smart_str_free(&LIBXML(error_buffer));
 	if (LIBXML(error_list)) {
 		zend_llist_destroy(LIBXML(error_list));
@@ -1105,11 +1106,14 @@ PHP_FUNCTION(libxml_set_streams_context)
 		Z_PARAM_RESOURCE(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_stream_context_from_zval(arg, true) != NULL) {
-		if (!Z_ISUNDEF(LIBXML(stream_context))) {
-			zval_ptr_dtor(&LIBXML(stream_context));
+	php_stream_context *context = php_stream_context_from_zval(arg, true);
+	if (context != NULL) {
+		if (LIBXML(stream_context)) {
+			/* Close resource associated to stream context, which will take
+			 * care of freeing the rest of the stream context. */
+			zend_list_close(LIBXML(stream_context)->res);
 		}
-		ZVAL_COPY(&LIBXML(stream_context), arg);
+		LIBXML(stream_context) = context;
 	}
 }
 /* }}} */
