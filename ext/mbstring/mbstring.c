@@ -6604,8 +6604,8 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	ZEND_PARSE_PARAMETERS_START(1, 5)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(charset_name)
-		Z_PARAM_STR(transenc_name)
+		Z_PARAM_STR_OR_NULL(charset_name)
+		Z_PARAM_STR_OR_NULL(transenc_name)
 		Z_PARAM_STRING(linefeed, linefeed_len)
 		Z_PARAM_LONG(indent)
 	ZEND_PARSE_PARAMETERS_END();

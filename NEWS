@@ -119,6 +119,8 @@ PHP                                                                        NEWS
     deeply nested arrays. (Eyüp Can Akman)
   . Fixed the JIT freeing the string returned by mb_encode_mimeheader() or
     mb_output_handler() while it is still in use. (Ilia Alshanetsky)
+  . Fixed bug GH-25832 (mb_encode_mimeheader() rejects null for $charset and
+    $transfer_encoding). (Tomasz Kowalczyk)
 
 - MySQLi:
   . Fixed bug GH-25779 (mysqli_fetch_object() crashes with JIT when the
