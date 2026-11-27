@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.7.0alpha1
 
 - Core:
+  . Fixed GH-25696 (serialize() and unserialize() state being freed while a
+    nested call in another Fiber is suspended). (Alessio Attilio)
   . A flat unkeyed list assignment from an array literal with one value per
     target, such as [$a, $b] = [$b, $a], no longer builds the array when the
     result is unused (GH-23048). (Artem Ukrainskiy)

@@ -88,7 +88,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
 
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
 	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
-	if (BG(serialize_lock)) {
+	if (d != BG(unserialize).data) {
 		var_destroy(&d);
 		efree(d);
 	} else if (!--BG(unserialize).level) {
