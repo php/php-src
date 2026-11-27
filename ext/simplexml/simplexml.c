@@ -1107,7 +1107,14 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 	}
 
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node_non_destructive(sxe, node);
+	if (sxe->iter.type == SXE_ITER_CHILD) {
+		/* Start at the first child rather than at the first element child, so that
+		 * non-element nodes (e.g. PIs, comments) before it are not skipped. Like
+		 * sxe_prop_is_empty(), only do so if there is a matching element child. */
+		node = php_sxe_get_first_node_non_destructive(sxe, node) ? node->children : NULL;
+	} else {
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
+	}
 
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
@@ -1128,7 +1135,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 		}
 
 		while (node) {
-			if (node->children != NULL || node->prev != NULL || node->next != NULL || xmlIsBlankNode(node)) {
+			if (node->children != NULL || node->prev != NULL || node->next != NULL || xmlIsBlankNode(node) || sxe->iter.type == SXE_ITER_CHILD) {
 				SKIP_TEXT(node);
 			} else {
 				if (node->type == XML_TEXT_NODE) {
