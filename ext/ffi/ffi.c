@@ -354,7 +354,10 @@ static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *
 }
 /* }}} */
 
-static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *type, int *i, size_t size)
+static ffi_type* zend_ffi_face_inner_struct_add_fields(ffi_type* t, zend_ffi_type *type, int *i, size_t *size);
+static ffi_type* zend_ffi_face_array_add_elements(ffi_type* t, zend_ffi_type *type, int *i, size_t *size);
+
+static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *type, int *i, size_t *size)
 {
 	zend_ffi_field *field;
 
@@ -396,18 +399,11 @@ static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *typ
 			case ZEND_FFI_TYPE_POINTER:
 				t->elements[(*i)++] = &ffi_type_pointer;
 				break;
+			case ZEND_FFI_TYPE_ARRAY:
+				t = zend_ffi_face_array_add_elements(t, ZEND_FFI_TYPE(field->type), i, size);
+				break;
 			case ZEND_FFI_TYPE_STRUCT: {
-				zend_ffi_type *field_type = ZEND_FFI_TYPE(field->type);
-				/* for unions we use only the first field */
-				uint32_t num_fields = !(field_type->attr & ZEND_FFI_ATTR_UNION) ?
-					zend_hash_num_elements(&field_type->record.fields) : 1;
-
-				if (num_fields > 1) {
-					size += sizeof(ffi_type*) * (num_fields - 1);
-					t = erealloc(t, size);
-					t->elements = (ffi_type**)(t + 1);
-				}
-				t = zend_ffi_face_struct_add_fields(t, field_type, i, size);
+				t = zend_ffi_face_inner_struct_add_fields(t, ZEND_FFI_TYPE(field->type), i, size);
 				break;
 			}
 			default:
@@ -419,6 +415,57 @@ static ffi_type* zend_ffi_face_struct_add_fields(ffi_type* t, zend_ffi_type *typ
 			break;
 		}
 	} ZEND_HASH_FOREACH_END();
+	return t;
+}
+
+static ffi_type* zend_ffi_face_inner_struct_add_fields(ffi_type* t, zend_ffi_type *type, int *i, size_t *size)
+{
+	assert(type->kind == ZEND_FFI_TYPE_STRUCT);
+	/* for unions we use only the first field */
+	uint32_t num_fields = !(type->attr & ZEND_FFI_ATTR_UNION) ?
+		zend_hash_num_elements(&type->record.fields) : 1;
+
+	if (num_fields > 1) {
+		*size += sizeof(ffi_type*) * (num_fields - 1);
+		t = erealloc(t, *size);
+		t->elements = (ffi_type**)(t + 1);
+	}
+	return zend_ffi_face_struct_add_fields(t, type, i, size);
+}
+
+static ffi_type *zend_ffi_get_type(zend_ffi_type *type);
+
+static ffi_type* zend_ffi_face_array_add_elements(ffi_type* t, zend_ffi_type *type, int *i, size_t *size)
+{
+	assert(type->kind == ZEND_FFI_TYPE_ARRAY);
+	zend_ffi_type *element_type = ZEND_FFI_TYPE(type->array.type);
+	zend_long length = type->array.length;
+
+	if (length <= 0) {
+		return t;
+	}
+
+	if (length > 1) {
+		*size += sizeof(ffi_type*) * (length - 1);
+		t = erealloc(t, *size);
+		t->elements = (ffi_type**)(t + 1);
+	}
+
+	if (element_type->kind == ZEND_FFI_TYPE_STRUCT) {
+		for (zend_long n = 0; n < length; n++) {
+			t = zend_ffi_face_inner_struct_add_fields(t, element_type, i, size);
+		}
+	} else if (element_type->kind == ZEND_FFI_TYPE_ARRAY) {
+		for (zend_long n = 0; n < length; n++) {
+			t = zend_ffi_face_array_add_elements(t, element_type, i, size);
+		}
+	} else {
+		ffi_type *element_ffi_type = zend_ffi_get_type(element_type);
+		for (zend_long n = 0; n < length; n++) {
+			t->elements[(*i)++] = element_ffi_type;
+		}
+	}
+
 	return t;
 }
 
@@ -436,7 +483,7 @@ static ffi_type *zend_ffi_make_fake_struct_type(zend_ffi_type *type) /* {{{ */
 	t->type = FFI_TYPE_STRUCT;
 	t->elements = (ffi_type**)(t + 1);
 	i = 0;
-	t = zend_ffi_face_struct_add_fields(t, type, &i, size);
+	t = zend_ffi_face_struct_add_fields(t, type, &i, &size);
 	t->elements[i] = NULL;
 	return t;
 }
