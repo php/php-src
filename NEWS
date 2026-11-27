@@ -107,6 +107,10 @@ PHP                                                                        NEWS
   . Fixed hash() and hash_file() hanging on invalid xxh3/xxh128 options.
     (lacatoire)
 
+- Iconv:
+  . Fixed iconv_mime_encode() failing with an integer overflow error for a
+    negative line-length. (lacatoire)
+
 - Intl:
   . Fixed NumberFormatter::getSymbol(), setSymbol(), getAttribute() and
     setAttribute() accepting out-of-range values that truncate to a valid one.
