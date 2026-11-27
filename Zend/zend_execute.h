@@ -99,7 +99,6 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(const zend_property_info *prop_info, const char *operation);
 
-ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API zend_never_inline ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, const zval *value);
 ZEND_API zend_never_inline ZEND_COLD void zend_verify_return_error(
@@ -107,15 +106,33 @@ ZEND_API zend_never_inline ZEND_COLD void zend_verify_return_error(
 ZEND_API zend_never_inline ZEND_COLD void zend_verify_never_error(
 		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
-ZEND_API bool zend_check_user_type_slow(
-		const zend_type *type, zval *arg, const zend_reference *ref, bool current_frame);
-ZEND_API bool zend_check_type_ex(
-		const zend_type *type, zval *arg, bool current_frame, bool is_internal);
+
+typedef enum {
+	ZEND_TYPE_CHECK_MODE_WEAK = false,
+	ZEND_TYPE_CHECK_MODE_STRICT = true,
+	ZEND_TYPE_CHECK_MODE_UNKNOWN_CURRENT_FRAME = 2,
+	ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME = 3,
+} zend_type_check_mode;
+
+ZEND_API bool zend_check_type_and_coerce_slow(
+	const zend_type *type,
+	zval *arg,
+	const zend_class_entry *scope,
+	zend_type_check_mode type_check_mode,
+	uint32_t callable_check_flag
+);
+ZEND_API bool zend_check_type_and_coerce(
+	const zend_type *type,
+	zval *arg,
+	const zend_class_entry *scope,
+	zend_type_check_mode type_checking_mode,
+	uint32_t callable_check_flag
+);
 
 #if ZEND_DEBUG
 ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_execute_data *call);
 ZEND_API zend_never_inline ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc);
-ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret);
+ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, const zval *ret);
 #endif
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
@@ -632,7 +649,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((bool)(ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS))
 
 
-ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant);
+ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, const zval *constant);
 
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
 

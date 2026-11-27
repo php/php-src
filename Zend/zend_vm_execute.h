@@ -6180,7 +6180,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_T
 		uint16_t argno = opline->extended_value >> 16;
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
-		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
+		if (UNEXPECTED(!zend_check_type_and_coerce_slow(
+			&arginfo->type,
+			value,
+			NULL,
+			ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME,
+			IS_CALLABLE_SUPPRESS_DEPRECATIONS)
+		)) {
 			zend_string *expected = zend_type_to_string(arginfo->type);
 			zend_argument_type_error_ex(fbc, argno,
 					"must be of type %pS, %s given",
@@ -11304,7 +11310,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -21666,7 +21672,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -29712,7 +29718,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -37167,7 +37173,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -49407,7 +49413,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_VERIFY_RETURN
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -59058,7 +59064,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_TYPE_A
 		uint16_t argno = opline->extended_value >> 16;
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
-		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
+		if (UNEXPECTED(!zend_check_type_and_coerce_slow(
+			&arginfo->type,
+			value,
+			NULL,
+			ZEND_TYPE_CHECK_MODE_UNKNOWN_PRIOR_FRAME,
+			IS_CALLABLE_SUPPRESS_DEPRECATIONS)
+		)) {
 			zend_string *expected = zend_type_to_string(arginfo->type);
 			zend_argument_type_error_ex(fbc, argno,
 					"must be of type %pS, %s given",
@@ -64080,7 +64092,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIF
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -74342,7 +74354,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -82388,7 +82400,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -89843,7 +89855,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
@@ -101981,7 +101993,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_VERIFY_RETURN_TYPE
 		}
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
+		if (UNEXPECTED(!zend_check_return_type_slow(&ret_info->type, retval_ptr, ref))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
 		}
