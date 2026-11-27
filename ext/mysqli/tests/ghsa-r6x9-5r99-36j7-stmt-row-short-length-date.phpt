@@ -22,7 +22,6 @@ $result = $stmt->get_result();
 while ($row = $result->fetch_row()) {
     var_dump($row);
 }
-$stmt->close();
 $process->terminate();
 
 print "done!";
