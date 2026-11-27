@@ -114,7 +114,7 @@ retry:
 	}
 
 	if (didwrite > 0) {
-		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), didwrite, 0);
+		php_stream_notify_progress_increment_no_fclose(stream, didwrite);
 	}
 
 	return didwrite;
@@ -202,7 +202,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 	if (nr_bytes > 0) {
-		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
+		php_stream_notify_progress_increment_no_fclose(stream, nr_bytes);
 	}
 
 	return nr_bytes;
