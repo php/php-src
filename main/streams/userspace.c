@@ -1051,8 +1051,17 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		case PHP_STREAM_OPTION_CHECK_LIVENESS:
 			return user_stream_set_check_liveliness(us);
 
-		case PHP_STREAM_OPTION_LOCKING:
-			return user_stream_set_locking(us, value);
+		case PHP_STREAM_OPTION_LOCKING: {
+			uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+			stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
+			int ret = user_stream_set_locking(us, value);
+
+			stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+			stream->flags |= orig_no_fclose;
+
+			return ret;
+		}
 
 		case PHP_STREAM_OPTION_TRUNCATE_API:
 			return user_stream_set_truncation(us, value, ptrparam);
