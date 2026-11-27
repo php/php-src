@@ -1,50 +1,79 @@
 --TEST--
-Hash: hash_file() function : basic functionality
+Hash: hash_hmac() basic functionality
 --FILE--
 <?php
+echo "*** Testing hash_hmac() basic functionality ***\n";
 
-echo "*** Testing hash_hmac() : basic functionality ***\n";
-
-$content = "This is a sample string used to test the hash_hmac function with various hashing algorithms";
+$msg = "The quick brown fox jumped over the lazy dog.";
 $key = 'secret';
 
-echo "gost: " . hash_hmac('gost', $content, $key) . "\n";
-echo "haval128,3: " . hash_hmac('haval128,3', $content, $key) . "\n";
-echo "md2: " . hash_hmac('md2', $content, $key) . "\n";
-echo "md4: " . hash_hmac('md4', $content, $key) . "\n";
-echo "md5: " . hash_hmac('md5', $content, $key) . "\n";
-echo "ripemd128: " . hash_hmac('ripemd128', $content, $key) . "\n";
-echo "ripemd160: " . hash_hmac('ripemd160', $content, $key) . "\n";
-echo "ripemd256: " . hash_hmac('ripemd256', $content, $key) . "\n";
-echo "ripemd320: " . hash_hmac('ripemd320', $content, $key) . "\n";
-echo "sha1: " . hash_hmac('sha1', $content, $key) . "\n";
-echo "sha256: " . hash_hmac('sha256', $content, $key) . "\n";
-echo "sha384: " . hash_hmac('sha384', $content, $key) . "\n";
-echo "sha512: " . hash_hmac('sha512', $content, $key) . "\n";
-echo "snefru: " . hash_hmac('snefru', $content, $key) . "\n";
-echo "tiger192,3: " . hash_hmac('tiger192,3', $content, $key) . "\n";
-echo "whirlpool: " . hash_hmac('whirlpool', $content, $key) . "\n";
-echo "md5(raw): " . bin2hex(hash_hmac('md5', $content, $key, TRUE)) . "\n";
-echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n";
+echo "Hex (default): ", hash_hmac("md5", $msg, $key), "\n";
+echo "Hex explicit: ", hash_hmac("md5", $msg, $key, false), "\n";
+echo "bin2hex(bin): ", bin2hex(hash_hmac("md5", $msg, $key, true)), "\n";
+echo "Incremental: ";
+$ctx = hash_init("md5", HASH_HMAC, $key);
+hash_update($ctx, substr($msg, 0, 20));
+hash_update($ctx, substr($msg, 20));
+echo hash_final($ctx), "\n";
 
+$data = include(__DIR__."/samples.inc");
+list($message, $key, $hmac) = [$data["message"], $data["key"], $data["hmac"]];
+echo "*** Outputs for content '{$message}' with key '{$key}' ***\n";
+foreach (hash_hmac_algos() as $algo) {
+	echo "{$algo}: ", $hash = hash_hmac($algo, $message, $key), "\n";
+	if ($hash !== $hmac[$algo]) {
+		echo "{$algo} EXPECTED {$hmac[$algo]}\n";
+	}
+}
 ?>
 --EXPECT--
-*** Testing hash_hmac() : basic functionality ***
-gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
-haval128,3: 4d1318607f0406bd1b7bd50907772672
-md2: 6d111dab563025e4cb5f4425c991fa12
-md4: 10cdbfe843000c623f8b8da0d5d20b0b
-md5: 2a632783e2812cf23de100d7d6a463ae
-ripemd128: 26c2f694a65b1928b668cf55f65529b4
-ripemd160: 4b3433ba596ec39692bb7ce760a9ee5fb818113f
-ripemd256: 4e4e5ec19322895a727f272dfe68f87bc1af66cc6ce27c6c1360a5ee78a14b30
-ripemd320: f10a8ff82e828b92a5ff0a02fc9032bc61352d0d824821fc42f7e09cf5b5f41ee59fd33a730d7469
-sha1: 5bfdb62b97e2c987405463e9f7c193139c0e1fd0
-sha256: 49bde3496b9510a17d0edd8a4b0ac70148e32a1d51e881ec76faa96534125838
-sha384: b781415b856744834e532b9899e1aa0bec5a82cf09a838f0a833470468e2a42648a52428cfd9012385d04de5cd9bd122
-sha512: 7de05636b18e2b0ca3427e03f53074af3a48a7b9df226daba4f22324c570638e7d7b26430e214799c9ce0db5ee88dad3292ca0f38bf99b8eaebed59b3a9c140a
-snefru: 67af483046f9cf16fe19f9087929ccfc6ad176ade3290b4d33f43e0ddb07e711
-tiger192,3: 00a0f884f15a9e5549ed0e40ca0190522d369027e16d5b59
-whirlpool: 4a0f1582b21b7aff59bfba7f9c29131c69741b2ce80acdc7d314040f3b768cf5a17e30b74cceb86fbc6b34b1692e0addd5bfd7cfc043d40c0621f1b97e26fa49
-md5(raw): 2a632783e2812cf23de100d7d6a463ae
-sha256(raw): 49bde3496b9510a17d0edd8a4b0ac70148e32a1d51e881ec76faa96534125838
+*** Testing hash_hmac() basic functionality ***
+Hex (default): 7eb2b5c37443418fc77c136dd20e859c
+Hex explicit: 7eb2b5c37443418fc77c136dd20e859c
+bin2hex(bin): 7eb2b5c37443418fc77c136dd20e859c
+Incremental: 7eb2b5c37443418fc77c136dd20e859c
+*** Outputs for content 'The quick brown fox jumps over the lazy dog' with key 'key' ***
+md2: 13758b9534bfb38d850457814613b0c1
+md4: 8d3366c440a9c65124ab0b5f4ca27338
+md5: 80070713463e7749b90c2dc24911e275
+sha1: de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9
+sha224: 88ff8b54675d39b8f72322e65ff945c52d96379988ada25639747e69
+sha256: f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8
+sha384: d7f4727e2c0b39ae0f1e40cc96f60242d5b7801841cea6fc592c5d3e1ae50700582a96cf35e1e554995fe4e03381c237
+sha512/224: a1afb4f708cb63570639195121785ada3dc615989cc3c73f38e306a3
+sha512/256: 7fb65e03577da9151a1016e9c2e514d4d48842857f13927f348588173dca6d89
+sha512: b42af09057bac1e2d41708e48a902e09b5ff7f12ab428a4fe86653c73dd248fb82f948a549f7b791a5b41915ee4d1ec3935357e4e2317250d0372afa2ebeeb3a
+sha3-224: ff6fa8447ce10fb1efdccfe62caf8b640fe46c4fb1007912bf85100f
+sha3-256: 8c6e0683409427f8931711b10ca92a506eb1fafa48fadd66d76126f47ac2c333
+sha3-384: aa739ad9fcdf9be4a04f06680ade7a1bd1e01a0af64accb04366234cf9f6934a0f8589772f857681fcde8acc256091a2
+sha3-512: 237a35049c40b3ef5ddd960b3dc893d8284953b9a4756611b1b61bffcf53edd979f93547db714b06ef0a692062c609b70208ab8d4a280ceee40ed8100f293063
+ripemd128: ea830b2f823e559e753aecfa22cf666c
+ripemd160: 50278a77d4d7670561ab72e867383aef6ce50b3e
+ripemd256: 39f102599868d204bbf6165139f79eaa856a75cf92d785492907e2fee4168097
+ripemd320: dfca8756189fc556323fb344001a927c161f83a9d8f402d092c537346ae977113c4d02cca757a7ad
+whirlpool: 7f7192e3a155cb6a8171584ba146882f26821658112dfd2601272db013517a31e573637d146584596f86a884eb0decc9514dde000ecf2476dc5d436a92197527
+tiger128,3: eb8aa51180c56e53873f7fccd6b1ed03
+tiger160,3: 7be9669d759b97704005ec3515c7f7c856f70b9e
+tiger192,3: fba544227e1471d8d47dd9d68c5008d554c6de6072ca2e2a
+tiger128,4: b96c7efb6b1aabda1ea6a3f8ae59811a
+tiger160,4: 02e8155ee2b6f84f5c288c54b030bd40ae327fe9
+tiger192,4: 65e3808ac6672d2caefa1a8e7fa0f707686291401c63dfda
+snefru: f06bce8a92372a56c5e188fd4151c62f3f420edb7bbec5481bb08a4b89ca7b46
+snefru256: f06bce8a92372a56c5e188fd4151c62f3f420edb7bbec5481bb08a4b89ca7b46
+gost: 71be5a01e820943523a70bfeaa139189a1c70dd05cfcd3467cba3694667dfdcb
+gost-crypto: e06ac9388fa2107fa7bb49d6b29c28a09a2c0cde316cd349a12bb4b0d3497370
+haval128,3: b2648a98efd89b3c1995a4d622003f47
+haval160,3: 18f111448d2c12521624d90e3554682a96a6cc49
+haval192,3: c49d5cb9adcce283761052f0a6d9c56a55b4f5c3c1fb6dc1
+haval224,3: 15e86138589cf2e5caf5af4247347df591ae054b861612518ddd502e
+haval256,3: 1f07b3feac9df53307bc97c3ece4ce487266746987c65ef094d15e03bca1fc26
+haval128,4: fe0c0f63b4fb9b187d96ff0a6cd77d57
+haval160,4: daab2d68842f29241a6b7303444828e0ba707b36
+haval192,4: c19ec834a5f2dedbb0279b1ee4cd5054dc414c704568d375
+haval224,4: 7ed43b91cef3c3dc1d629c2029df2d701c1ade64f9d921e0c12cc2ca
+haval256,4: 565896a45b9711597969a85772ecd1b7b45e84377874d25349239aa22ab54323
+haval128,5: 96e68e4253a30ca782a2c3e84b14cd15
+haval160,5: 5e0c69785712da1bf4060a3fe575fb4e5a5dd2a0
+haval192,5: 284c96f4926e9a0358c7a648a885b79df29bb84293ac5ad1
+haval224,5: 736e38e52579198cb64a7b0dabab1158954c156d3a38817a2f3b5868
+haval256,5: 6c22f28a4705da5b8a963edd11dc7adb7a8b974bc1f3109718de44581f71102e
