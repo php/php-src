@@ -178,6 +178,10 @@ PHP                                                                        NEWS
   . Fixed a crash when executing a prepared statement again after a failed
     execute() with libmysqlclient. (Ilia Alshanetsky)
 
+- PDO_PGSQL:
+  . Fixed bug GH-25838 (use-after-free when a lazy statement follows a failed
+    query). (Yun Dou)
+
 - PDO_SQLite:
   . Fixed bug GH-25588 (Use-after-free of a string parameter omitted on a later
     execute() or rebound while fetching). (Ilia Alshanetsky)
