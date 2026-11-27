@@ -42,9 +42,7 @@
 #include "ext/standard/html.h"
 #include "ext/random/php_random.h"
 
-#ifdef __SSE2__
 #include "Zend/zend_bitset.h"
-#endif
 
 #include "zend_simd.h"
 
@@ -3048,6 +3046,25 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 }
 /* }}} */
 
+static zend_always_inline void php_strtr_note_key(const char *key, size_t len, zend_ulong *len_bitset,
+	zend_ulong *first_bitset, zend_ulong *second_bitset, unsigned char *first_bytes, size_t first_bytes_size, size_t *first_byte_count)
+{
+	if (EXPECTED(len < 256)) {
+		zend_bitset_incl(len_bitset, len);
+	}
+	unsigned char c0 = (unsigned char) key[0];
+	if (!zend_bitset_in(first_bitset, c0)) {
+		zend_bitset_incl(first_bitset, c0);
+		if (*first_byte_count < first_bytes_size) {
+			first_bytes[*first_byte_count] = c0;
+		}
+		(*first_byte_count)++;
+	}
+	if (len >= 2) {
+		zend_bitset_incl(second_bitset, (unsigned char) key[1]);
+	}
+}
+
 static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable *pats)
 {
 	const char *str = ZSTR_VAL(input);
@@ -3056,18 +3073,18 @@ static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable
 	zend_string *str_key;
 	size_t len, pos, old_pos;
 	bool has_num_keys = false;
-	size_t minlen = 128*1024;
+	size_t minlen = SIZE_MAX;
 	size_t maxlen = 0;
 	HashTable str_hash;
 	zval *entry;
 	const char *key;
 	smart_str result = {0};
-	zend_ulong bitset[256/sizeof(zend_ulong)];
-	zend_ulong *num_bitset;
-
-	/* we will collect all possible key lengths */
-	num_bitset = ecalloc((slen + sizeof(zend_ulong)) / sizeof(zend_ulong), sizeof(zend_ulong));
-	memset(bitset, 0, sizeof(bitset));
+	zend_ulong bitset[256 / (ZEND_BITSET_ELM_SIZE * 8)] = {0};
+	zend_ulong second_bitset[256 / (ZEND_BITSET_ELM_SIZE * 8)] = {0};
+	zend_ulong stack_num_bitset[256 / (ZEND_BITSET_ELM_SIZE * 8)] = {0};
+	zend_ulong *num_bitset = stack_num_bitset;
+	unsigned char first_bytes[4];
+	size_t first_byte_count = 0;
 
 	/* check if original array has numeric keys */
 	ZEND_HASH_FOREACH_STR_KEY(pats, str_key) {
@@ -3089,8 +3106,7 @@ static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable
 				minlen = len;
 			}
 			/* remember possible key length */
-			num_bitset[len / sizeof(zend_ulong)] |= Z_UL(1) << (len % sizeof(zend_ulong));
-			bitset[((unsigned char)ZSTR_VAL(str_key)[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)ZSTR_VAL(str_key)[0]) % sizeof(zend_ulong));
+			php_strtr_note_key(ZSTR_VAL(str_key), len, stack_num_bitset, bitset, second_bitset, first_bytes, sizeof(first_bytes), &first_byte_count);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -3114,8 +3130,7 @@ static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable
 					minlen = len;
 				}
 				/* remember possible key length */
-				num_bitset[len / sizeof(zend_ulong)] |= Z_UL(1) << (len % sizeof(zend_ulong));
-				bitset[((unsigned char)ZSTR_VAL(key_used)[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)ZSTR_VAL(key_used)[0]) % sizeof(zend_ulong));
+				php_strtr_note_key(ZSTR_VAL(key_used), len, stack_num_bitset, bitset, second_bitset, first_bytes, sizeof(first_bytes), &first_byte_count);
 			} else {
 				key_used = str_key;
 				len = ZSTR_LEN(key_used);
@@ -3137,43 +3152,111 @@ static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable
 		if (pats == &str_hash) {
 			zend_hash_destroy(&str_hash);
 		}
-		efree(num_bitset);
 		RETURN_STR_COPY(input);
 	}
 
-	old_pos = pos = 0;
-	while (pos <= slen - minlen) {
-		/* One replacement is appended per match, so stop once over the limit. */
-		if (ZEND_HAS_OOM()) {
-			smart_str_free(&result);
-			if (pats == &str_hash) {
-				zend_hash_destroy(&str_hash);
-			}
-			efree(num_bitset);
-			RETURN_OOM();
-		}
-		key = str + pos;
-		if (bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & (Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong)))) {
-			len = maxlen;
-			if (len > slen - pos) {
-				len = slen - pos;
-			}
-			while (len >= minlen) {
-				if ((num_bitset[len / sizeof(zend_ulong)] & (Z_UL(1) << (len % sizeof(zend_ulong))))) {
-					entry = zend_hash_str_find(pats, key, len);
-					if (entry != NULL) {
-						zend_string *tmp;
-						zend_string *s = zval_get_tmp_string(entry, &tmp);
-						smart_str_appendl(&result, str + old_pos, pos - old_pos);
-						smart_str_append(&result, s);
-						old_pos = pos + len;
-						pos = old_pos - 1;
-						zend_tmp_string_release(tmp);
-						break;
-					}
+	if (UNEXPECTED(maxlen >= 256)) {
+		num_bitset = ecalloc(zend_bitset_len(maxlen + 1), ZEND_BITSET_ELM_SIZE);
+		memcpy(num_bitset, stack_num_bitset, sizeof(stack_num_bitset));
+		ZEND_HASH_FOREACH_STR_KEY(pats, str_key) {
+			if (str_key) {
+				len = ZSTR_LEN(str_key);
+				if (len >= 256 && len <= maxlen) {
+					zend_bitset_incl(num_bitset, len);
 				}
-				len--;
 			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+#ifdef XSSE2
+	__m128i v0 = _mm_setzero_si128();
+	__m128i v1 = v0;
+	__m128i v2 = v0;
+	__m128i v3 = v0;
+	if (first_byte_count >= 2 && first_byte_count <= sizeof(first_bytes)) {
+		v0 = _mm_set1_epi8((char) first_bytes[0]);
+		v1 = _mm_set1_epi8((char) first_bytes[1]);
+		v2 = _mm_set1_epi8((char) (first_byte_count >= 3 ? first_bytes[2] : first_bytes[0]));
+		v3 = _mm_set1_epi8((char) (first_byte_count == 4 ? first_bytes[3] : first_bytes[0]));
+	}
+#endif
+
+	const size_t scan_end = slen - minlen;
+	old_pos = pos = 0;
+	while (pos <= scan_end) {
+		if (first_byte_count == 1) {
+			const char *match = memchr(str + pos, first_bytes[0], scan_end - pos + 1);
+			if (!match) {
+				break;
+			}
+			pos = (size_t) (match - str);
+#ifdef XSSE2
+		} else if (first_byte_count <= sizeof(first_bytes)) {
+			while (pos + sizeof(__m128i) <= scan_end + 1) {
+				__m128i chunk = _mm_loadu_si128((const __m128i *) (str + pos));
+				__m128i cmp = _mm_or_si128(
+					_mm_or_si128(_mm_cmpeq_epi8(chunk, v0), _mm_cmpeq_epi8(chunk, v1)),
+					_mm_or_si128(_mm_cmpeq_epi8(chunk, v2), _mm_cmpeq_epi8(chunk, v3)));
+				int mask = _mm_movemask_epi8(cmp);
+				if (mask == 0) {
+					pos += sizeof(__m128i);
+					continue;
+				}
+				pos += (size_t) zend_ulong_ntz((zend_ulong) (unsigned int) mask);
+				goto strtr_check_candidate;
+			}
+			while (pos <= scan_end && !ZEND_BIT_TEST(bitset, (unsigned char) str[pos])) {
+				pos++;
+			}
+			if (pos > scan_end) {
+				break;
+			}
+#endif
+		} else {
+			if (!ZEND_BIT_TEST(bitset, (unsigned char) str[pos])) {
+				pos++;
+				continue;
+			}
+		}
+
+#ifdef XSSE2
+strtr_check_candidate:
+#endif
+		key = str + pos;
+		if (minlen >= 2 && !ZEND_BIT_TEST(second_bitset, (unsigned char) key[1])) {
+			pos++;
+			continue;
+		}
+
+		len = maxlen;
+		if (len > slen - pos) {
+			len = slen - pos;
+		}
+		while (len >= minlen) {
+			if (minlen == maxlen || ZEND_BIT_TEST(num_bitset, len)) {
+				entry = zend_hash_str_find(pats, key, len);
+				if (entry != NULL) {
+					if (ZEND_HAS_OOM()) {
+						smart_str_free(&result);
+						if (pats == &str_hash) {
+							zend_hash_destroy(&str_hash);
+						}
+						if (num_bitset != stack_num_bitset) {
+							efree(num_bitset);
+						}
+						RETURN_OOM();
+					}
+					zend_string *tmp;
+					zend_string *s = zval_get_tmp_string(entry, &tmp);
+					smart_str_appendl(&result, str + old_pos, pos - old_pos);
+					smart_str_append(&result, s);
+					old_pos = pos + len;
+					pos = old_pos - 1;
+					zend_tmp_string_release(tmp);
+					break;
+				}
+			}
+			len--;
 		}
 		pos++;
 	}
@@ -3189,7 +3272,9 @@ static void php_strtr_array_ex(zval *return_value, zend_string *input, HashTable
 	if (pats == &str_hash) {
 		zend_hash_destroy(&str_hash);
 	}
-	efree(num_bitset);
+	if (num_bitset != stack_num_bitset) {
+		efree(num_bitset);
+	}
 }
 
 /* {{{ count_chars */
