@@ -18,6 +18,7 @@
 #include "Zend/zend_enum.h"
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
+#include "lexbor/encoding/decode.h"
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -586,6 +587,113 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, const zval *v
 	}
 
 	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_query_component_repair_utf8(
+	const char *str, const size_t str_length, smart_str *repaired_utf8
+)
+{
+	const lxb_char_t *p = (const lxb_char_t *) str;
+	const lxb_char_t *end = p + str_length;
+	const lxb_char_t *start = p;
+	lxb_encoding_decode_t decoder = {0};
+
+	/* UTF-8 decode without BOM: preserve valid bytes, including an initial BOM. */
+	while (p < end) {
+		const lxb_char_t *previous = p;
+		const lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoder, &p, end);
+		if (codepoint == LXB_ENCODING_DECODE_ERROR || codepoint == LXB_ENCODING_DECODE_CONTINUE) {
+			smart_str_appendl(repaired_utf8, (const char *) start, previous - start);
+			smart_str_appendl(repaired_utf8, (const char *) LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
+			start = p;
+		}
+	}
+
+	if (repaired_utf8->s != NULL) {
+		smart_str_appendl(repaired_utf8, (const char *) start, end - start);
+	}
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_query_component_percent_decode(const char *str, const size_t str_length)
+{
+	lexbor_str_t result = {0};
+
+	const lxb_status_t status = lxb_url_percent_decode_plus(
+		(const lxb_char_t *) str, (const lxb_char_t *) (str + str_length),
+		&result, &lexbor_mraw
+	);
+
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&result, &lexbor_mraw, false);
+		return NULL;
+	}
+
+	smart_str repaired_utf8 = {0};
+	php_uri_parser_whatwg_query_component_repair_utf8((const char *) result.data, result.length, &repaired_utf8);
+	zend_string *decoded = repaired_utf8.s != NULL
+		? smart_str_extract(&repaired_utf8)
+		: zend_string_init((const char *) result.data, result.length, false);
+	lexbor_str_destroy(&result, &lexbor_mraw, false);
+	return decoded;
+}
+
+ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_whatwg_query_component_percent_encode(const zend_string *component)
+{
+	smart_str repaired_utf8 = {0};
+	php_uri_parser_whatwg_query_component_repair_utf8(ZSTR_VAL(component), ZSTR_LEN(component), &repaired_utf8);
+
+	if (repaired_utf8.s == NULL) {
+		return php_uri_parser_whatwg_form_query_percent_encode(ZSTR_VAL(component), ZSTR_LEN(component));
+	}
+
+	zend_string *result = php_uri_parser_whatwg_form_query_percent_encode(ZSTR_VAL(repaired_utf8.s), ZSTR_LEN(repaired_utf8.s));
+	smart_str_free(&repaired_utf8);
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_query_params_to_string(const php_uri_query_params_object *object)
+{
+	smart_str buf = {0};
+	bool is_first = true;
+
+	ZEND_HASH_FOREACH_PTR(&object->entry_list, php_uri_query_param_list_entry *entry) {
+		if (entry->key == NULL) {
+			continue;
+		}
+
+		/* Omit empty fields preserved by the RFC-based parsers. */
+		if (ZSTR_LEN(entry->key) == 0 && entry->value == NULL) {
+			continue;
+		}
+
+		zend_string *name = php_uri_parser_whatwg_query_component_percent_encode(entry->key);
+		if (UNEXPECTED(name == NULL)) {
+			smart_str_free(&buf);
+			return NULL;
+		}
+
+		if (is_first) {
+			is_first = false;
+		} else {
+			smart_str_appendc(&buf, '&');
+		}
+
+		smart_str_append(&buf, name);
+		zend_string_release(name);
+
+		if (entry->value != NULL) {
+			zend_string *value = php_uri_parser_whatwg_query_component_percent_encode(entry->value);
+			if (UNEXPECTED(value == NULL)) {
+				smart_str_free(&buf);
+				return NULL;
+			}
+			smart_str_appendc(&buf, '=');
+			smart_str_append(&buf, value);
+			zend_string_release(value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return buf.s != NULL ? smart_str_extract(&buf) : ZSTR_EMPTY_ALLOC();
 }
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg)

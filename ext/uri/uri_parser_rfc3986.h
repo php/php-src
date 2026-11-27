@@ -34,6 +34,8 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_validate(cons
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_host_validate(const zend_string *host);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_port_validate(zend_long port);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_path_validate(const zend_string *path);
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc1866_query_is_well_formed(const char *query, size_t query_length);
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_rfc3986_query_is_well_formed(const char *query, size_t query_length);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_query_validate(const zend_string *query);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_fragment_validate(const zend_string *fragment);
 
@@ -42,5 +44,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2,3,4,5,6,7,8) php_uri_parser_rfc3986_uris *php_uri_
 	const zval *scheme, const zval *userinfo, const zval *host, const zval *port,
 	const zval *path, const zval *query, const zval *fragment
 );
+
+zend_string *php_uri_parser_rfc3986_query_component_percent_decode(const char *str, size_t str_length, bool plus_to_space);
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_rfc3986_query_params_to_string(const php_uri_query_params_object *query_params_object, bool space_to_plus);
 
 #endif
