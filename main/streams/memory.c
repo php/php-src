@@ -395,7 +395,7 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 static ssize_t php_stream_temp_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
-	size_t got;
+	ssize_t got;
 
 	assert(ts != NULL);
 
@@ -405,7 +405,10 @@ static ssize_t php_stream_temp_read(php_stream *stream, char *buf, size_t count)
 
 	got = php_stream_read(ts->innerstream, buf, count);
 
-	stream->eof = ts->innerstream->eof;
+	/* The inner stream is read greedily and may already hit EOF while still
+	 * returning data. Only propagate EOF once no more data is available, so that
+	 * php://temp reports EOF at the same point as php://memory and plain files. */
+	stream->eof = got <= 0 && ts->innerstream->eof;
 
 	return got;
 }

@@ -52,6 +52,7 @@ fclose($f2);
 --EXPECT--
 filter onCreate
 filtered 8192 bytes.
-filtered 128 bytes and closing. Stream has reached end-of-file.
+filtered 128 bytes.
+filtered 0 bytes and closing.
 int(8320)
 filter onClose
