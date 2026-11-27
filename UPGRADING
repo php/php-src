@@ -161,6 +161,10 @@ PHP 8.7 UPGRADE NOTES
   . Added Spoofchecker::getRestrictionLevel() to retrieve the configured
     restriction level as one of the Spoofchecker restriction level constants.
 
+- Standard:
+  . Added gethostaddresses() to resolve a hostname to its IPv4 and IPv6
+    addresses through the system resolver.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
