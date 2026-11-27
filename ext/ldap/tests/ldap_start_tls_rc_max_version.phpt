@@ -1,20 +1,21 @@
 --TEST--
-ldap_start_tls() - Basic ldap_start_tls test
+ldap_start_tls() - TLS max version from LDAPCONF is enforced
 --EXTENSIONS--
 ldap
 --ENV--
 LDAPCONF={PWD}/ldap_start_tls_rc_max_version.conf
 --SKIPIF--
 <?php
-// Skip in CI for now as adding olcTLSProtocolMin does not seem to work (needs investigation)
-if (getenv('CI')) {
-    die("Skip in CI for now");
-}
 $require_vendor = [
     "name" => "OpenLDAP",
     "min_version" => 20600,
 ];
 require_once __DIR__ .'/skipifbindfailure.inc';
+// GnuTLS backend ignores TLS protocol min and max options on both client and server
+$link = ldap_connect($uri);
+if (!ldap_get_option($link, LDAP_OPT_X_TLS_PACKAGE, $package) || $package === 'GnuTLS') {
+    die("skip Requires libldap TLS backend that supports TLS protocol version limits");
+}
 ?>
 --FILE--
 <?php
