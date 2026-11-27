@@ -13,6 +13,14 @@ var_dump( new DateTime("GMT") );
 var_dump( new DateTime("2005-07-14 22:30:41") );
 var_dump( new DateTime("2005-07-14 22:30:41 GMT") );
 
+echo "\n-- Calling the constructor again resets the time zone --\n";
+$d = new DateTime("2005-07-14 22:30:41 Asia/Tokyo");
+$d->__construct();
+var_dump($d->getTimezone()->getName());
+$d = new DateTime("2005-07-14 22:30:41 Asia/Tokyo");
+$d->__construct("now");
+var_dump($d->getTimezone()->getName());
+
 ?>
 --EXPECTF--
 *** Testing new DateTime() : basic functionality ***
@@ -48,3 +56,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(3) "GMT"
 }
+
+-- Calling the constructor again resets the time zone --
+string(13) "Europe/London"
+string(13) "Europe/London"

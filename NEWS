@@ -25,6 +25,10 @@ PHP                                                                        NEWS
     passing an array of CURLFile or CURLStringFile objects to
     CURLOPT_POSTFIELDS. (Sjoerd Langkemper)
 
+- Date:
+  . Improved performance of new DateTime(), new DateTimeImmutable() and
+    date_create() without a time string or with "now". (Alexander Danilov)
+
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
