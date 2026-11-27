@@ -63,6 +63,8 @@ PHP                                                                        NEWS
     node map iterator that has no current item. (Ilia Alshanetsky)
   . Fixed use-after-free in getElementById() after a removed ID attribute is
     freed. (Ilia Alshanetsky)
+  . Fixed bug GH-25750 (adoptNode() accepts DTD declaration nodes, which can
+    crash at document teardown). (Ian Mattas)
 
 - FFI:
   . Fixed bug GH-25558 (struct with an enum field passed by value is described
