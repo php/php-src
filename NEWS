@@ -124,6 +124,10 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed json_decode() and json_validate() error messages. (lacatoire)
 
+- GD:
+  . Fixed imagecreatefromxbm() accepting XBM files with out-of-range
+    dimensions. (Ilia Alshanetsky)
+
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
     deeply nested arrays. (Eyüp Can Akman)
