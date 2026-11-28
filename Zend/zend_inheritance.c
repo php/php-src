@@ -1253,6 +1253,19 @@ static void do_inherit_method(zend_string *key, zend_function *parent, zend_clas
 			return;
 		}
 
+		if (is_interface && (ce->ce_flags & ZEND_ACC_INTERFACE)
+				&& func->common.scope != ce
+				&& (func->common.fn_flags & ZEND_ACC_ABSTRACT)
+				&& (parent->common.fn_flags & ZEND_ACC_ABSTRACT)
+				&& (func->common.fn_flags & ZEND_ACC_STATIC) == (parent->common.fn_flags & ZEND_ACC_STATIC)
+				&& zend_do_perform_implementation_check(
+					parent, parent->common.scope, func, func->common.scope) == INHERITANCE_SUCCESS
+				&& zend_do_perform_implementation_check(
+					func, func->common.scope, parent, parent->common.scope) != INHERITANCE_SUCCESS) {
+			Z_PTR_P(child) = zend_duplicate_function(parent, ce);
+			return;
+		}
+
 		do_inheritance_check_on_method(
 			func, func->common.scope, parent, parent->common.scope, ce, child, flags);
 	} else {
