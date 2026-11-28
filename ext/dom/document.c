@@ -1159,6 +1159,67 @@ static void libxml_fixup_name_and_content_outer(xmlDocPtr src_doc, xmlDocPtr dst
 }
 #endif
 
+static void php_dom_transfer_single_template(
+	php_dom_private_data *old_private,
+	php_dom_private_data *new_private,
+	php_dom_libxml_ns_mapper *ns_mapper,
+	xmlNodePtr el,
+	xmlDocPtr new_document,
+	dom_object *dom_object_new_document);
+
+static void php_dom_transfer_templated_content_in_subtree(
+	php_dom_private_data *old_private,
+	php_dom_private_data *new_private,
+	php_dom_libxml_ns_mapper *ns_mapper,
+	xmlNodePtr base,
+	xmlDocPtr new_document,
+	dom_object *dom_object_new_document)
+{
+	if (base->type == XML_ELEMENT_NODE && php_dom_get_template_count(old_private) > 0) {
+		php_dom_transfer_single_template(
+			old_private, new_private, ns_mapper, base, new_document, dom_object_new_document);
+	}
+
+	xmlNodePtr current = base->children;
+	while (current != NULL && php_dom_get_template_count(old_private) > 0) {
+		if (current->type == XML_ELEMENT_NODE) {
+			php_dom_transfer_single_template(
+				old_private, new_private, ns_mapper, current, new_document, dom_object_new_document);
+		}
+		current = php_dom_next_in_tree_order(current, base);
+	}
+}
+
+static void php_dom_transfer_single_template(
+	php_dom_private_data *old_private,
+	php_dom_private_data *new_private,
+	php_dom_libxml_ns_mapper *ns_mapper,
+	xmlNodePtr el,
+	xmlDocPtr new_document,
+	dom_object *dom_object_new_document)
+{
+	xmlNodePtr fragment = php_dom_detach_templated_content(old_private, el);
+	if (fragment != NULL) {
+#if LIBXML_VERSION < 21300
+		xmlDocPtr old_doc = fragment->doc;
+#endif
+		xmlSetTreeDoc(fragment, new_document);
+		for (xmlNodePtr child = fragment->children; child != NULL; child = child->next) {
+			php_dom_libxml_reconcile_modern(ns_mapper, child);
+#if LIBXML_VERSION < 21300
+			libxml_fixup_name_and_content_outer(old_doc, new_document, child);
+#endif
+		}
+		php_dom_transfer_document_ref(fragment, dom_object_new_document->document);
+		if (EXPECTED(el->ns != NULL)) {
+			dom_add_element_ns_hook(new_private, el);
+		}
+		php_dom_add_templated_content(new_private, el, fragment);
+		php_dom_transfer_templated_content_in_subtree(
+			old_private, new_private, ns_mapper, fragment, new_document, dom_object_new_document);
+	}
+}
+
 bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document)
 {
 	xmlDocPtr old_doc = nodep->doc;
@@ -1166,6 +1227,12 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 	php_libxml_invalidate_node_list_cache_from_doc(old_doc);
 	if (old_doc != new_document) {
 		php_libxml_invalidate_node_list_cache(dom_object_new_document->document);
+		dom_object *old_intern = php_dom_object_get_data(nodep);
+		if (old_intern == NULL && old_doc != NULL) {
+			old_intern = php_dom_object_get_data((xmlNodePtr) old_doc);
+		}
+		php_dom_private_data *old_private =
+			(old_intern != NULL && old_intern->document != NULL) ? php_dom_get_private_data(old_intern) : NULL;
 
 		/* Note for ATTRIBUTE_NODE: specified is always true in ext/dom,
 		 * and since this unlink it; the owner element will be unset (i.e. parentNode). */
@@ -1174,17 +1241,25 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 			xmlSetTreeDoc(nodep, new_document);
 			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(dom_object_new_document);
 			php_dom_libxml_reconcile_modern(ns_mapper, nodep);
+#if LIBXML_VERSION < 21300
+			/* Must be first before transferring the ref to ensure the old document dictionary stays alive. */
+			libxml_fixup_name_and_content_outer(old_doc, new_document, nodep);
+#endif
+			php_dom_private_data *new_private = php_dom_get_private_data(dom_object_new_document);
+			if (old_private != NULL && new_private != NULL && php_dom_get_template_count(old_private) > 0) {
+				php_dom_transfer_templated_content_in_subtree(
+					old_private, new_private, ns_mapper, nodep, new_document, dom_object_new_document);
+			}
 		} else {
 			int ret = xmlDOMWrapAdoptNode(NULL, old_doc, nodep, new_document, NULL, /* options, unused */ 0);
 			if (UNEXPECTED(ret != 0)) {
 				return false;
 			}
-		}
-
 #if LIBXML_VERSION < 21300
-		/* Must be first before transferring the ref to ensure the old document dictionary stays alive. */
-		libxml_fixup_name_and_content_outer(old_doc, new_document, nodep);
+			/* Must be first before transferring the ref to ensure the old document dictionary stays alive. */
+			libxml_fixup_name_and_content_outer(old_doc, new_document, nodep);
 #endif
+		}
 
 		php_dom_transfer_document_ref(nodep, dom_object_new_document->document);
 	} else {
