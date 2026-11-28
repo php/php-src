@@ -16,7 +16,8 @@ all
 memory_limit=-1
 --FILE--
 <?php
-$uri = new Uri\Rfc3986\Uri("a://b/" . str_repeat("x", 2147483647 - 6));
+// Parsing a single relative path segment is cheap under sanitizers.
+$uri = new Uri\Rfc3986\Uri(str_repeat("x", 2147483647));
 
 try {
     $uri->toRawString();
