@@ -144,7 +144,10 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 	const char *hex = "0123456789ABCDEF";
 	zend_string *ret;
 
-	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
+	ret = zend_string_safe_falloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0, true);
+	if (UNEXPECTED(ret == NULL)) {
+		return NULL;
+	}
 	d = (unsigned char*)ZSTR_VAL(ret);
 
 	while (length--) {
@@ -267,6 +270,9 @@ PHP_FUNCTION(quoted_printable_encode)
 	}
 
 	new_str = php_quot_print_encode((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str));
+	if (UNEXPECTED(new_str == NULL)) {
+		RETURN_OOM();
+	}
 	RETURN_STR(new_str);
 }
 /* }}} */
