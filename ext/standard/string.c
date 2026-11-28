@@ -3337,12 +3337,12 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 			return new_str;
 		} else {
 			size_t count = 0;
-			const char *o = ZSTR_VAL(haystack);
-			const char *n = needle;
-			const char *endp = o + ZSTR_LEN(haystack);
+			const char *last_match_end = ZSTR_VAL(haystack);
+			end = last_match_end + ZSTR_LEN(haystack);
+			const char *first_match = php_memnstr(last_match_end, needle, needle_len, end);
 
-			while ((o = (char*)php_memnstr(o, n, needle_len, endp))) {
-				o += needle_len;
+			for (r = first_match; r; r = php_memnstr(last_match_end, needle, needle_len, end)) {
+				last_match_end = r + needle_len;
 				count++;
 			}
 			if (count == 0) {
@@ -3359,11 +3359,17 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 			}
 
 			e = ZSTR_VAL(new_str);
-			end = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
-			for (p = ZSTR_VAL(haystack); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+			*replace_count += count;
+			p = ZSTR_VAL(haystack);
+			/* If all matches are adjacent, their positions are already known. */
+			bool adjacent = first_match + count * needle_len == last_match_end;
+			for (r = first_match; ; r = adjacent ? p : php_memnstr(p, needle, needle_len, end)) {
 				e = zend_mempcpy(e, p, r - p);
 				e = zend_mempcpy(e, str, str_len);
-				(*replace_count)++;
+				p = r + needle_len;
+				if (p == last_match_end) {
+					break;
+				}
 			}
 
 			if (p < end) {
