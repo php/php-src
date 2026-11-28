@@ -44,12 +44,7 @@ static inline int php_io_win_wait_for_data(php_io_fd *fd)
 		return 1;
 	}
 
-	int timeout_ms;
-	if (fd->timeout.tv_sec == -1) {
-		timeout_ms = -1;
-	} else {
-		timeout_ms = fd->timeout.tv_sec * 1000 + fd->timeout.tv_usec / 1000;
-	}
+	int timeout_ms = php_tvtoto(&fd->timeout);
 
 	WSAPOLLFD pfd;
 	pfd.fd = fd->socket;
