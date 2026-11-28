@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: 9a32b308176289c1b1475524372a69257f464bd4
+ * Stub hash: d2c22c27a27f9b1c40c94409236d3068d1b8128a
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -133,8 +133,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_read_mib, 0, 1, _IS_BOOL, 0
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_init_mib, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, mibdirs, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_init_mib, 0, 0, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mibdirs, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SNMP___construct, 0, 0, 3)
