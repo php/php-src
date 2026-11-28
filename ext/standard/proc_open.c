@@ -274,6 +274,12 @@ static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int opti
 }
 #endif
 
+static bool proc_open_pipe_must_not_close(const zend_resource *pipe)
+{
+	const php_stream *stream = (const php_stream*)pipe->ptr;
+	return stream != NULL && (stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0;
+}
+
 /* {{{ proc_open_rsrc_dtor
  * Free `proc` resource, either because all references to it were dropped or because `pclose` or
  * `proc_close` were called */
@@ -287,12 +293,18 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	int waitpid_options = 0;
 	pid_t wait_pid;
 #endif
+	bool pipe_kept_open = false;
 
 	/* Close all handles to avoid a deadlock */
 	for (int i = 0; i < proc->npipes; i++) {
 		if (proc->pipes[i] != NULL) {
-			GC_DELREF(proc->pipes[i]);
-			zend_list_close(proc->pipes[i]);
+			if (proc_open_pipe_must_not_close(proc->pipes[i])) {
+				zend_list_delete(proc->pipes[i]);
+				pipe_kept_open = true;
+			} else {
+				GC_DELREF(proc->pipes[i]);
+				zend_list_close(proc->pipes[i]);
+			}
 			proc->pipes[i] = NULL;
 		}
 	}
@@ -300,9 +312,10 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	/* `pclose_wait` tells us: Are we freeing this resource because `pclose` or `proc_close` were
 	 * called? If so, we need to wait until the child process exits, because its exit code is
 	 * needed as the return value of those functions.
-	 * But if we're freeing the resource because of GC, don't wait. */
+	 * But if we're freeing the resource because of GC, don't wait.
+	 * Also don't wait if a pipe had to be kept open, because the child might block on it. */
 #ifdef PHP_WIN32
-	if (FG(pclose_wait)) {
+	if (FG(pclose_wait) && !pipe_kept_open) {
 		WaitForSingleObject(proc->childHandle, INFINITE);
 	}
 	GetExitCodeProcess(proc->childHandle, &wstatus);
@@ -314,7 +327,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	CloseHandle(proc->childHandle);
 
 #elif HAVE_SYS_WAIT_H
-	if (!FG(pclose_wait)) {
+	if (!FG(pclose_wait) || pipe_kept_open) {
 		waitpid_options = WNOHANG;
 	}
 	do {
@@ -389,6 +402,13 @@ PHP_FUNCTION(proc_close)
 	proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open);
 	if (proc == NULL) {
 		RETURN_THROWS();
+	}
+
+	for (int i = 0; i < proc->npipes; i++) {
+		if (proc->pipes[i] != NULL && proc_open_pipe_must_not_close(proc->pipes[i])) {
+			php_error_docref(NULL, E_WARNING, "Cannot close the process, as one of its pipes must not be manually closed");
+			RETURN_LONG(-1);
+		}
 	}
 
 	FG(pclose_wait) = 1; /* See comment in `proc_open_rsrc_dtor` */
