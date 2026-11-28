@@ -15,7 +15,7 @@ $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 $proc = proc_open($php . ' -n -r "usleep(2000000); echo \'data\';"', [1 => ['socket']], $pipes);
 
 stream_set_timeout($pipes[1], 4294968);
-var_dump(stream_copy_to_stream($pipes[1], $dest));
+var_dump(stream_copy_to_stream($pipes[1], $dest, 4));
 
 fclose($pipes[1]);
 fclose($dest);
