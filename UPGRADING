@@ -22,6 +22,8 @@ PHP 8.7 UPGRADE NOTES
 - Core:
   . Block declaration support for the encoding declare has been removed as it
     did not function properly.
+  . Float to string conversion no longer leaves a trailing zero when rounding
+    an exact tie down: sprintf('%.3G', 370500.0) now returns "3.7E+5".
 
 - Curl:
   . curl_multi_exec() now throws a TypeError when $still_running cannot be
@@ -233,6 +235,10 @@ PHP 8.7 UPGRADE NOTES
     traversed the whole graph again after every 10000 possible roots.
   . Improved performance of integer to string conversion (string casts, echo,
     implode(), json_encode(), serialize(), var_export() and others).
+  . Improved performance of float to string conversion (string casts,
+    sprintf(), number_format(), json_encode(), serialize(), var_export() and
+    others) and of converting long numeric strings to float ((float) casts,
+    json_decode(), unserialize() and others).
 
 - DOM:
   . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for

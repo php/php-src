@@ -81,6 +81,9 @@
  *     */
 #define IEEE_BIG_ENDIAN
 #undef IEEE_LITTLE_ENDIAN
+/* The 64-bit integer code in dtoa.c reads a double as a 64-bit integer, which
+ * requires both to have the same word order. */
+#define NO_BF96 1
 #endif
 
 #ifdef __vax__

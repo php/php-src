@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Improved performance of integer to string conversion, used by string casts,
     echo, implode(), json_encode(), serialize() and other places, by emitting
     two digits per step. (Alexander Danilov)
+  . Updated dtoa.c to the latest version, improving float conversion
+    performance. (Alexander Danilov)
   . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
     __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
 
