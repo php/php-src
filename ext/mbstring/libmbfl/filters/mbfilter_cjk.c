@@ -2025,13 +2025,13 @@ retry:
 					s1 |= 0x80;
 					CK((*filter->output_function)(0x8f, filter->data));
 				} else {
-					if ((filter->status & 0xff00) != 0x200) {
+					if ((filter->status & 0xff00) != 0x300) {
 						CK((*filter->output_function)(0x1b, filter->data)); /* ESC */
 						CK((*filter->output_function)('$', filter->data));
 						CK((*filter->output_function)('(', filter->data));
 						CK((*filter->output_function)('P', filter->data));
 					}
-					filter->status = 0x200;
+					filter->status = 0x300;
 				}
 			}
 
