@@ -2,41 +2,39 @@
 Test normal operation of password_hash() with Argon2i and Argon2id
 --SKIPIF--
 <?php
-if (!defined('PASSWORD_ARGON2I')) die('skip password_hash not built with Argon2');
-if (!defined('PASSWORD_ARGON2ID')) die('skip password_hash not built with Argon2');
+if (!defined('PASSWORD_ARGON2_PROVIDER')) die('skip password_hash not built with Argon2');
 ?>
 --FILE--
 <?php
 
 $password = "the password for testing 12345!";
 
+// To allow not repeating the same costly test
+var_dump(PASSWORD_ARGON2I === 'argon2i');
+var_dump(PASSWORD_ARGON2ID === 'argon2id');
+
 $algos = [
     PASSWORD_ARGON2I,
-    'argon2i',
     2,
     PASSWORD_ARGON2ID,
-    'argon2id',
     3,
 ];
 foreach ($algos as $algo) {
-  $hash = password_hash($password, $algo);
+  echo ($hash = password_hash($password, $algo)), "\n";
   var_dump(password_verify($password, $hash));
-  var_dump(password_get_info($hash)['algo']);
 }
 
 echo "OK!";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
-string(7) "argon2i"
 bool(true)
-string(7) "argon2i"
+$argon2i$v=19$m=%d,t=%d,p=%d$%s$%s
 bool(true)
-string(7) "argon2i"
+$argon2i$v=19$m=%d,t=%d,p=%d$%s$%s
 bool(true)
-string(8) "argon2id"
+$argon2id$v=19$m=%d,t=%d,p=%d$%s$%s
 bool(true)
-string(8) "argon2id"
+$argon2id$v=19$m=%d,t=%d,p=%d$%s$%s
 bool(true)
-string(8) "argon2id"
 OK!
