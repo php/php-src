@@ -899,7 +899,8 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_host_validate(const zen
 	 * https://url.spec.whatwg.org/#opaque-host-parser */
 	for (const char *p = first; p < last; p++) {
 		if (*p == '/' || *p == '?' || *p == '#' || *p == '\\'
-			|| *p == '\0' || *p == ' ' || *p == '<' || *p == '>' || *p == '@' || *p == '^' || *p == '|') {
+			|| *p == '\0' || *p == ' ' || *p == '<' || *p == '>' || *p == '@' || *p == '^' || *p == '|'
+			|| (*first != '[' && (*p == ':' || *p == '[' || *p == ']'))) {
 			return php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT);
 		}
 	}
