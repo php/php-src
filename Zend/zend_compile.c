@@ -4307,7 +4307,23 @@ static bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* 
 }
 /* }}} */
 
-static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type) /* {{{ */
+static bool zend_func_forbids_dynamic_calls(zend_string *name) /* {{{ */
+{
+	const char *str = ZSTR_VAL(name);
+	size_t len = ZSTR_LEN(name);
+	if (len > 0 && str[0] == '\\') {
+		str++;
+		len--;
+	}
+
+	/* Only internal functions have ZEND_ACC2_FORBID_DYN_CALLS, so an undefined
+	 * function at compile time can be assumed not to forbid dynamic calls. */
+	const zend_function *fbc = zend_hash_str_find_ptr_lc(CG(function_table), str, len);
+	return fbc && (fbc->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS);
+}
+/* }}} */
+
+static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type, bool is_dynamic) /* {{{ */
 {
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
 		const char *colon;
@@ -4325,6 +4341,8 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 			/* 2 slots, for class and method */
 			opline->result.num = zend_alloc_cache_slots(2);
 			zval_ptr_dtor(&name_node->u.constant);
+		} else if (is_dynamic && zend_func_forbids_dynamic_calls(str)) {
+			zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, name_node);
 		} else {
 			zend_op *opline = get_next_op();
 
@@ -5710,7 +5728,7 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
-		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type);
+		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type, /* is_dynamic */ true);
 		return;
 	}
 
@@ -5746,7 +5764,7 @@ static void zend_compile_call(znode *result, const zend_ast *ast, uint32_t type)
 		 || !fbc_is_finalized(fbc)
 		 || zend_compile_ignore_function(fbc, CG(active_op_array)->filename)) {
 			zend_string_release_ex(lcname, 0);
-			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type);
+			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno, type, /* is_dynamic */ false);
 			return;
 		}
 
@@ -7062,14 +7080,34 @@ static bool can_match_use_jumptable(const zend_ast_list *arms) {
 	return true;
 }
 
+static bool zend_is_pipe_optimizable_func_name(zend_string *name)
+{
+	/* Assert compilation adds a message operand, but this is incompatible with the
+	 * pipe optimization that uses a temporary znode for the reference elimination.
+	 * Therefore, disable the optimization for assert. */
+	if (zend_string_equals_literal_ci(name, "assert")) {
+		return false;
+	}
+
+	/* Functions that forbid dynamic calls must not be rewritten into direct calls. */
+	return !zend_func_forbids_dynamic_calls(name);
+}
+
 static bool zend_is_pipe_optimizable_callable_name(zend_ast *ast)
 {
 	if (ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(ast)) == IS_STRING) {
-		/* Assert compilation adds a message operand, but this is incompatible with the
-		 * pipe optimization that uses a temporary znode for the reference elimination.
-		 * Therefore, disable the optimization for assert.
-		 * Note that "assert" as a name is always treated as fully qualified. */
-		return !zend_string_equals_literal_ci(zend_ast_get_str(ast), "assert");
+		zend_string *orig_name = zend_ast_get_str(ast);
+		bool is_fully_qualified;
+		zend_string *resolved_name = zend_resolve_function_name(
+			orig_name, ast->attr, &is_fully_qualified);
+
+		bool optimizable = zend_is_pipe_optimizable_func_name(resolved_name);
+		if (optimizable && !is_fully_qualified && FC(current_namespace)) {
+			optimizable = zend_is_pipe_optimizable_func_name(orig_name);
+		}
+
+		zend_string_release_ex(resolved_name, false);
+		return optimizable;
 	}
 
 	return true;
