@@ -3475,14 +3475,14 @@ gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int src
             sy = sy1;
             do {
                 float yportion;
-                if (floorf(sy) == floorf(sy1)) {
-                    yportion = 1.0 - (sy - floorf(sy));
+                if (floor_cast(sy) == floor_cast(sy1)) {
+                    yportion = 1.0 - (sy - floor_cast(sy));
                     if (yportion > sy2 - sy1) {
                         yportion = sy2 - sy1;
                     }
-                    sy = floorf(sy);
+                    sy = floor_cast(sy);
                 } else if (sy == floorf(sy2)) {
-                    yportion = sy2 - floorf(sy2);
+                    yportion = sy2 - floor_cast(sy2);
                 } else {
                     yportion = 1.0;
                 }
@@ -3493,14 +3493,14 @@ gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int src
                     float xportion;
                     float pcontribution;
                     int p;
-                    if (floorf(sx) == floorf(sx1)) {
-                        xportion = 1.0 - (sx - floorf(sx));
+                    if (floorf(sx) == floor_cast(sx1)) {
+                        xportion = 1.0 - (sx - floor_cast(sx));
                         if (xportion > sx2 - sx1) {
                             xportion = sx2 - sx1;
                         }
-                        sx = floorf(sx);
+                        sx = floor_cast(sx);
                     } else if (sx == floorf(sx2)) {
-                        xportion = sx2 - floorf(sx2);
+                        xportion = sx2 - floor_cast(sx2);
                     } else {
                         xportion = 1.0;
                     }
