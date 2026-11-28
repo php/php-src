@@ -11,6 +11,10 @@ php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
 Web development and can be embedded into HTML. This is a variant of PHP that will run in the background as a daemon, listening for CGI requests. Output is logged to @php_fpm_localstatedir@/log/php-fpm.log.
 .LP
 Most options are set in the configuration file. The configuration file is @php_fpm_sysconfdir@/php-fpm.conf. By default, php-fpm will respond to CGI requests listening on localhost http port 9000. Therefore php-fpm expects your webserver to forward all requests for '.php' files to port 9000 and you should edit your webserver configuration file appropriately.
+.LP
+When PHP was built with the CLI SAPI, php-fpm runs as
+.BR php (1)
+instead when invoked under the name php, optionally followed by a digit (e.g. php8.7), typically through a symbolic link.
 .SH OPTIONS
 .TP 15
 .B \-C
