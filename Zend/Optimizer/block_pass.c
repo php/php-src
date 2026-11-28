@@ -199,7 +199,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				zval c;
 
 				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
-				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
+				if (opline->opcode == ZEND_TYPE_ASSERT) {
+					/* Does not consume its operand, which is used again later. */
+					if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
+						++(*opt_count);
+					} else {
+						zval_ptr_dtor_nogc(&c);
+					}
+				} else if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
 					VAR_SOURCE(op2) = NULL;
 					if (!zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
 						literal_dtor(&ZEND_OP1_LITERAL(src));
