@@ -5,7 +5,7 @@ xml
 --SKIPIF--
 <?php
 require __DIR__ . '/libxml_expat_skipif.inc';
-skipif(want_expat: true);
+skipif(!xml_uses_expat(), 'test is for Expat');
 ?>
 --FILE--
 <?php
