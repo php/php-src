@@ -5013,6 +5013,27 @@ static void array_bucketindex_swap(void *p, void *q)
 	*g = t;
 }
 
+static zend_always_inline zval *php_array_unique_add_string(HashTable *seen, zend_string *str, bool has_int)
+{
+	zend_ulong h;
+	if (UNEXPECTED(has_int) && ZEND_HANDLE_NUMERIC(str, h)) {
+		return zend_hash_index_add_empty_element(seen, h);
+	}
+	return zend_hash_add_empty_element(seen, str);
+}
+
+static void php_array_unique_add_numeric_aliases(HashTable *seen)
+{
+	uint32_t n = seen->nNumUsed;
+	for (uint32_t i = 0; i < n; i++) {
+		zend_ulong h;
+		zend_string *key = seen->arData[i].key;
+		if (key && ZEND_HANDLE_NUMERIC(key, h)) {
+			zend_hash_index_add_empty_element(seen, h);
+		}
+	}
+}
+
 /* {{{ Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
@@ -5043,15 +5064,26 @@ PHP_FUNCTION(array_unique)
 		zend_hash_init(&seen, zend_hash_num_elements(Z_ARRVAL_P(array)), NULL, NULL, 0);
 		array_init(return_value);
 
+		bool has_int = false;
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
 			zval *retval;
-			if (Z_TYPE_P(val) == IS_STRING) {
-				retval = zend_hash_add_empty_element(&seen, Z_STR_P(val));
+			if (EXPECTED(Z_TYPE_P(val) == IS_STRING)) {
+				retval = php_array_unique_add_string(&seen, Z_STR_P(val), has_int);
 			} else {
-				zend_string *tmp_str_val;
-				zend_string *str_val = zval_get_tmp_string(val, &tmp_str_val);
-				retval = zend_hash_add_empty_element(&seen, str_val);
-				zend_tmp_string_release(tmp_str_val);
+				zval *lookup_val = val;
+				ZVAL_DEREF(lookup_val);
+				if (Z_TYPE_P(lookup_val) == IS_LONG) {
+					if (UNEXPECTED(!has_int)) {
+						has_int = true;
+						php_array_unique_add_numeric_aliases(&seen);
+					}
+					retval = zend_hash_index_add_empty_element(&seen, (zend_ulong) Z_LVAL_P(lookup_val));
+				} else {
+					zend_string *tmp_str_val;
+					zend_string *str_val = zval_get_tmp_string(lookup_val, &tmp_str_val);
+					retval = php_array_unique_add_string(&seen, str_val, has_int);
+					zend_tmp_string_release(tmp_str_val);
+				}
 			}
 
 			if (retval) {
