@@ -625,13 +625,15 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 	s = ZCSG(interned_strings).top;
 	hash_slot = STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), h);
 	STRTAB_COLLISION(s) = *hash_slot;
-	*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
 	GC_SET_REFCOUNT(s, 2);
 	GC_TYPE_INFO(s) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT)| (ZSTR_IS_VALID_UTF8(str) ? IS_STR_VALID_UTF8 : 0);
 	ZSTR_H(s) = h;
 	ZSTR_LEN(s) = ZSTR_LEN(str);
 	memcpy(ZSTR_VAL(s), ZSTR_VAL(str), ZSTR_LEN(s) + 1);
 	ZCSG(interned_strings).top = STRTAB_NEXT(s);
+	/* Publish last, a process killed before this only leaks the string */
+	ZEND_ATOMIC_FENCE_RELEASE();
+	*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
 
 finish:
 	/* Transfer CE_CACHE map ptr slot to new interned string.
@@ -2776,7 +2778,6 @@ static void zend_reset_cache_vars(void)
 	ZCSG(misses) = 0;
 	ZCSG(blacklist_misses) = 0;
 	ZSMMG(wasted_shared_memory) = 0;
-	ZCSG(restart_pending) = false;
 	ZCSG(force_restart_time) = 0;
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
 	ZCSG(map_ptr_static_last) = zend_map_ptr_static_last;
@@ -2864,18 +2865,6 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 			if (accel_is_inactive()) {
 #endif
 				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting!");
-				ZCSG(restart_pending) = false;
-				switch ZCSG(restart_reason) {
-					case ACCEL_RESTART_OOM:
-						ZCSG(oom_restarts)++;
-						break;
-					case ACCEL_RESTART_HASH:
-						ZCSG(hash_restarts)++;
-						break;
-					case ACCEL_RESTART_USER:
-						ZCSG(manual_restarts)++;
-						break;
-				}
 				accel_restart_enter();
 
 				zend_map_ptr_reset();
@@ -2901,6 +2890,20 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 				} else {
 					ZCSG(last_restart_time)++;
 				}
+				switch ZCSG(restart_reason) {
+					case ACCEL_RESTART_OOM:
+						ZCSG(oom_restarts)++;
+						break;
+					case ACCEL_RESTART_HASH:
+						ZCSG(hash_restarts)++;
+						break;
+					case ACCEL_RESTART_USER:
+						ZCSG(manual_restarts)++;
+						break;
+				}
+				/* Clear last, so the next request redoes a restart that was killed midway */
+				ZEND_ATOMIC_FENCE_RELEASE();
+				ZCSG(restart_pending) = false;
 				accel_restart_leave();
 #ifndef ZEND_WIN32
 				accel_restart_end();
@@ -2910,17 +2913,26 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 		zend_shared_alloc_unlock();
 	}
 
-	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled);
+	/* Let readers drain for a pending restart, even one a killed process left enabled */
+	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled) && !ZCSG(restart_pending);
+	/* Pairs with the release before clearing restart_pending, so last_restart_time is current */
+	ZEND_ATOMIC_FENCE_ACQUIRE();
 
 #ifndef ZEND_WIN32
 	/* This is the only place where a request starts to use SHM */
 	if (ZCG(accelerator_enabled)) {
-		if (accel_reader_enter()) {
+		if (!accel_reader_enter()) {
+			ZCG(accelerator_enabled) = false;
+		} else if (ZCSG(restart_pending)) {
+			/* A restart may have been killed while this request waited for the reader lock */
+			ZCG(counted) = true;
+			accel_deactivate_sub();
+			ZCG(counted) = false;
+			ZCG(accelerator_enabled) = false;
+		} else {
 			ZCG(counted) = true;
 			/* SHM-backed keys may be added to the PCRE cache again */
 			ZCG(pcre_reseted) = false;
-		} else {
-			ZCG(accelerator_enabled) = false;
 		}
 	}
 #endif
@@ -3686,16 +3698,16 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	SHM_UNPROTECT();
-	ZCSG(restart_pending) = true;
 	ZCSG(restart_reason) = reason;
 	ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
-	ZCSG(accelerator_enabled) = false;
-
 	if (ZCG(accel_directives).force_restart_timeout) {
 		ZCSG(force_restart_time) = zend_accel_get_time() + ZCG(accel_directives).force_restart_timeout;
 	} else {
 		ZCSG(force_restart_time) = 0;
 	}
+	ZEND_ATOMIC_FENCE_RELEASE();
+	ZCSG(restart_pending) = true;
+	ZCSG(accelerator_enabled) = false;
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
