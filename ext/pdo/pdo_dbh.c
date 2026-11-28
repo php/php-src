@@ -1528,6 +1528,10 @@ static void pdo_dbh_free_storage(zend_object *std)
 		return;
 	}
 
+	if (!dbh->is_persistent) {
+		dbh->is_closed = 1;
+	}
+
 	/* The persistent list holds one reference, other objects may hold the rest */
 	if (dbh->driver_data && dbh->methods && dbh->methods->rollback
 			&& (!dbh->is_persistent || dbh->refcount <= 2) && pdo_is_in_transaction(dbh)) {
