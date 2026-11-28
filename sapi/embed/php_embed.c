@@ -170,8 +170,6 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 # endif
 #endif
 
-	zend_signal_startup();
-
 	/* SAPI initialization (SINIT)
 	 *
 	 * Initialize the SAPI globals (memset to 0). After this point we can set

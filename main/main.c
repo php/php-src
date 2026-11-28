@@ -1924,10 +1924,6 @@ zend_result php_request_startup(void)
 		php_basic_early_rinit();
 		sapi_activate();
 
-#ifdef ZEND_SIGNALS
-		zend_signal_activate();
-#endif
-
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
 		} else {
@@ -2085,11 +2081,6 @@ void php_request_shutdown(void *dummy)
 	/* Reset memory limit, as the reset during INI_STAGE_DEACTIVATE may have failed.
 	 * At this point, no memory beyond a single chunk should be in use. */
 	zend_set_memory_limit(PG(memory_limit));
-
-	/* 17. Deactivate Zend signals */
-#ifdef ZEND_SIGNALS
-	zend_signal_deactivate();
-#endif
 
 #ifdef PHP_WIN32
 	if (PG(com_initialized)) {

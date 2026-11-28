@@ -15,6 +15,13 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 
 - Breaking changes:
+  . Zend Signals has been removed, along with Zend/zend_signal.h. ZEND_SIGNALS,
+    SIGG(), zend_signal_globals_t, HANDLE_BLOCK_INTERRUPTIONS(),
+    HANDLE_UNBLOCK_INTERRUPTIONS(), ZEND_SIGNAL_BLOCK_INTERRUPTIONS(),
+    ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS(), zend_signal_startup(),
+    zend_signal_init(), zend_signal_activate(), zend_signal_deactivate(),
+    zend_signal() and zend_sigaction() no longer exist. Use signal() and
+    sigaction() directly.
   . Added zend_module_entry.child_init_func, an optional void callback invoked
     by php_child_init() in the child process after core child initialization.
     It runs in module dependency order for started modules and may run before a
@@ -117,6 +124,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . The --disable-zend-signals configure option has been removed.
 
 ========================
 3. Module changes

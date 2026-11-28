@@ -22,6 +22,11 @@ PHP 8.7 UPGRADE NOTES
 - Core:
   . Block declaration support for the encoding declare has been removed as it
     did not function properly.
+  . Zend Signals has been removed, along with the --disable-zend-signals
+    configure option and the "Zend Signal Handling" phpinfo() entry. Signals
+    are no longer deferred while the engine runs, including while OPcache
+    writes to shared memory. pcntl_signal() handlers are replaced at request
+    shutdown by the handler installed before the request, instead of SIG_DFL.
 
 - Curl:
   . curl_multi_exec() now throws a TypeError when $still_running cannot be
@@ -202,6 +207,9 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Core:
+  . The zend.signal_check INI setting has been removed.
 
 - Opcache:
   . opcache.max_accelerated_files now defaults to 16229 (previously 10000),
