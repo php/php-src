@@ -46,14 +46,7 @@ static inline int php_io_linux_wait_for_data(php_io_fd *fd)
 		return 1;
 	}
 
-	struct timeval *ptimeout = (fd->timeout.tv_sec == -1) ? NULL : &fd->timeout;
-	int timeout_ms;
-
-	if (ptimeout == NULL) {
-		timeout_ms = -1;
-	} else {
-		timeout_ms = ptimeout->tv_sec * 1000 + ptimeout->tv_usec / 1000;
-	}
+	int timeout_ms = php_tvtoto(&fd->timeout);
 
 	int ret;
 	do {
