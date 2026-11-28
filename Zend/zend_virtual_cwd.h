@@ -175,6 +175,9 @@ CWD_API void virtual_cwd_activate(void);
 CWD_API void virtual_cwd_deactivate(void);
 CWD_API bool virtual_cwd_is_emulated(void);
 CWD_API void virtual_cwd_unshare(void);
+#if defined(ZEND_HAVE_UNSHARE_FS) && defined(HAVE_CHROOT)
+CWD_API int virtual_cwd_chroot(const char *path);
+#endif
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API zend_result virtual_chdir(const char *path);

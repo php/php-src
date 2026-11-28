@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 53d47cfb46b55f62340f435b4637de62c4d0b531
+ * Stub hash: 0df5d4a0bbe07804d15fa3bc0b4e687ab9ee9eab
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -1124,7 +1124,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chdir, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
+#if (defined(HAVE_CHROOT) && (!defined(ZTS) || defined(ZEND_HAVE_UNSHARE_FS)) && defined(ENABLE_CHROOT_FUNC))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chroot, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -2655,7 +2655,7 @@ ZEND_FUNCTION(opendir);
 ZEND_FUNCTION(dir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
-#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
+#if (defined(HAVE_CHROOT) && (!defined(ZTS) || defined(ZEND_HAVE_UNSHARE_FS)) && defined(ENABLE_CHROOT_FUNC))
 ZEND_FUNCTION(chroot);
 #endif
 ZEND_FUNCTION(getcwd);
@@ -3268,7 +3268,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)
 	ZEND_FE(chdir, arginfo_chdir)
-#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
+#if (defined(HAVE_CHROOT) && (!defined(ZTS) || defined(ZEND_HAVE_UNSHARE_FS)) && defined(ENABLE_CHROOT_FUNC))
 	ZEND_FE(chroot, arginfo_chroot)
 #endif
 	ZEND_FE(getcwd, arginfo_getcwd)

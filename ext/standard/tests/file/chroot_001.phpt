@@ -5,18 +5,11 @@ chroot()
 if (!function_exists("chroot")) {
     die("skip chroot() not available");
 }
-// Skip if not being run by root (files are always readable, writeable and executable)
-$filename = @tempnam(__DIR__, 'root_check_');
-if (!file_exists($filename)) {
-    die('WARN Unable to create the "root check" file');
+if (getenv('SKIP_REPEAT')) {
+    die('skip the changed root persists across repetitions');
 }
-
-$isRoot = fileowner($filename) == 0;
-
-unlink($filename);
-
-if (!$isRoot) {
-    die('SKIP Must be run as root');
+if (!@chroot('/')) {
+    die('skip chroot is unavailable for this process');
 }
 ?>
 --FILE--

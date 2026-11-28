@@ -2694,7 +2694,7 @@ function closedir($dir_handle = null): void {}
 
 function chdir(string $directory): bool {}
 
-#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
+#if (defined(HAVE_CHROOT) && (!defined(ZTS) || defined(ZEND_HAVE_UNSHARE_FS)) && defined(ENABLE_CHROOT_FUNC))
 function chroot(string $directory): bool {}
 #endif
 

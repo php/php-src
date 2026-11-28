@@ -309,7 +309,7 @@ PHP_METHOD(Directory, read)
 	RETURN_FALSE;
 }
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
+#if defined(HAVE_CHROOT) && (!defined(ZTS) || defined(ZEND_HAVE_UNSHARE_FS)) && defined(ENABLE_CHROOT_FUNC)
 /* {{{ Change root directory */
 PHP_FUNCTION(chroot)
 {
@@ -321,7 +321,11 @@ PHP_FUNCTION(chroot)
 		Z_PARAM_PATH(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+#ifdef ZTS
+	ret = virtual_cwd_chroot(str);
+#else
 	ret = chroot(str);
+#endif
 	if (ret != 0) {
 		php_error_docref(NULL, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;

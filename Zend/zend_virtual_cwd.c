@@ -30,6 +30,7 @@
 #ifdef ZEND_HAVE_UNSHARE_FS
 #include <sched.h>
 static TSRM_TLS TSRM_TLS_MODEL_ATTR bool native_cwd;
+static TSRM_TLS TSRM_TLS_MODEL_ATTR bool cwd_root_changed;
 static TSRM_TLS TSRM_TLS_MODEL_ATTR int saved_cwd_fd = -1;
 #else
 static const bool native_cwd = false;
@@ -251,6 +252,16 @@ static char *native_getcwd(size_t *length)
 CWD_API void virtual_cwd_activate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd == NULL) {
+#ifdef ZEND_HAVE_UNSHARE_FS
+		if (cwd_root_changed) {
+			/* The startup directory belongs to the old root. */
+			CWDG(cwd).cwd = native_getcwd(&CWDG(cwd).cwd_length);
+			if (!CWDG(cwd).cwd) {
+				CWDG(cwd).cwd = estrdup("");
+			}
+			return;
+		}
+#endif
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
 }
@@ -286,6 +297,27 @@ CWD_API void virtual_cwd_unshare(void)
 	native_cwd = true;
 #endif
 }
+
+#if defined(ZEND_HAVE_UNSHARE_FS) && defined(HAVE_CHROOT)
+CWD_API int virtual_cwd_chroot(const char *path)
+{
+	if (!native_cwd) {
+		errno = EPERM;
+		return -1;
+	}
+	/* Native libraries may have started threads since request startup. */
+	if (unshare(CLONE_FS) != 0 || chroot(path) != 0) {
+		return -1;
+	}
+	/* Do not restore a working directory outside the new root. */
+	cwd_root_changed = true;
+	if (saved_cwd_fd >= 0) {
+		close(saved_cwd_fd);
+		saved_cwd_fd = -1;
+	}
+	return 0;
+}
+#endif
 
 CWD_API void virtual_cwd_deactivate(void) /* {{{ */
 {
