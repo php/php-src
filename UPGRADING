@@ -238,6 +238,11 @@ PHP 8.7 UPGRADE NOTES
   . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
     small inputs.
 
+- Intl:
+  . Improved performance of grapheme_strlen(), grapheme_substr(),
+    grapheme_strpos() and the related grapheme functions on ASCII strings
+    longer than 8 bytes.
+
 - PDO:
   . Improved performance of fetching rows with PDO::FETCH_OBJ.
 

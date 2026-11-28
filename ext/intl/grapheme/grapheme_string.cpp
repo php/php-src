@@ -113,7 +113,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strpos)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	if (offset >= 0 && grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0) {
+	if (offset >= 0 && haystack_len <= INT32_MAX && grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0) {
 		/* quick check to see if the string might be there
 		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
 		*/
@@ -168,7 +168,7 @@ U_CFUNC PHP_FUNCTION(grapheme_stripos)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
+	is_ascii = haystack_len <= INT32_MAX && grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0;
 
 	if ( is_ascii ) {
 		char *haystack_dup, *needle_dup;
@@ -234,7 +234,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrpos)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
+	is_ascii = haystack_len <= INT32_MAX && grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
 	if ( is_ascii ) {
 
@@ -293,7 +293,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strripos)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
+	is_ascii = haystack_len <= INT32_MAX && grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
 	if ( is_ascii ) {
 		char *needle_dup, *haystack_dup;
@@ -376,7 +376,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	if ( grapheme_ascii_check((unsigned char *)str, str_len) >= 0 ) {
+	if ( str_len <= INT32_MAX && grapheme_ascii_check((unsigned char *)str, str_len) >= 0 ) {
 		int32_t asub_str_len;
 		char *sub_str;
 		grapheme_substr_ascii(str, str_len, start, (int32_t)length, &sub_str, &asub_str_len);
