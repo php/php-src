@@ -343,6 +343,10 @@ PHP                                                                        NEWS
   . Fixed GHSA-5j3f-64r7-f564 (PHP-CGI out-of-bounds read and write during
     PATH_INFO correction). (CVE-2026-129538) (Jakub Zelenka)
 
+- Apache:
+  . Fixed bug #61471 (Incomplete POST does not timeout but is passed to PHP).
+    (Jakub Zelenka)
+
 - CLI:
   . Fixed bug GH-24697 (PHP_HTTP_PARSER_STRICT build option doesn't work).
     (ndossche, devnexen)

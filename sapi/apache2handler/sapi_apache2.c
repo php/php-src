@@ -67,6 +67,28 @@ char *apache2_php_ini_path_override = NULL;
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
+/* ap_map_http_request_error() is available since httpd 2.4.16 (MMN 20120211.46) */
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 46)
+# define php_apache_map_http_request_error ap_map_http_request_error
+#else
+static int php_apache_map_http_request_error(apr_status_t rv, int status)
+{
+	switch (rv) {
+		case AP_FILTER_ERROR:
+			return AP_FILTER_ERROR;
+		case APR_ENOSPC:
+			return HTTP_REQUEST_ENTITY_TOO_LARGE;
+		case APR_ENOTIMPL:
+			return HTTP_NOT_IMPLEMENTED;
+		case APR_TIMEUP:
+		case APR_ETIMEDOUT:
+			return HTTP_REQUEST_TIME_OUT;
+		default:
+			return status;
+	}
+}
+#endif
+
 static size_t
 php_apache_sapi_ub_write(const char *str, size_t str_length)
 {
@@ -188,6 +210,11 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	brigade = ctx->brigade;
 	len = count_bytes;
 
+	if (ctx->read_post_error != APR_SUCCESS) {
+		/* The request body read already failed, do not try to read it again. */
+		return 0;
+	}
+
 	/*
 	 * This loop is needed because ap_get_brigade() can return us partial data
 	 * which would cause premature termination of request read. Therefore we
@@ -206,7 +233,19 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	}
 
 	if (status != APR_SUCCESS) {
-		return 0;
+		/* The input filter might have left the data read before the error in the brigade so keep them. */
+		if (!APR_BRIGADE_EMPTY(brigade)) {
+			if (apr_brigade_flatten(brigade, buf, &len) == APR_SUCCESS) {
+				tlen += len;
+			}
+			apr_brigade_cleanup(brigade);
+		}
+		/* APR_EOF is a clean end of the input. Anything else means that the request body could not be read
+		 * completely, e.g. the client disconnected (APR_INCOMPLETE) or the read timed out (APR_TIMEUP), and
+		 * the error is remembered so that the handler can report it to httpd. */
+		if (status != APR_EOF) {
+			ctx->read_post_error = status;
+		}
 	}
 
 	return tlen;
@@ -521,6 +560,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 	char *content_length;
 	const char *auth;
 
+	ctx->read_post_error = APR_SUCCESS;
 	SG(sapi_headers).http_response_code = !r->status ? HTTP_OK : r->status;
 	SG(request_info).content_type = apr_table_get(r->headers_in, "Content-Type");
 	SG(request_info).query_string = apr_pstrdup(r->pool, r->args);
@@ -552,6 +592,27 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 
 	return php_request_startup();
+}
+
+/* Returns the HTTP status to be returned to httpd when the request body read failed during the request
+ * startup (reading of the POST data) or OK if the request can be processed. */
+static int php_apache_request_body_status(request_rec *r, php_struct *ctx)
+{
+	int status;
+
+	if (ctx->read_post_error == APR_SUCCESS) {
+		return OK;
+	}
+
+	/* The request body could not be read completely (e.g. the client disconnected or the read timed out) so the
+	 * request cannot be processed by the script. The error is reported to httpd which generates the appropriate
+	 * error response (e.g. 400 Bad Request or 408 Request Timeout) or has already done so (AP_FILTER_ERROR). */
+	status = php_apache_map_http_request_error(ctx->read_post_error, HTTP_BAD_REQUEST);
+	/* AP_FILTER_ERROR is not an APR status so it is not logged */
+	ap_log_rerror(APLOG_MARK, APLOG_INFO, status == AP_FILTER_ERROR ? APR_SUCCESS : ctx->read_post_error, r,
+		"Error reading the request body for script '%s', request is not processed", r->filename);
+
+	return status;
 }
 
 static void php_apache_request_dtor(request_rec *r)
@@ -588,6 +649,7 @@ static int php_handler(request_rec *r)
 	apr_bucket_brigade * volatile brigade;
 	apr_bucket *bucket;
 	apr_status_t rv;
+	int volatile status = OK;
 	request_rec * volatile parent_req = NULL;
 #ifdef ZTS
 	/* initial resource fetch */
@@ -672,6 +734,7 @@ zend_first_try {
 		if (php_apache_request_ctor(r, ctx)!=SUCCESS) {
 			zend_bailout();
 		}
+		status = php_apache_request_body_status(r, ctx);
 	} else {
 		if (!parent_req) {
 			parent_req = ctx->r;
@@ -683,6 +746,7 @@ zend_first_try {
 			if (php_apache_request_ctor(r, ctx)!=SUCCESS) {
 				zend_bailout();
 			}
+			status = php_apache_request_body_status(r, ctx);
 		}
 
 		/*
@@ -699,54 +763,65 @@ zend_first_try {
 		brigade = ctx->brigade;
 	}
 
-	if (AP2(last_modified)) {
-		ap_update_mtime(r, r->finfo.mtime);
-		ap_set_last_modified(r);
-	}
-
-	/* Determine if we need to parse the file or show the source */
-	if (strncmp(r->handler, PHP_SOURCE_MAGIC_TYPE, sizeof(PHP_SOURCE_MAGIC_TYPE) - 1) == 0) {
-		zend_syntax_highlighter_ini syntax_highlighter_ini;
-		php_get_highlight_struct(&syntax_highlighter_ini);
-		highlight_file((char *)r->filename, &syntax_highlighter_ini);
-	} else {
-		zend_file_handle zfd;
-		zend_stream_init_filename(&zfd, (char *) r->filename);
-		zfd.primary_script = 1;
-
-		if (!parent_req) {
-			php_execute_script(&zfd);
-		} else {
-			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
+	/* The script is executed only if the request body was read successfully */
+	if (status == OK) {
+		if (AP2(last_modified)) {
+			ap_update_mtime(r, r->finfo.mtime);
+			ap_set_last_modified(r);
 		}
-		zend_destroy_file_handle(&zfd);
 
-		apr_table_set(r->notes, "mod_php_memory_usage",
-			apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1)));
+		/* Determine if we need to parse the file or show the source */
+		if (strncmp(r->handler, PHP_SOURCE_MAGIC_TYPE, sizeof(PHP_SOURCE_MAGIC_TYPE) - 1) == 0) {
+			zend_syntax_highlighter_ini syntax_highlighter_ini;
+			php_get_highlight_struct(&syntax_highlighter_ini);
+			highlight_file((char *)r->filename, &syntax_highlighter_ini);
+		} else {
+			zend_file_handle zfd;
+			zend_stream_init_filename(&zfd, (char *) r->filename);
+			zfd.primary_script = 1;
+
+			if (!parent_req) {
+				php_execute_script(&zfd);
+			} else {
+				zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
+			}
+			zend_destroy_file_handle(&zfd);
+
+			apr_table_set(r->notes, "mod_php_memory_usage",
+				apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1)));
+		}
+	} else {
+		/* Discard the output produced during the request startup (e.g. displayed warnings) as httpd generates
+		 * the error response. */
+		php_output_discard_all();
 	}
 
 } zend_end_try();
 
 	if (!parent_req) {
+		/* The request shutdown is always done (even if the request body read failed) so that all the request
+		 * resources like the uploaded files are released. */
 		php_apache_request_dtor(r);
 		ctx->request_processed = 1;
 		apr_brigade_cleanup(brigade);
-		bucket = apr_bucket_eos_create(r->connection->bucket_alloc);
-		APR_BRIGADE_INSERT_TAIL(brigade, bucket);
+		if (status == OK) {
+			bucket = apr_bucket_eos_create(r->connection->bucket_alloc);
+			APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 
-		rv = ap_pass_brigade(r->output_filters, brigade);
-		if (rv != APR_SUCCESS || r->connection->aborted) {
+			rv = ap_pass_brigade(r->output_filters, brigade);
+			if (rv != APR_SUCCESS || r->connection->aborted) {
 zend_first_try {
-			php_handle_aborted_connection();
+				php_handle_aborted_connection();
 } zend_end_try();
+			}
+			apr_brigade_cleanup(brigade);
 		}
-		apr_brigade_cleanup(brigade);
 		apr_pool_cleanup_run(r->pool, (void *)&SG(server_context), php_server_context_cleanup);
 	} else {
 		ctx->r = parent_req;
 	}
 
-	return OK;
+	return status;
 }
 
 static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
