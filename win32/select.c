@@ -168,7 +168,8 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 				}
 			}
 		}
-		if (retcode == 0 && num_read_pipes == n_handles && sock_max_fd < 0) {
+		if (retcode == 0 && num_read_pipes == n_handles && sock_max_fd < 0
+				&& (tv == NULL || tv->tv_sec > 0 || tv->tv_usec > 0)) {
 			usleep(100);
 		}
 	} while (retcode == 0 && (ms_total == INFINITE || GetTickCount64() < limit));
