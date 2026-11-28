@@ -371,15 +371,11 @@ bail:
 				}
 				goto bail;
 			}
-#ifdef WORDS_BIGENDIAN
 # define PHAR_GET_32(buffer) \
-	(((((unsigned char*)(buffer))[3]) << 24) \
-		| ((((unsigned char*)(buffer))[2]) << 16) \
-		| ((((unsigned char*)(buffer))[1]) <<  8) \
-		| (((unsigned char*)(buffer))[0]))
-#else
-# define PHAR_GET_32(buffer) (uint32_t) *(buffer)
-#endif
+	((((uint32_t)(((unsigned char*)(buffer))[3])) << 24) \
+		| (((uint32_t)(((unsigned char*)(buffer))[2])) << 16) \
+		| (((uint32_t)(((unsigned char*)(buffer))[1])) <<  8) \
+		| ((uint32_t)(((unsigned char*)(buffer))[0])))
 			myphar->sig_flags = PHAR_GET_32(buf);
 			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, myphar->sig_flags, buf + 8, size - 8, fname, &myphar->signature, &sig_len, error)) {
 				if (error) {
