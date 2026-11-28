@@ -1860,7 +1860,7 @@ PHP_FUNCTION(snmp_init_mib)
 	}
 
 	shutdown_mib();
-	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, ZSTR_VAL(mibdirs));
+	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, mibdirs ? ZSTR_VAL(mibdirs) : NULL);
 #ifdef HAVE_NETSNMP_INIT_MIB
 	netsnmp_init_mib();
 #else
