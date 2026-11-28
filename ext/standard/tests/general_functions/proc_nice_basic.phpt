@@ -9,15 +9,20 @@ Simone Gentili (sensorario@gmail.com)
 <?php
 if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
 if(substr(strtoupper(PHP_OS), 0, 3) == 'WIN') die('skip. not for Windows');
-exec('ps -p 1 -o "pid,nice"', $output, $exit_code);
+$command = PHP_OS_FAMILY === 'Linux' ? 'nice' : 'ps -p 1 -o "pid,nice"';
+exec($command, $output, $exit_code);
 if ($exit_code !== 0) {
-    die("skip ps -p is not available");
+    die("skip cannot read process priority");
 }
 ?>
 --FILE--
 <?php
     function getNice($id)
     {
+        if (PHP_OS_FAMILY === 'Linux') {
+            // The child inherits our niceness even when ps sees another PID namespace.
+            return (int) shell_exec('nice');
+        }
         $res = shell_exec('ps -p ' . $id .' -o "pid,nice"');
         preg_match('/^\s*\w+\s+\w+\s*(\d+)\s+(-?\d+)/m', $res, $matches);
         if (count($matches) > 2)
