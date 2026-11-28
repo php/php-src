@@ -2058,7 +2058,7 @@ static int mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 	k = filter->cache;
 	filter->cache = 0;
 
-	if (filter->status == 1 && k >= 0 && k <= jisx0213_u2_tbl_len) {
+	if ((filter->status & 0xf) == 1 && k >= 0 && k < jisx0213_u2_tbl_len) {
 		s1 = jisx0213_u2_fb_tbl[k];
 
 		if (filter->to->no_encoding == mbfl_no_encoding_sjis2004) {
