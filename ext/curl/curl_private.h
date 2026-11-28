@@ -83,6 +83,7 @@ typedef struct {
 	zend_fcall_info_cache xferinfo;
 	zend_fcall_info_cache fnmatch;
 	zend_fcall_info_cache debug;
+	zend_fcall_info_cache opensocket;
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	zend_fcall_info_cache prereq;
 #endif
