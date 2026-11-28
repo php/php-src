@@ -70,7 +70,8 @@ For the execute, function-jit and tracing-jit fuzzers, a corpus may be generated
 
 ```sh
 sapi/cli/php sapi/fuzzer/generate_execute_corpus.php ./execute-corpus Zend/tests ext/opcache/tests/jit
-sapi/fuzzer/php-fuzzer-function-jit ./execute-corpus
+sapi/cli/php sapi/fuzzer/generate_execute_dict.php
+sapi/fuzzer/php-fuzz-function-jit -dict=$PWD/sapi/fuzzer/dict/execute ./execute-corpus
 ```
 
 For the mbstring fuzzer, a dictionary of encodings should be generated first:
