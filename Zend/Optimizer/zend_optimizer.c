@@ -666,6 +666,17 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 							if (is_last) {
 								break;
 							}
+						} else if (opline->op2_type == type && opline->op2.var == var
+								&& opline->opcode != ZEND_FE_FETCH_R
+								&& opline->opcode != ZEND_FE_FETCH_RW) {
+							/* An OP2 operand is always consumed, so this is the last use.
+							 * OP2 of FE_FETCH is a def rather than a use, stop there. */
+							Z_TRY_ADDREF_P(val);
+							if (!zend_optimizer_update_op2_const(op_array, opline, val)) {
+								zval_ptr_dtor(val);
+								return false;
+							}
+							break;
 						}
 						opline++;
 					}
