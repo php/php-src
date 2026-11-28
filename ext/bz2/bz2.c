@@ -215,29 +215,24 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-#ifdef VIRTUAL_DIR
-	virtual_filepath_ex(path, &path_copy, NULL);
-#else
-	path_copy = (char *)path;
-#endif
+	if (virtual_cwd_is_emulated()) {
+		virtual_filepath_ex(path, &path_copy, NULL);
+	}
+	const char *bz_path = path_copy ? path_copy : path;
 
-	if (php_check_open_basedir(path_copy)) {
-#ifdef VIRTUAL_DIR
+	if (php_check_open_basedir(bz_path)) {
 		efree(path_copy);
-#endif
 		return NULL;
 	}
 
 	/* try and open it directly first */
-	bz_file = BZ2_bzopen(path_copy, mode);
+	bz_file = BZ2_bzopen(bz_path, mode);
 
 	if (opened_path && bz_file) {
-		*opened_path = zend_string_init(path_copy, strlen(path_copy), 0);
+		*opened_path = zend_string_init(bz_path, strlen(bz_path), 0);
 	}
 
-#ifdef VIRTUAL_DIR
 	efree(path_copy);
-#endif
 
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */

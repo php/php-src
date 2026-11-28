@@ -27,6 +27,15 @@
 #include "zend.h"
 #include "zend_virtual_cwd.h"
 
+#ifdef ZEND_HAVE_UNSHARE_FS
+#include <sched.h>
+static TSRM_TLS TSRM_TLS_MODEL_ATTR bool native_cwd;
+static TSRM_TLS TSRM_TLS_MODEL_ATTR bool cwd_root_changed;
+static TSRM_TLS TSRM_TLS_MODEL_ATTR int saved_cwd_fd = -1;
+#else
+static const bool native_cwd = false;
+#endif
+
 #ifdef ZEND_WIN32
 #include <io.h>
 #include "tsrm_win32.h"
@@ -229,16 +238,99 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 }
 /* }}} */
 
+#ifdef ZEND_HAVE_UNSHARE_FS
+static char *native_getcwd(size_t *length)
+{
+	char *cwd = getcwd(NULL, 0);
+	*length = cwd ? strlen(cwd) : 0;
+	char *result = cwd ? estrndup(cwd, *length) : NULL;
+	free(cwd);
+	return result;
+}
+#endif
+
 CWD_API void virtual_cwd_activate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd == NULL) {
+#ifdef ZEND_HAVE_UNSHARE_FS
+		if (cwd_root_changed) {
+			/* The startup directory belongs to the old root. */
+			CWDG(cwd).cwd = native_getcwd(&CWDG(cwd).cwd_length);
+			if (!CWDG(cwd).cwd) {
+				CWDG(cwd).cwd = estrdup("");
+			}
+			return;
+		}
+#endif
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
 }
 /* }}} */
 
+CWD_API bool virtual_cwd_is_emulated(void)
+{
+#ifdef VIRTUAL_DIR
+	return !native_cwd;
+#else
+	return false;
+#endif
+}
+
+/* Enter native mode only for this request. A reused worker (or a thread
+ * created by that worker) may share filesystem state again on entry. */
+CWD_API void virtual_cwd_unshare(void)
+{
+#ifdef ZEND_HAVE_UNSHARE_FS
+	if (native_cwd || !CWDG(cwd).cwd_length || unshare(CLONE_FS) != 0) {
+		return;
+	}
+
+	int fd = open(".", O_PATH | O_DIRECTORY | O_CLOEXEC);
+	if (fd < 0) {
+		return;
+	}
+	if (chdir(CWDG(cwd).cwd) != 0) {
+		close(fd);
+		return;
+	}
+	saved_cwd_fd = fd;
+	native_cwd = true;
+#endif
+}
+
+#if defined(ZEND_HAVE_UNSHARE_FS) && defined(HAVE_CHROOT)
+CWD_API int virtual_cwd_chroot(const char *path)
+{
+	if (!native_cwd) {
+		errno = EPERM;
+		return -1;
+	}
+	/* Native libraries may have started threads since request startup. */
+	if (unshare(CLONE_FS) != 0 || chroot(path) != 0) {
+		return -1;
+	}
+	/* Do not restore a working directory outside the new root. */
+	cwd_root_changed = true;
+	if (saved_cwd_fd >= 0) {
+		close(saved_cwd_fd);
+		saved_cwd_fd = -1;
+	}
+	return 0;
+}
+#endif
+
 CWD_API void virtual_cwd_deactivate(void) /* {{{ */
 {
+#ifdef ZEND_HAVE_UNSHARE_FS
+	if (saved_cwd_fd >= 0) {
+		if (fchdir(saved_cwd_fd) != 0) {
+			zend_error(E_CORE_WARNING, "Could not restore working directory: %s", strerror(errno));
+		}
+		close(saved_cwd_fd);
+		saved_cwd_fd = -1;
+	}
+	native_cwd = false;
+#endif
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
 		CWDG(cwd).cwd = NULL;
@@ -250,6 +342,11 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 {
 	cwd_state *state;
 
+#ifdef ZEND_HAVE_UNSHARE_FS
+	if (native_cwd) {
+		return native_getcwd(length);
+	}
+#endif
 	state = &CWDG(cwd);
 
 	if (state->cwd_length == 0) {
@@ -292,6 +389,11 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 	size_t length;
 	char *cwd;
 
+#ifdef ZEND_HAVE_UNSHARE_FS
+	if (native_cwd && buf) {
+		return getcwd(buf, size);
+	}
+#endif
 	cwd = virtual_getcwd_ex(&length);
 
 	if (buf == NULL) {
@@ -1215,6 +1317,9 @@ verify:
 
 CWD_API zend_result virtual_chdir(const char *path) /* {{{ */
 {
+	if (native_cwd) {
+		return chdir(path) == 0 ? SUCCESS : FAILURE;
+	}
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok, CWD_REALPATH) ? FAILURE : SUCCESS;
 }
 /* }}} */
@@ -1261,6 +1366,10 @@ CWD_API char *virtual_realpath(const char *path, char *real_path) /* {{{ */
 	char *retval;
 	char cwd[MAXPATHLEN];
 
+	if (native_cwd) {
+		return tsrm_realpath(path, real_path);
+	}
+
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)emalloc(1);
@@ -1298,7 +1407,15 @@ CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_f
 	cwd_state new_state;
 	int retval;
 
-	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	if (native_cwd && !IS_ABSOLUTE_PATH(path, strlen(path))) {
+		new_state.cwd = virtual_getcwd_ex(&new_state.cwd_length);
+		if (!new_state.cwd) {
+			*filepath = estrdup("");
+			return 1;
+		}
+	} else {
+		CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	}
 	retval = virtual_file_ex(&new_state, path, verify_path, CWD_FILEPATH);
 
 	*filepath = new_state.cwd;
@@ -1316,11 +1433,14 @@ CWD_API int virtual_filepath(const char *path, char **filepath) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
-/* An absolute path without dot segments doesn't need a per-thread CWD emulation */
+/* In emulated mode, only absolute paths without dot segments can go directly to libc. */
 static zend_always_inline bool virtual_path_is_direct(const char *path)
 {
 	const char *s = path;
 
+	if (native_cwd) {
+		return true;
+	}
 	if (*s != '/') {
 		return false;
 	}
@@ -1341,15 +1461,14 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
 	cwd_state new_state;
 	FILE *f;
 
-	if (path[0] == '\0') { /* Fail to open empty path */
-		return NULL;
-	}
-
 #ifndef ZEND_WIN32
 	if (virtual_path_is_direct(path)) {
 		return fopen(path, mode);
 	}
 #endif
+	if (path[0] == '\0') { /* Fail to open empty path */
+		return NULL;
+	}
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND)) {
@@ -1375,7 +1494,7 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 	int ret;
 
 #ifndef ZEND_WIN32
-	if (pathname[0] == '/') {
+	if (native_cwd || pathname[0] == '/') {
 		return access(pathname, mode);
 	}
 #endif
@@ -1404,6 +1523,12 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	cwd_state new_state;
 	int ret;
 
+#ifndef ZEND_WIN32
+	if (native_cwd) {
+		return utime(filename, buf);
+	}
+#endif
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH)) {
 		CWD_STATE_FREE_ERR(&new_state);
@@ -1426,6 +1551,10 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 {
 	cwd_state new_state;
 	int ret;
+
+	if (native_cwd) {
+		return chmod(filename, mode);
+	}
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH)) {
@@ -1462,6 +1591,17 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	cwd_state new_state;
 	int ret;
 
+	if (native_cwd) {
+		if (link) {
+#ifdef HAVE_LCHOWN
+			return lchown(filename, owner, group);
+#else
+			return -1;
+#endif
+		}
+		return chown(filename, owner, group);
+	}
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, link ? CWD_EXPAND : CWD_REALPATH)) {
 		CWD_STATE_FREE_ERR(&new_state);
@@ -1488,19 +1628,21 @@ CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
 {
 	cwd_state new_state;
 	int f;
+	mode_t mode = 0;
+	bool needs_mode = (flags & O_CREAT) != 0;
+#ifdef O_TMPFILE
+	needs_mode |= (flags & O_TMPFILE) == O_TMPFILE;
+#endif
+	if (needs_mode) {
+		va_list arg;
+		va_start(arg, flags);
+		mode = (mode_t) va_arg(arg, int);
+		va_end(arg);
+	}
 
 #ifndef ZEND_WIN32
 	if (virtual_path_is_direct(path)) {
-		if (flags & O_CREAT) {
-			mode_t mode;
-			va_list arg;
-
-			va_start(arg, flags);
-			mode = (mode_t) va_arg(arg, int);
-			va_end(arg);
-			return open(path, flags, mode);
-		}
-		return open(path, flags);
+		return open(path, flags, mode);
 	}
 #endif
 
@@ -1510,26 +1652,11 @@ CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
 		return -1;
 	}
 
-	if (flags & O_CREAT) {
-		mode_t mode;
-		va_list arg;
-
-		va_start(arg, flags);
-		mode = (mode_t) va_arg(arg, int);
-		va_end(arg);
-
 #ifdef ZEND_WIN32
-		f = php_win32_ioutil_open(new_state.cwd, flags, mode);
+	f = php_win32_ioutil_open(new_state.cwd, flags, mode);
 #else
-		f = open(new_state.cwd, flags, mode);
+	f = open(new_state.cwd, flags, mode);
 #endif
-	} else {
-#ifdef ZEND_WIN32
-		f = php_win32_ioutil_open(new_state.cwd, flags);
-#else
-		f = open(new_state.cwd, flags);
-#endif
-	}
 	CWD_STATE_FREE_ERR(&new_state);
 	return f;
 }
@@ -1539,6 +1666,10 @@ CWD_API int virtual_creat(const char *path, mode_t mode) /* {{{ */
 {
 	cwd_state new_state;
 	int f;
+
+	if (native_cwd) {
+		return creat(path, mode);
+	}
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH)) {
@@ -1558,6 +1689,10 @@ CWD_API int virtual_rename(const char *oldname, const char *newname) /* {{{ */
 	cwd_state old_state;
 	cwd_state new_state;
 	int retval;
+
+	if (native_cwd) {
+		return rename(oldname, newname);
+	}
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
 	if (virtual_file_ex(&old_state, oldname, NULL, CWD_EXPAND)) {
@@ -1596,7 +1731,7 @@ CWD_API int virtual_stat(const char *path, zend_stat_t *buf) /* {{{ */
 	int retval;
 
 #ifndef ZEND_WIN32
-	if (path[0] == '/') {
+	if (native_cwd || path[0] == '/') {
 		return php_sys_stat(path, buf);
 	}
 #endif
@@ -1646,6 +1781,10 @@ CWD_API int virtual_unlink(const char *path) /* {{{ */
 	cwd_state new_state;
 	int retval;
 
+	if (native_cwd) {
+		return unlink(path);
+	}
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE_ERR(&new_state);
@@ -1668,6 +1807,12 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
 	cwd_state new_state;
 	int retval;
 
+#ifndef ZEND_WIN32
+	if (native_cwd) {
+		return mkdir(pathname, mode);
+	}
+#endif
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_FILEPATH)) {
 		CWD_STATE_FREE_ERR(&new_state);
@@ -1688,6 +1833,10 @@ CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
+
+	if (native_cwd) {
+		return rmdir(pathname);
+	}
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_EXPAND)) {
@@ -1747,6 +1896,10 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	char *command_line;
 	char *ptr, *dir;
 	FILE *retval;
+
+	if (native_cwd) {
+		return popen(command, type);
+	}
 
 	command_length = strlen(command);
 

@@ -215,7 +215,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	char work_pattern[MAXPATHLEN];
 	char *result;
 	size_t cwd_skip = 0;
-	if (!IS_ABSOLUTE_PATH(path, strlen(path))) {
+	if (virtual_cwd_is_emulated() && !IS_ABSOLUTE_PATH(path, strlen(path))) {
 		result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		if (!result) {
 			cwd[0] = '\0';

@@ -731,7 +731,7 @@ static int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_val
 	}
 
 #ifdef ZTS
-	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
+	if (virtual_cwd_is_emulated() && !IS_ABSOLUTE_PATH(pattern, pattern_len)) {
 		result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		if (!result) {
 			cwd[0] = '\0';
@@ -821,7 +821,7 @@ static int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *ret
 	pcre2_match_context *mctx = php_pcre_mctx();
 
 #ifdef ZTS
-	if (!IS_ABSOLUTE_PATH(path, path_len)) {
+	if (virtual_cwd_is_emulated() && !IS_ABSOLUTE_PATH(path, path_len)) {
 		result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		if (!result) {
 			cwd[0] = '\0';
