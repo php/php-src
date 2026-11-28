@@ -81,6 +81,19 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 #define IF_SESSION_VARS() \
 	if (Z_ISREF_P(&PS(http_session_vars)) && Z_TYPE_P(Z_REFVAL(PS(http_session_vars))) == IS_ARRAY)
 
+/* Clean $_SESSION: install an empty array before releasing the old values, so
+ * that their destructors do not observe the array being cleaned. */
+static void php_session_clean_vars(void)
+{
+	IF_SESSION_VARS() {
+		zval *sess_var = Z_REFVAL(PS(http_session_vars));
+		zval old_vars;
+		ZVAL_COPY_VALUE(&old_vars, sess_var);
+		array_init(sess_var);
+		zval_ptr_dtor(&old_vars);
+	}
+}
+
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
 		php_error_docref(NULL, E_WARNING, "Session ini settings cannot be changed when a session is active");	\
@@ -145,8 +158,10 @@ static void php_rshutdown_session_globals(void) /* {{{ */
 {
 	/* Do NOT destroy PS(mod_user_names) here! */
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
-		zval_ptr_dtor(&PS(http_session_vars));
+		zval session_vars;
+		ZVAL_COPY_VALUE(&session_vars, &PS(http_session_vars));
 		ZVAL_UNDEF(&PS(http_session_vars));
+		zval_ptr_dtor(&session_vars);
 	}
 	if (PS(mod_data) || PS(mod_user_implemented)) {
 		zend_try {
@@ -243,20 +258,22 @@ PHPAPI zval* php_get_session_var_str(const char *name, size_t name_len)
 
 static void php_session_track_init(void) /* {{{ */
 {
-	zval session_vars;
+	zval session_vars, old_session_vars;
 	zend_string *var_name = ZSTR_INIT_LITERAL("_SESSION", 0);
 	/* Unconditionally destroy existing array -- possible dirty data */
 	zend_delete_global_variable(var_name);
 
-	if (!Z_ISUNDEF(PS(http_session_vars))) {
-		zval_ptr_dtor(&PS(http_session_vars));
-	}
+	/* Install the new array before releasing the old one, so that destructors
+	 * of the old values do not observe the array that is being destroyed. */
+	ZVAL_COPY_VALUE(&old_session_vars, &PS(http_session_vars));
 
 	array_init(&session_vars);
 	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
 	Z_ADDREF_P(&PS(http_session_vars));
 	zend_hash_update_ind(&EG(symbol_table), var_name, &PS(http_session_vars));
 	zend_string_release_ex(var_name, 0);
+
+	zval_ptr_dtor(&old_session_vars);
 }
 /* }}} */
 
@@ -498,6 +515,10 @@ static zend_result php_session_initialize(void) /* {{{ */
 
 	/* Read data */
 	php_session_track_init();
+	/* A destructor of an old session value may have closed the session. */
+	if (UNEXPECTED(PS(session_status) != php_session_active)) {
+		return FAILURE;
+	}
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
 		php_session_abort();
 		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
@@ -1030,7 +1051,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 {
 	const char *endptr = val + vallen;
-	zval session_vars;
+	zval session_vars, old_session_vars;
 	php_unserialize_data_t var_hash;
 	bool result;
 	zend_string *var_name = ZSTR_INIT_LITERAL("_SESSION", 0);
@@ -1045,9 +1066,9 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 		ZVAL_NULL(&session_vars);
 	}
 
-	if (!Z_ISUNDEF(PS(http_session_vars))) {
-		zval_ptr_dtor(&PS(http_session_vars));
-	}
+	/* Install the new array before releasing the old one, so that destructors
+	 * of the old values do not observe the array that is being destroyed. */
+	ZVAL_COPY_VALUE(&old_session_vars, &PS(http_session_vars));
 	if (Z_TYPE(session_vars) == IS_NULL) {
 		array_init(&session_vars);
 	}
@@ -1055,6 +1076,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	Z_ADDREF_P(&PS(http_session_vars));
 	zend_hash_update_ind(&EG(symbol_table), var_name, &PS(http_session_vars));
 	zend_string_release_ex(var_name, 0);
+	zval_ptr_dtor(&old_session_vars);
 	return result || !vallen ? SUCCESS : FAILURE;
 }
 /* }}} */
@@ -2786,12 +2808,7 @@ PHP_FUNCTION(session_start)
 	php_session_start();
 
 	if (PS(session_status) != php_session_active) {
-		IF_SESSION_VARS() {
-			zval *sess_var = Z_REFVAL(PS(http_session_vars));
-			SEPARATE_ARRAY(sess_var);
-			/* Clean $_SESSION. */
-			zend_hash_clean(Z_ARRVAL_P(sess_var));
-		}
+		php_session_clean_vars();
 		RETURN_FALSE;
 	}
 
@@ -2825,13 +2842,7 @@ PHP_FUNCTION(session_unset)
 		RETURN_FALSE;
 	}
 
-	IF_SESSION_VARS() {
-		zval *sess_var = Z_REFVAL(PS(http_session_vars));
-		SEPARATE_ARRAY(sess_var);
-
-		/* Clean $_SESSION. */
-		zend_hash_clean(Z_ARRVAL_P(sess_var));
-	}
+	php_session_clean_vars();
 	RETURN_TRUE;
 }
 /* }}} */
