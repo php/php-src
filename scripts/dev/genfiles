@@ -31,6 +31,8 @@
 #   For example:
 #     YACC=/path/to/bison ./genfiles
 
+set -ex
+
 YACC=${YACC:-bison}
 YACC="$YACC -l"
 YFLAGS="-Wall"
@@ -40,7 +42,7 @@ SED=${SED:-sed}
 MAKE=${MAKE:-make}
 
 # Go to project root.
-cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)"
 
 # Check required bison version from the configure.ac file.
 required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\([0-9\.]*\)\].*/\1/p' configure.ac)

@@ -5,17 +5,16 @@
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to Git by Stanislav Malyshev <stas@php.net>.
 
+set -ex
+
 # Check whether gtar is present (GNU tar)
-tar="$(which gtar)"
-tar="${tar:-$(which tar)}"
+tar="$(command -v gtar || command -v tar)"
 
 # Handle GNU vs. BSD checksum utilities
-md5sum="$(which md5sum)"
-md5sum="${md5sum:-$(which md5)}"
+md5sum="$(command -v md5sum || command -v md5)"
 
 # GNU touch is preferred since it handles local TZ in timestamps
-touch="$(which gtouch)"
-touch="${touch:-$(which touch)}"
+touch="$(command -v gtouch || command -v touch)"
 
 if [[ $($tar --version) == *"bsdtar"* ]]; then
   echo "Found bsdtar at $tar, but this script needs GNU tar."
@@ -23,7 +22,7 @@ if [[ $($tar --version) == *"bsdtar"* ]]; then
 fi
 
 # Go to project root directory.
-cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)"
 
 # Process options and arguments.
 while :; do
