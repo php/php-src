@@ -1018,10 +1018,16 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					if (!SetFilePointerEx(h, old_sz, NULL, FILE_BEGIN)) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
-					return PHP_STREAM_OPTION_RETURN_OK;
 #else
-					return ftruncate(fd, new_size) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+					if (ftruncate(fd, new_size) != 0) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
 #endif
+					if (EG(active)) {
+						/* clear stat cache as size, mtime and ctime got changed */
+						php_clear_stat_cache(0, NULL, 0);
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
 				}
 			}
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
