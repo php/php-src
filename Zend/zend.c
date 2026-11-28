@@ -1336,6 +1336,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 {
 #ifdef ZTS
 	virtual_cwd_activate();
+	virtual_cwd_unshare();
 #endif
 	gc_reset();
 	init_compiler();

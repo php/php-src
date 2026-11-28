@@ -457,7 +457,7 @@ PHP_FUNCTION(glob)
 	int passed_glob_flags = flags & PHP_GLOB_FLAGMASK;
 
 #ifdef ZTS
-	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
+	if (virtual_cwd_is_emulated() && !IS_ABSOLUTE_PATH(pattern, pattern_len)) {
 		/* System glob uses the current work directory which is not thread safe.
 		 * The first fix is to override the functions used to open/read/... paths
 		 * with the VCWD ones used in PHP.

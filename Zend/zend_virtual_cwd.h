@@ -173,6 +173,8 @@ CWD_API void virtual_cwd_startup(void);
 CWD_API void virtual_cwd_shutdown(void);
 CWD_API void virtual_cwd_activate(void);
 CWD_API void virtual_cwd_deactivate(void);
+CWD_API bool virtual_cwd_is_emulated(void);
+CWD_API void virtual_cwd_unshare(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API zend_result virtual_chdir(const char *path);

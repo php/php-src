@@ -863,6 +863,25 @@ AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
       PHP thread safety (ZTS) build.
     ]))])
 
+  dnl This will succeed when building in containers!
+  dnl But Docker containers with their default policies fail the call at
+  dnl runtime and fall back to virtual cwd behaviour.
+  dnl https://docs.docker.com/engine/security/seccomp/#significant-syscalls-blocked-by-the-default-profile
+  AS_CASE([$host_os], [linux*], [
+    AC_CACHE_CHECK([for unshare(CLONE_FS)], [php_cv_unshare_fs], [
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+        #include <fcntl.h>
+        #include <sched.h>
+      ]], [[
+        int fd = open(".", O_PATH | O_DIRECTORY | O_CLOEXEC);
+        return unshare(CLONE_FS) || fd < 0;
+      ]])], [php_cv_unshare_fs=yes], [php_cv_unshare_fs=no])
+    ])
+    AS_VAR_IF([php_cv_unshare_fs], [yes],
+      [AC_DEFINE([ZEND_HAVE_UNSHARE_FS], [1],
+        [Define to 1 if ZTS can use Linux per-thread filesystem state.])])
+  ])
+
   AC_MSG_CHECKING([for POSIX threads])
   AC_MSG_RESULT([yes])
 
