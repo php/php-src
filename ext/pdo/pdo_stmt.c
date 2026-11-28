@@ -662,9 +662,21 @@ static bool pdo_call_fetch_object_constructor(zend_function *constructor, HashTa
 	return failed;
 }
 
+static bool get_column_index_by_column_name(pdo_stmt_t *stmt, zend_string *lookup_string, int *lookup_index) {
+	int column_index_to_fetch = 0;
+	for (; column_index_to_fetch < stmt->column_count; column_index_to_fetch++) {
+		zend_string *column_name = stmt->columns[column_index_to_fetch].name;
+		if (zend_string_equals(column_name, lookup_string)) {
+			*lookup_index = column_index_to_fetch;
+			return true;
+		}
+	}
+	return false;
+}
+
 /* Performs a row fetch, the value is stored into return_value according to HOW.
  * return_value MUST be safely destroyable as it will be freed if an error occurs. */
-static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *group_key) /* {{{ */
+static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *group_key, int *group_by_key) /* {{{ */
 {
 	int flags;
 	zend_class_entry *ce = NULL;
@@ -832,10 +844,13 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		default: ZEND_UNREACHABLE();
 	}
 
-	if (group_key) {
+	if (group_key && ! group_by_key) {
 		fetch_value(stmt, group_key, column_index_to_fetch, NULL);
 		convert_to_string(group_key);
 		column_index_to_fetch++;
+	} else if (group_key && group_by_key) {
+		fetch_value(stmt, group_key, *group_by_key, NULL);
+		convert_to_string(group_key);
 	}
 
 	if (how == PDO_FETCH_CLASS && (flags & PDO_FETCH_SERIALIZE)) {
@@ -1072,7 +1087,7 @@ PHP_METHOD(PDOStatement, fetch)
 		}
 		return;
 	}
-	if (!do_fetch(stmt, return_value, how, ori, off, NULL)) {
+	if (!do_fetch(stmt, return_value, how, ori, off, NULL, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -1109,7 +1124,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 	stmt->fetch.cls.ce = ce;
 	stmt->fetch.cls.ctor_args = ctor_args;
 
-	if (!do_fetch(stmt, return_value, PDO_FETCH_CLASS, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
+	if (!do_fetch(stmt, return_value, PDO_FETCH_CLASS, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		RETVAL_FALSE;
 	}
@@ -1254,7 +1269,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 		default:
 			/* No support for PDO_FETCH_INTO which takes 2 args??? */
-			if (ZEND_NUM_ARGS() > 1) {
+			if (ZEND_NUM_ARGS() > 1 && ! (flags & PDO_FETCH_GROUP)) {
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%pS() expects exactly 1 argument for the fetch mode provided, %d given",
 				func, ZEND_NUM_ARGS());
@@ -1285,7 +1300,14 @@ PHP_METHOD(PDOStatement, fetchAll)
 	// Need to handle the "broken" PDO_FETCH_GROUP|PDO_FETCH_UNIQUE fetch case
 	//if (flags == PDO_FETCH_GROUP || flags == PDO_FETCH_UNIQUE) {
 	if (flags & PDO_FETCH_GROUP || flags & PDO_FETCH_UNIQUE) {
-		while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, &group_key)) {
+		int *group_by_key = NULL;
+		int tmp_group_by_key;
+		if (flags & PDO_FETCH_GROUP && ZEND_NUM_ARGS() == 2) {
+			if (get_column_index_by_column_name(stmt, Z_STR_P(arg2), &tmp_group_by_key)) {
+				group_by_key = &tmp_group_by_key;
+			}
+		}
+		while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, &group_key, group_by_key)) {
 			ZEND_ASSERT(Z_TYPE(group_key) == IS_STRING);
 			if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
 				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR(group_key), &data);
@@ -1302,7 +1324,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			zval_ptr_dtor_str(&group_key);
 		}
 	} else {
-		while (do_fetch(stmt, &data, how, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
+		while (do_fetch(stmt, &data, how, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL, NULL)) {
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &data);
 		}
 	}
@@ -2206,7 +2228,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 	}
 
 	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
+			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
@@ -2248,7 +2270,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	ZVAL_OBJ(&I->iter.data, Z_OBJ_P(object));
 
 	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
+			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
