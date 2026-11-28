@@ -1,5 +1,5 @@
 /* This is a generated file, edit ftp.stub.php instead.
- * Stub hash: 29606d7114a0698b8ae231173a624b17c196ffec */
+ * Stub hash: ac7e05423e8c2ee530d8b2b56dc5d36621452806 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -77,7 +77,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_rawlist, 0, 2, MAY_BE_ARRAY|
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, recursive, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-#define arginfo_ftp_mlsd arginfo_ftp_nlist
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_mlsd, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, normalize_fact_names, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
 
 #define arginfo_ftp_systype arginfo_ftp_pwd
 

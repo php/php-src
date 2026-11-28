@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
 
+- FTP:
+  . Added optional fact name normalization to ftp_mlsd().
+
 - GD:
   . Fixed imagecolormatch() and imagejpeg() ValueError messages. (lacatoire)
 

@@ -644,7 +644,7 @@ char** ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	return ftp_genlist(ftp, "MLSD", sizeof("MLSD")-1, path, path_len);
 }
 
-zend_result ftp_mlsd_parse_line(HashTable *ht, const char *input)
+zend_result ftp_mlsd_parse_line(HashTable *ht, const char *input, bool normalize_fact_names)
 {
 	zval zstr;
 	const char *end = input + strlen(input);
@@ -677,8 +677,21 @@ zend_result ftp_mlsd_parse_line(HashTable *ht, const char *input)
 			return FAILURE;
 		}
 
-		ZVAL_STRINGL(&zstr, eq + 1, semi - eq - 1);
-		zend_hash_str_update(ht, input, eq - input, &zstr);
+		if (normalize_fact_names) {
+			zend_string *key = zend_string_init(input, eq - input, false);
+			zend_str_tolower(ZSTR_VAL(key), ZSTR_LEN(key));
+
+			/* The pathname is stored under "name", not supplied as a fact. */
+			if (!zend_string_equals_literal(key, "name")) {
+				ZVAL_STRINGL(&zstr, eq + 1, semi - eq - 1);
+				/* As with repeated exact keys, the last fact wins. */
+				zend_hash_update(ht, key, &zstr);
+			}
+			zend_string_release(key);
+		} else {
+			ZVAL_STRINGL(&zstr, eq + 1, semi - eq - 1);
+			zend_hash_str_update(ht, input, eq - input, &zstr);
+		}
 		input = semi + 1;
 	}
 
