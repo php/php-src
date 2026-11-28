@@ -182,8 +182,12 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 		if (!dont_wait || MSG_DONTWAIT == 0) {
 			php_sock_stream_wait_for_data(stream, sock, has_buffered_data);
 			if (sock->timeout_event) {
-				/* It is ok to timeout if there is any data buffered so return 0, otherwise -1. */
-				return has_buffered_data ? 0 : -1;
+				if (has_buffered_data) {
+					/* The poll did not wait as there is data buffered, so this is not a timeout. */
+					sock->timeout_event = 0;
+					return 0;
+				}
+				return -1;
 			}
 		}
 	}
