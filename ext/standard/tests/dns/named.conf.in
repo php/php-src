@@ -1,0 +1,29 @@
+options {
+    directory "@TEST_DIR@";
+    pid-file "@PID_FILE@";
+    listen-on port @PORT@ { @ADDRESS@; };
+    listen-on-v6 { none; };
+    allow-query { any; };
+    recursion yes;
+    allow-recursion { localhost; };
+    dnssec-validation no;
+    @FORWARDERS@
+};
+
+controls { };
+
+logging {
+    channel file {
+        file "@LOG_FILE@";
+        severity info;
+        print-time yes;
+        print-category yes;
+    };
+    category default { file; };
+    category queries { file; };
+};
+
+zone "basic.dnstest.php.net" {
+    type primary;
+    file "zones/basic.dnstest.php.net.zone";
+};
