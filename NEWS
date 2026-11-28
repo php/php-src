@@ -289,6 +289,9 @@ PHP                                                                        NEWS
   . Fixed stream_context_create() and stream_context_set_params() rejecting
     an options array passed by reference in the context parameters. (lacatoire)
 
+- URI:
+  . Fixed bug GH-25604 (Accepted IPv4 hosts report a fatal range error).
+    (Akouh Mohamed Amine)
 - XSL:
   . Fixed a crash in XSLTProcessor::transformToDoc() when the return class
     cannot be instantiated. (Ilia Alshanetsky)

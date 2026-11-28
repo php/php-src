@@ -65,7 +65,7 @@ static zend_always_inline bool zval_long_or_null_to_lexbor_str(zval *value, lexb
  * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
  * The result is passed by reference to the errors parameter.
  */
-static const char *fill_errors(zval *errors)
+static const char *fill_errors(zval *errors, lxb_status_t status)
 {
 	if (lexbor_parser.log == NULL || lexbor_plog_length(lexbor_parser.log) == 0) {
 		ZVAL_EMPTY_ARRAY(errors);
@@ -118,7 +118,7 @@ static const char *fill_errors(zval *errors)
 				break;
 			case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
 				error_str = "Ipv4OutOfRangePart";
-				ZVAL_TRUE(&failure);
+				ZVAL_BOOL(&failure, status == LXB_STATUS_ERROR_OVERFLOW);
 				break;
 			case LXB_URL_ERROR_TYPE_IPV6_UNCLOSED:
 				error_str = "Ipv6Unclosed";
@@ -223,7 +223,7 @@ static const char *fill_errors(zval *errors)
 	return result;
 }
 
-static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
+static void throw_invalid_url_exception_during_write(zval *errors, const char *component, lxb_status_t status)
 {
 	if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
@@ -231,7 +231,7 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	}
 
 	zval err;
-	const char *reason = fill_errors(&err);
+	const char *reason = fill_errors(&err, status);
 	if (ZEND_HAS_OOM()) {
 		zval_ptr_dtor(&err);
 		zend_handle_delayed_oom();
@@ -287,8 +287,9 @@ static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zv
 
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lxb_url_api_protocol_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "scheme");
+	lxb_status_t status = lxb_url_api_protocol_set(lexbor_uri, &lexbor_parser, str.data, str.length);
+	if (status != LXB_STATUS_OK) {
+		throw_invalid_url_exception_during_write(errors, "scheme", status);
 
 		return FAILURE;
 	}
@@ -325,7 +326,7 @@ static zend_result php_uri_parser_whatwg_username_write(void *uri, zval *value, 
 	lxb_url_parser_clean(&lexbor_parser);
 
 	if (lxb_url_api_username_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "username");
+		throw_invalid_url_exception_during_write(errors, "username", LXB_STATUS_ERROR);
 
 		return FAILURE;
 	}
@@ -356,7 +357,7 @@ static zend_result php_uri_parser_whatwg_password_write(void *uri, zval *value, 
 	lxb_url_parser_clean(&lexbor_parser);
 
 	if (lxb_url_api_password_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "password");
+		throw_invalid_url_exception_during_write(errors, "password", LXB_STATUS_ERROR);
 
 		return FAILURE;
 	}
@@ -429,8 +430,9 @@ static zend_result php_uri_parser_whatwg_host_write(void *uri, zval *value, zval
 
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lxb_url_api_hostname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "host");
+	lxb_status_t status = lxb_url_api_hostname_set(lexbor_uri, &lexbor_parser, str.data, str.length);
+	if (status != LXB_STATUS_OK) {
+		throw_invalid_url_exception_during_write(errors, "host", status);
 
 		return FAILURE;
 	}
@@ -464,8 +466,9 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval
 
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lxb_url_api_port_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "port");
+	lxb_status_t status = lxb_url_api_port_set(lexbor_uri, &lexbor_parser, str.data, str.length);
+	if (status != LXB_STATUS_OK) {
+		throw_invalid_url_exception_during_write(errors, "port", status);
 
 		return FAILURE;
 	}
@@ -495,8 +498,9 @@ static zend_result php_uri_parser_whatwg_path_write(void *uri, zval *value, zval
 
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lxb_url_api_pathname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "path");
+	lxb_status_t status = lxb_url_api_pathname_set(lexbor_uri, &lexbor_parser, str.data, str.length);
+	if (status != LXB_STATUS_OK) {
+		throw_invalid_url_exception_during_write(errors, "path", status);
 
 		return FAILURE;
 	}
@@ -526,8 +530,9 @@ static zend_result php_uri_parser_whatwg_query_write(void *uri, zval *value, zva
 
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lxb_url_api_search_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "query string");
+	lxb_status_t status = lxb_url_api_search_set(lexbor_uri, &lexbor_parser, str.data, str.length);
+	if (status != LXB_STATUS_OK) {
+		throw_invalid_url_exception_during_write(errors, "query string", status);
 
 		return FAILURE;
 	}
@@ -557,8 +562,9 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, zval *value, 
 
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lxb_url_api_hash_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		throw_invalid_url_exception_during_write(errors, "fragment");
+	lxb_status_t status = lxb_url_api_hash_set(lexbor_uri, &lexbor_parser, str.data, str.length);
+	if (status != LXB_STATUS_OK) {
+		throw_invalid_url_exception_during_write(errors, "fragment", status);
 
 		return FAILURE;
 	}
@@ -617,7 +623,9 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 {
 	lxb_url_parser_clean(&lexbor_parser);
 
-	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
+	lxb_status_t status = lxb_url_parse_basic(&lexbor_parser, NULL, lexbor_base_url,
+		(const lxb_char_t *) uri_str, uri_str_len, LXB_URL_STATE__UNDEF, LXB_ENCODING_AUTO);
+	lxb_url_t *url = lexbor_parser.url;
 
 	if (ZEND_HAS_OOM()) {
 		zend_handle_delayed_oom();
@@ -626,7 +634,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 
 	if ((url == NULL && !silent) || errors != NULL) {
 		zval err;
-		const char *reason = fill_errors(&err);
+		const char *reason = fill_errors(&err, status);
 		if (ZEND_HAS_OOM()) {
 			zval_ptr_dtor(&err);
 			zend_handle_delayed_oom();
