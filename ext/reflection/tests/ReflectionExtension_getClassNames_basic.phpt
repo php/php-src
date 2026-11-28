@@ -32,6 +32,9 @@ Io\Poll\PollException
 Io\Poll\Watcher
 RoundingMode
 SortDirection
+Str\MatchResult
+Str\Matcher
+Str\Replacer
 StreamBucket
 StreamError
 StreamErrorCode
