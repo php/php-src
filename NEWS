@@ -266,6 +266,10 @@ PHP                                                                        NEWS
     throws an Error instead of returning an object with unresolved values.
     (Ilia Alshanetsky)
 
+- SNMP:
+  . Fixed bug GH-25858 (snmp_init_mib() crashes when $mibdirs is omitted or
+    null). (lazerg)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)

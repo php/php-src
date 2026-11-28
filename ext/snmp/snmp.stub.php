@@ -192,7 +192,7 @@ namespace
 
     function snmp_read_mib(string $filename): bool {}
 
-    function snmp_init_mib(?string $mibdirs): void {}
+    function snmp_init_mib(?string $mibdirs = null): void {}
 
     /** @not-serializable */
     class SNMP
