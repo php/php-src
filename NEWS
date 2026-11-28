@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25788 (clone() with properties corrupts memory with JIT when
     __clone() keeps a reference and the result is discarded). (Tomasz Kowalczyk)
 
+- CLI:
+  . Added --loglevel for the built-in development server to select process,
+    error, or request logs (GH-16855). (mvanhorn)
+
 - Curl:
   . Negative values for CURLOPT_POSTREDIR are now rejected, causing
     curl_setopt() to return false. (Sjoerd Langkemper)
