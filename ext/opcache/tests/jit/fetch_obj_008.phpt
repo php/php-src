@@ -24,6 +24,8 @@ $a->prop = new B;
 ?>
 DONE
 --EXPECTF--
+Deprecated: Implicit conversion from B to string for property A::$prop of type string is deprecated in %s on line %d
+
 Warning: Undefined variable $e in %sfetch_obj_008.php on line 9
 
 Warning: Attempt to read property "prop" on string in %sfetch_obj_008.php on line 10

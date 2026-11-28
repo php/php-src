@@ -34,13 +34,15 @@ var_dump($dom->documentElement->className);
 echo $dom->saveXML();
 
 ?>
---EXPECT--
+--EXPECTF--
 string(0) ""
 string(15) "hello & world<>"
 string(0) ""
 string(2) "é"
 string(0) ""
 string(5) "12345"
+
+Deprecated: Implicit conversion from MyStringable to string for property DOMElement::$className of type string is deprecated in %s on line %d
 Exception: foo
 string(5) "12345"
 <?xml version="1.0"?>

@@ -24,10 +24,12 @@ try {
 var_dump($dom->version);
 echo $dom->saveXML();
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "1.0"
 string(6) "foobar"
 <?xml version="foobar"?>
+
+Deprecated: Implicit conversion from MyThrowingStringable to string for property DOMDocument::$version of type ?string is deprecated in %s on line %d
 Exception: An exception was thrown
 string(6) "foobar"
 <?xml version="foobar"?>
