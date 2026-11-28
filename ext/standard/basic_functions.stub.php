@@ -2146,6 +2146,12 @@ function gethostbyname(string $hostname): string {}
  */
 function gethostbynamel(string $hostname): array|false {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function gethostaddresses(string $hostname): array|false {}
+
 #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 

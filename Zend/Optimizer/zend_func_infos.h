@@ -442,6 +442,7 @@ static const func_info_t func_infos[] = {
 	F1("gethostbyaddr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("gethostbyname", MAY_BE_STRING),
 	F1("gethostbynamel", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+	F1("gethostaddresses", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	F1("dns_get_record", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 #endif

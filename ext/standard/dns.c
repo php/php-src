@@ -287,6 +287,56 @@ PHP_FUNCTION(gethostbynamel)
 }
 /* }}} */
 
+/* {{{ Return a list of IPv4 and IPv6 addresses that a given hostname resolves to. */
+PHP_FUNCTION(gethostaddresses)
+{
+	char *hostname;
+	size_t hostname_len;
+	struct sockaddr **sal, **sap;
+#ifdef HAVE_IPV6
+	char addr[INET6_ADDRSTRLEN];
+#else
+	char addr[INET_ADDRSTRLEN];
+#endif
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(hostname, hostname_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (hostname_len > MAXFQDNLEN) {
+		php_error_docref(NULL, E_WARNING, "Host name cannot be longer than %d characters", MAXFQDNLEN);
+		RETURN_FALSE;
+	}
+
+	if (!php_network_getaddresses(hostname, SOCK_STREAM, &sal, NULL)) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	for (sap = sal; *sap != NULL; sap++) {
+		const char *ipaddr = NULL;
+
+		switch ((*sap)->sa_family) {
+			case AF_INET:
+				ipaddr = inet_ntop(AF_INET, &((struct sockaddr_in *) *sap)->sin_addr, addr, sizeof(addr));
+				break;
+#ifdef HAVE_IPV6
+			case AF_INET6:
+				ipaddr = inet_ntop(AF_INET6, &((struct sockaddr_in6 *) *sap)->sin6_addr, addr, sizeof(addr));
+				break;
+#endif
+		}
+
+		if (ipaddr) {
+			add_next_index_string(return_value, ipaddr);
+		}
+	}
+
+	php_network_freeaddresses(sal);
+}
+/* }}} */
+
 /* {{{ php_gethostbyname */
 static zend_string *php_gethostbyname(char *name)
 {
