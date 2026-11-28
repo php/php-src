@@ -31,7 +31,6 @@ $old_stat = lstat($linkname);
 var_dump( chmod($linkname, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = lstat($linkname);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );

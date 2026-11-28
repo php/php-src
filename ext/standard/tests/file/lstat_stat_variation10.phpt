@@ -15,13 +15,13 @@ require "$file_path/file.inc";
 /* create temp file, link and directory */
 $dirname = "$file_path/lstat_stat_variation10";
 mkdir($dirname);  // temp dir
+touch($dirname, 946684800);
 
 // is_dir() on a directory
 echo "*** Testing stat() on directory after using is_dir() on it ***\n";
 $old_stat = stat($dirname);
 // clear the cache
 clearstatcache();
-sleep(1);
 var_dump( is_dir($dirname) );
 $new_stat = stat($dirname);
 
