@@ -293,7 +293,7 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 			remove_fname_cache |= phar->flags & PHAR_FILE_COMPRESSION_MASK;
 		}
 
-		if (remove_fname_cache) {
+		if (remove_fname_cache && !PHAR_G(request_ends)) {
 			if (zend_hash_del(&(PHAR_G(phar_fname_map)), phar->fname) != SUCCESS) {
 				phar_destroy_phar_data(phar);
 			}
